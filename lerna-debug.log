@@ -1,0 +1,7 @@
+48 error Error: Command failed with exit code 128: git tag @selfhq/siwys-react-js@0.0.1 -m @selfhq/siwys-react-js@0.0.1
+48 error fatal: tag '@selfhq/siwys-react-js@0.0.1' already exists
+48 error     at makeError (/Users/henrybrigham/repos/self/siwys-js/node_modules/execa/lib/error.js:60:11)
+48 error     at handlePromise (/Users/henrybrigham/repos/self/siwys-js/node_modules/execa/index.js:118:26)
+48 error     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+48 error     at async Promise.all (index 0)
+48 error     at async Promise.all (index 0)

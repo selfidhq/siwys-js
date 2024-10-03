@@ -1,0 +1,16 @@
+{
+  "command": {
+    "publish": {
+      "registry": "https://npm.pkg.github.com/selfidhq"
+    },
+    "version": {
+      "allowBranch": ["main", "sapp-76-react-js-sdk"],
+      "conventionalCommits": true
+    }
+  },
+  "packages": ["packages/*"],
+  "$schema": "node_modules/lerna/schemas/lerna-schema.json",
+  "useNx": true,
+  "npmClient": "yarn",
+  "version": "independent"
+}

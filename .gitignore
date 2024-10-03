@@ -1,0 +1,12 @@
+node_modules/
+
+# production
+/build
+**/build
+**/dist
+dist
+*dist
+.nx/cache
+
+.npmrc
+**/.npmrc

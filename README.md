@@ -9,13 +9,13 @@ SIWYS-JS is a monorepo designed to support Self's JS packages.
 ### Install Root Deps
 
 ```bash
-npm i
+yarn
 ```
 
 ### Initialize Husky
 
 ```bash
-npm run prepare
+yarn prepare
 ```
 
 ### Install Package Deps
@@ -27,7 +27,7 @@ lerna bootstrap
 ### Build Packages
 
 ```bash
-npm run build
+yarn build
 ```
 
 ## Releases
@@ -36,4 +36,17 @@ Releases are automatically versioned and published via lerna in github actions.
 
 ## Commits
 
-This repository requires commitlint formatting. To properly setup your env please make sure you run the prepare script at the root of the project.
+This repository requires adhering to semantic release commit formatting [Semantic Release](https://github.com/semantic-release/semantic-release). To properly setup your env please make sure you run the prepare script at the root of the project.
+
+Each commit, and the PR title, must follow the semantic release commit formatting rules for lerna to properly version and publish the package. Here are example commits for patch, minor, and major release updates:
+
+### Patch
+
+`fix(sapp-1): updating text prop`
+`chore(sapp-2): fixing tests for button`
+
+### Minor
+
+`feat(sapp-3): adding qr code component`
+
+### Major

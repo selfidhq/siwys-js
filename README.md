@@ -40,13 +40,15 @@ This repository requires adhering to semantic release commit formatting [Semanti
 
 Each commit, and the PR title, must follow the semantic release commit formatting rules for lerna to properly version and publish the package. Here are example commits for patch, minor, and major release updates:
 
-### Patch
+### Fix
 
 `fix(sapp-1): updating text prop`
 `chore(sapp-2): fixing tests for button`
 
-### Minor
+### Feat
 
 `feat(sapp-3): adding qr code component`
 
-### Major
+### Breaking Change
+
+`BREAKING CHANGE: rewriting button component`

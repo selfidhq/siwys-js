@@ -52,3 +52,7 @@ Each commit, and the PR title, must follow the semantic release commit formattin
 ### Breaking Change
 
 `BREAKING CHANGE: rewriting button component`
+
+## Pull Requests
+
+Due to our use of lerna's auto versioning and publishing, our pull request titles must also adhere to the commitlint rules. Any PR titles that do not adhere to the formatting rules will fail validation.

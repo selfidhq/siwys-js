@@ -1,6 +1,6 @@
 import React from "react";
 import "@testing-library/jest-dom";
-import { render, screen } from "@testing-library/react";
+import { render, screen, fireEvent } from "@testing-library/react";
 import Button from "./Button";
 
 describe("Button Component", () => {
@@ -8,6 +8,18 @@ describe("Button Component", () => {
     render(<Button onClick={() => {}}>Click Me!</Button>);
     const buttonElement = screen.getByRole("button", { name: /click me!/i });
     expect(buttonElement).toBeInTheDocument();
+  });
+
+  it("should call the onClick handler", () => {
+    const onClickSpy = jest.fn();
+    render(
+      <Button colorTheme="dark" onClick={onClickSpy}>
+        Click Me!
+      </Button>
+    );
+    const buttonElement = screen.getByRole("button");
+    fireEvent.click(buttonElement);
+    expect(onClickSpy).toHaveBeenCalled();
   });
 
   it("should have the correct style for a light color theme", () => {

@@ -8,14 +8,14 @@ import {
   SelfTextLogoWhite,
 } from "../../icons";
 
-interface ButtonProps {
-  onClick: () => void;
+interface SignInButtonProps {
   colorTheme: ColorTheme;
+  onClick: () => void;
 }
 
-const SignInButton: React.FC<ButtonProps> = ({
-  onClick,
+const SignInButton: React.FC<SignInButtonProps> = ({
   colorTheme = "auto",
+  onClick,
 }) => {
   const darkModeEnabled = window.matchMedia(
     "(prefers-color-scheme: dark)"

@@ -3,7 +3,6 @@ import path from "path";
 import fsPromises from "fs/promises";
 import postcss from "postcss";
 import postcssModules from "postcss-modules";
-import { generateScopedName } from "hash-css-selector";
 
 export default defineConfig({
   entry: ["src/index.ts"], // Entry point of the library
@@ -19,15 +18,13 @@ export default defineConfig({
       setup(build): void {
         build.onResolve(
           { filter: /\.module\.css$/, namespace: "file" },
-          (args) => {
-            return {
-              path: `${args.path}#css-module`,
-              namespace: "css-module",
-              pluginData: {
-                pathDir: path.join(args.resolveDir, args.path),
-              },
-            };
-          }
+          (args) => ({
+            path: `${args.path}#css-module`,
+            namespace: "css-module",
+            pluginData: {
+              pathDir: path.join(args.resolveDir, args.path),
+            },
+          })
         );
         build.onLoad(
           { filter: /#css-module$/, namespace: "css-module" },
@@ -41,17 +38,12 @@ export default defineConfig({
               "utf8"
             );
 
-            let cssModule: any = {};
+            let cssModule = {};
             const result = await postcss([
               postcssModules({
-                generateScopedName: function (name, filename) {
-                  const newSelector = generateScopedName(name, filename);
-                  cssModule[name] = newSelector;
-
-                  return newSelector;
+                getJSON(_, json) {
+                  cssModule = json;
                 },
-                getJSON: () => {},
-                scopeBehaviour: "local",
               }),
             ]).process(source, { from: pluginData.pathDir });
 

@@ -1220,11 +1220,6 @@ has-flag@^4.0.0:
   resolved "https://registry.yarnpkg.com/has-flag/-/has-flag-4.0.0.tgz#944771fd9c81c81265c4d6941860da06bb59479b"
   integrity sha512-EykJT/Q1KjTWctppgIAgfSO0tKVuZUjhgMr17kqTumMl6Afv3EISleU7qZUzoXDFTAHTDC4NOoG/ZxU3EvlMPQ==
 
-hash-css-selector@^1.1.0:
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/hash-css-selector/-/hash-css-selector-1.1.0.tgz#f4c575269133f1625b9bfc07c5e61e100dd347b5"
-  integrity sha512-NJCFKJZZsY2RFeHCaEku6+6ZcPeIgFGCD2jwjK7gS/PobCZ0Z4B/OWTB/aXydva4KHzXw4B1D9H/KO53PrCR1w==
-
 human-signals@^2.1.0:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/human-signals/-/human-signals-2.1.0.tgz#dc91fcba42e4d06e4abaed33b3e7a3c02f514ea0"

@@ -19,15 +19,14 @@
   },
   "dependencies": {
     "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react-dom": "^18.3.1",
+    "styled-components": "^6.1.13"
   },
   "devDependencies": {
     "@svgr/cli": "^8.1.0",
     "@types/node": "^22.7.5",
     "@types/react": "^18.3.10",
     "@types/react-dom": "^18.3.0",
-    "hash-css-selector": "^1.1.0",
-    "postcss-modules": "^6.0.0",
     "tsup": "^8.3.0",
     "typescript": "4.9.4",
     "vite": "^5.4.8"

@@ -18,11 +18,11 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
     >
       <SignInButton
         colorTheme="light"
-        onClick={() => alert("Clicked light button!")}
+        onClick={() => console.log("Clicked light button!")}
       />
       <SignInButton
         colorTheme="dark"
-        onClick={() => alert("Clicked dark button!")}
+        onClick={() => console.log("Clicked dark button!")}
       />
     </div>
   </React.StrictMode>

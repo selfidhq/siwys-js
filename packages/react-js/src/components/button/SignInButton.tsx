@@ -9,17 +9,17 @@ import {
 } from "../../icons";
 
 interface SignInButtonProps {
-  colorTheme: ColorTheme;
   onClick: () => void;
+  colorTheme?: ColorTheme;
 }
 
 const SignInButton: React.FC<SignInButtonProps> = ({
-  colorTheme = "auto",
   onClick,
+  colorTheme = "auto",
 }) => {
   const darkModeEnabled = useMemo(() => {
-    return window.matchMedia("(prefers-color-scheme: dark)").matches;
-  }, []);
+    return window?.matchMedia("(prefers-color-scheme: dark)").matches;
+  }, [window]);
 
   const showBlackIcons =
     colorTheme === "light" || (colorTheme === "auto" && !darkModeEnabled);

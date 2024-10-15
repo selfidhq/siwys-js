@@ -5,15 +5,15 @@ import styles from "./Button.module.css";
 export type ColorTheme = "auto" | "light" | "dark";
 
 interface ButtonProps {
-  colorTheme: ColorTheme;
   children: string | React.ReactNode;
   onClick: () => void;
+  colorTheme?: ColorTheme;
 }
 
 const Button: React.FC<ButtonProps> = ({
-  colorTheme = "auto",
   children,
   onClick,
+  colorTheme = "auto",
 }) => {
   return (
     <button

@@ -8,8 +8,9 @@ const StyledButton = styled.button<{ $colorTheme: ColorTheme }>`
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 17.625rem;
-  height: 3rem;
+  // TODO: adjust height/width to support mobile
+  min-height: 3rem;
+  min-width: 17.625rem;
   border-radius: 60px;
   border: none;
   cursor: pointer;

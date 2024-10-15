@@ -18,8 +18,9 @@ const SignInButton: React.FC<SignInButtonProps> = ({
   colorTheme = "auto",
 }) => {
   const darkModeEnabled = useMemo(() => {
+    console.log(`window:`, window);
     return window?.matchMedia("(prefers-color-scheme: dark)").matches;
-  }, [window]);
+  }, []);
 
   const showBlackIcons =
     colorTheme === "light" || (colorTheme === "auto" && !darkModeEnabled);

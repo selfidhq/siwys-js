@@ -62,7 +62,12 @@ const Button: React.FC<ButtonProps> = ({
   colorTheme = "auto",
 }) => {
   return (
-    <StyledButton type="button" onClick={onClick} $colorTheme={colorTheme}>
+    <StyledButton
+      type="button"
+      role="button"
+      onClick={onClick}
+      $colorTheme={colorTheme}
+    >
       {children}
     </StyledButton>
   );

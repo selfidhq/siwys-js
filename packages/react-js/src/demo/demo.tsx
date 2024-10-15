@@ -24,6 +24,10 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
         colorTheme="dark"
         onClick={() => console.log("Clicked dark button!")}
       />
+      <SignInButton
+        colorTheme="auto"
+        onClick={() => console.log("Clicked auto button!")}
+      />
     </div>
   </React.StrictMode>
 );

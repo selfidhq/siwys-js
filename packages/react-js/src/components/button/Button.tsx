@@ -4,18 +4,18 @@ import styled from "styled-components";
 
 export type ColorTheme = "auto" | "light" | "dark";
 
-const StyledButton = styled.button<{ colorTheme: ColorTheme }>`
+const StyledButton = styled.button<{ $colorTheme: ColorTheme }>`
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 282px;
-  height: 48px;
+  width: 17.625rem;
+  height: 3rem;
   border-radius: 60px;
   cursor: pointer;
   border: none;
 
   &:active {
-    transform: scale(0.9);
+    transform: scale(0.98);
   }
 
   &:hover {
@@ -23,11 +23,11 @@ const StyledButton = styled.button<{ colorTheme: ColorTheme }>`
   }
 
   ${(props) => {
-    if (props.colorTheme === "light") {
+    if (props.$colorTheme === "light") {
       return `
         background: white;
       `;
-    } else if (props.colorTheme === "dark") {
+    } else if (props.$colorTheme === "dark") {
       return `
         background: black;
         color: white;
@@ -59,7 +59,7 @@ const Button: React.FC<ButtonProps> = ({
   colorTheme = "auto",
 }) => {
   return (
-    <StyledButton type="button" colorTheme={colorTheme} onClick={onClick}>
+    <StyledButton type="button" onClick={onClick} $colorTheme={colorTheme}>
       {children}
     </StyledButton>
   );

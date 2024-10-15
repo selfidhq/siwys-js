@@ -31,8 +31,14 @@ const SignInButton: React.FC<SignInButtonProps> = ({
     <Button colorTheme={colorTheme} onClick={onClick}>
       {showBlackIcons && <CircleLogoBlack width="1.5rem" height="1.5rem" />}
       {!showBlackIcons && <CircleLogoWhite width="1.5rem" height="1.5rem" />}
-      <div style={{ marginLeft: "0.5rem" }}>
-        <span>Sign in with your</span>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          marginLeft: "0.5rem",
+        }}
+      >
+        <span style={{ fontSize: "16px" }}>Sign in with your</span>
         {showBlackIcons && <SelfTextLogoBlack width="4rem" />}
         {!showBlackIcons && <SelfTextLogoWhite width="4rem" />}
       </div>

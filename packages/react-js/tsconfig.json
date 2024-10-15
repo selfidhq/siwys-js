@@ -12,6 +12,6 @@
     "skipLibCheck": true,
     "outDir": "dist" // Output the compiled code and type definitions to dist
   },
-  "include": ["src/**/*", "global.d.ts"],
+  "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"] // Exclude node_modules and dist
 }

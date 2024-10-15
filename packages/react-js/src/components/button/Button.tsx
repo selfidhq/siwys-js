@@ -11,8 +11,8 @@ const StyledButton = styled.button<{ $colorTheme: ColorTheme }>`
   width: 17.625rem;
   height: 3rem;
   border-radius: 60px;
-  cursor: pointer;
   border: none;
+  cursor: pointer;
 
   &:active {
     transform: scale(0.98);
@@ -26,6 +26,7 @@ const StyledButton = styled.button<{ $colorTheme: ColorTheme }>`
     if (props.$colorTheme === "light") {
       return `
         background: white;
+        color: black;
       `;
     } else if (props.$colorTheme === "dark") {
       return `
@@ -36,6 +37,7 @@ const StyledButton = styled.button<{ $colorTheme: ColorTheme }>`
       return `
         @media (prefers-color-scheme: light) {
           background: white;
+          color: black;
         }
 
         @media (prefers-color-scheme: dark) {

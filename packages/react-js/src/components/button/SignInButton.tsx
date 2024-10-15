@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 
 import Button, { ColorTheme } from "./Button";
 import {
@@ -17,9 +17,9 @@ const SignInButton: React.FC<SignInButtonProps> = ({
   colorTheme = "auto",
   onClick,
 }) => {
-  const darkModeEnabled = window.matchMedia(
-    "(prefers-color-scheme: dark)"
-  ).matches;
+  const darkModeEnabled = useMemo(() => {
+    return window.matchMedia("(prefers-color-scheme: dark)").matches;
+  }, []);
 
   const showBlackIcons =
     colorTheme === "light" || (colorTheme === "auto" && !darkModeEnabled);

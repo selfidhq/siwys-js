@@ -12,9 +12,6 @@ export default defineConfig({
   sourcemap: true, // Generate sourcemaps for debugging
   clean: true, // Clean the dist folder before building
   external: ["react", "react-dom"], // Mark peer dependencies as external
-  loader: {
-    ".css": "local-css",
-  },
   esbuildPlugins: [
     // see: https://github.com/egoist/tsup/issues/536#issuecomment-1302012400
     {

@@ -17,11 +17,11 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
       }}
     >
       <SignInButton
-        variant="light"
+        colorTheme="light"
         onClick={() => alert("Clicked light button!")}
       />
       <SignInButton
-        variant="dark"
+        colorTheme="dark"
         onClick={() => alert("Clicked dark button!")}
       />
     </div>

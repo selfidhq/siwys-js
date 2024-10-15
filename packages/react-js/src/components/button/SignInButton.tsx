@@ -10,19 +10,22 @@ import {
 
 interface ButtonProps {
   onClick: () => void;
-  variant: ColorTheme;
+  colorTheme: ColorTheme;
 }
 
-const SignInButton: React.FC<ButtonProps> = ({ onClick, variant = "auto" }) => {
+const SignInButton: React.FC<ButtonProps> = ({
+  onClick,
+  colorTheme = "auto",
+}) => {
   const darkModeEnabled = window.matchMedia(
     "(prefers-color-scheme: dark)"
   ).matches;
 
   const showBlackIcons =
-    variant === "light" || (variant === "auto" && !darkModeEnabled);
+    colorTheme === "light" || (colorTheme === "auto" && !darkModeEnabled);
 
   return (
-    <Button onClick={onClick} colorTheme={variant}>
+    <Button colorTheme={colorTheme} onClick={onClick}>
       {showBlackIcons && <CircleLogoBlack width="1.5rem" height="1.5rem" />}
       {!showBlackIcons && <CircleLogoWhite width="1.5rem" height="1.5rem" />}
       <div style={{ marginLeft: "0.5rem" }}>

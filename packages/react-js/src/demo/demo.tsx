@@ -23,7 +23,6 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
         />
         <SignInButton
           colorTheme="dark"
-          glow
           onClick={() => console.log("Clicked dark button!")}
         />
         <SignInButton
@@ -38,7 +37,6 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
         />
         <ConnectButton
           colorTheme="dark"
-          glow
           onClick={() => console.log("Clicked dark button!")}
         />
         <ConnectButton

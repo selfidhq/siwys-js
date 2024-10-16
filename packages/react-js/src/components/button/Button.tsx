@@ -7,12 +7,10 @@ type ColorTheme = "light" | "dark" | "blue";
 export interface ButtonProps {
   onClick: () => void;
   colorTheme?: ColorTheme;
-  glow?: boolean;
 }
 
 const StyledButton = styled.button<{
   $colorTheme?: ColorTheme;
-  $glow?: boolean;
 }>`
   display: flex;
   justify-content: center;
@@ -28,15 +26,9 @@ const StyledButton = styled.button<{
     transform: scale(0.98);
   }
 
-  ${(props) => {
-    if (props.$glow) {
-      return `
-      &:hover {
-        box-shadow: 0px 0px 42px rgba(255, 255, 255, 0.5);
-      }
-      `;
-    }
-  }}
+  &:hover {
+    box-shadow: 0px 0px 42px rgba(255, 255, 255, 0.5);
+  }
 
   ${(props) => {
     if (props.$colorTheme === "light") {
@@ -74,14 +66,13 @@ const StyledButton = styled.button<{
 
 const Button: React.FC<
   ButtonProps & { children: string | React.ReactNode }
-> = ({ children, onClick, colorTheme, glow }) => {
+> = ({ children, onClick, colorTheme }) => {
   return (
     <StyledButton
       type="button"
       role="button"
       onClick={onClick}
       $colorTheme={colorTheme}
-      $glow={glow}
     >
       {children}
     </StyledButton>

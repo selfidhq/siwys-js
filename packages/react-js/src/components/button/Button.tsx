@@ -2,18 +2,25 @@ import React from "react";
 
 import styled from "styled-components";
 
-export type ColorTheme = "auto" | "light" | "dark";
+type ColorTheme = "light" | "dark" | "blue";
 
-const StyledButton = styled.button<{ $colorTheme: ColorTheme }>`
+export interface ButtonProps {
+  onClick: () => void;
+  colorTheme?: ColorTheme;
+}
+
+const StyledButton = styled.button<{
+  $colorTheme?: ColorTheme;
+}>`
   display: flex;
   justify-content: center;
   align-items: center;
-  // TODO: adjust height/width to support mobile
-  min-height: 3rem;
-  min-width: 17.625rem;
+  height: 3rem;
+  width: fit-content;
   border-radius: 60px;
   border: none;
   cursor: pointer;
+  padding: 12px 40px 12px 40px;
 
   &:active {
     transform: scale(0.98);
@@ -34,7 +41,13 @@ const StyledButton = styled.button<{ $colorTheme: ColorTheme }>`
         background: black;
         color: white;
       `;
+    } else if (props.$colorTheme === "blue") {
+      return `
+        background: #ACC2FE;
+        color: black;
+      `;
     } else {
+      // auto-detect light vs dark mode
       return `
         @media (prefers-color-scheme: light) {
           background: white;
@@ -50,17 +63,9 @@ const StyledButton = styled.button<{ $colorTheme: ColorTheme }>`
   }}
 `;
 
-interface ButtonProps {
-  children: string | React.ReactNode;
-  onClick: () => void;
-  colorTheme?: ColorTheme;
-}
-
-const Button: React.FC<ButtonProps> = ({
-  children,
-  onClick,
-  colorTheme = "auto",
-}) => {
+const Button: React.FC<
+  ButtonProps & { children: string | React.ReactNode }
+> = ({ children, onClick, colorTheme }) => {
   return (
     <StyledButton
       type="button"

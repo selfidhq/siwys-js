@@ -33,6 +33,8 @@ jobs:
         run: yarn bootstrap
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_ACCESS_TOKEN }}
+      - name: Run Unit Tests
+        run: yarn test
       - name: Run builds
         run: yarn lerna exec yarn build
       - name: "Version and publish"

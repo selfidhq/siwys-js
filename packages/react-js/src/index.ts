@@ -1,1 +1,1 @@
-export { default as Button } from "./Button";
+export { default as SignInButton } from "./components/button/SignInButton";

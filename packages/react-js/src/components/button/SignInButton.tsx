@@ -1,22 +1,26 @@
 import React, { useMemo } from "react";
 
-import Button, { ColorTheme } from "./Button";
+import { default as GenericButton, ButtonProps } from "./Button";
 import {
   CircleLogoBlack,
   CircleLogoWhite,
   SelfTextLogoBlack,
   SelfTextLogoWhite,
 } from "../../icons";
+import styled from "styled-components";
 
-interface SignInButtonProps {
-  onClick: () => void;
-  colorTheme?: ColorTheme;
-}
+const SignInMessage = styled.span`
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-left: 0.5rem;
+`;
 
-const SignInButton: React.FC<SignInButtonProps> = ({
-  onClick,
-  colorTheme = "auto",
+const Button: React.FC<ButtonProps & { type: "signIn" | "connect" }> = ({
+  type,
+  ...rest
 }) => {
+  const { colorTheme } = rest;
   const darkModeEnabled = useMemo(() => {
     return (
       typeof window !== "undefined" &&
@@ -25,25 +29,31 @@ const SignInButton: React.FC<SignInButtonProps> = ({
   }, []);
 
   const showBlackIcons =
-    colorTheme === "light" || (colorTheme === "auto" && !darkModeEnabled);
+    colorTheme === "light" ||
+    colorTheme === "blue" ||
+    (!colorTheme && !darkModeEnabled);
+
+  const label = type === "signIn" ? "Sign in with your" : "Connect your";
 
   return (
-    <Button colorTheme={colorTheme} onClick={onClick}>
+    <GenericButton {...rest}>
       {showBlackIcons && <CircleLogoBlack width="1.5rem" height="1.5rem" />}
       {!showBlackIcons && <CircleLogoWhite width="1.5rem" height="1.5rem" />}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          marginLeft: "0.5rem",
-        }}
-      >
-        <span style={{ fontSize: "16px" }}>Sign in with your</span>
+      <SignInMessage>
+        <span style={{ fontSize: "1rem" }}>{label}</span>
         {showBlackIcons && <SelfTextLogoBlack width="4rem" />}
         {!showBlackIcons && <SelfTextLogoWhite width="4rem" />}
-      </div>
-    </Button>
+      </SignInMessage>
+    </GenericButton>
   );
 };
 
-export default SignInButton;
+const ConnectButton: React.FC<ButtonProps> = ({ ...props }) => {
+  return <Button type="connect" {...props} />;
+};
+
+const SignInButton: React.FC<ButtonProps> = ({ ...props }) => {
+  return <Button type="signIn" {...props} />;
+};
+
+export { ConnectButton, SignInButton };

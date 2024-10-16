@@ -40,7 +40,7 @@ const Button: React.FC<ButtonProps & { type: "signIn" | "connect" }> = ({
       {showBlackIcons && <CircleLogoBlack width="1.5rem" height="1.5rem" />}
       {!showBlackIcons && <CircleLogoWhite width="1.5rem" height="1.5rem" />}
       <SignInMessage>
-        {label}
+        <span>{label}</span>
         {showBlackIcons && <SelfTextLogoBlack width="4rem" />}
         {!showBlackIcons && <SelfTextLogoWhite width="4rem" />}
       </SignInMessage>

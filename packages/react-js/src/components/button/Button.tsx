@@ -42,6 +42,7 @@ const StyledButton = styled.button<{
         color: white;
       `;
     } else if (props.$colorTheme === "blue") {
+      // TODO: add global styles for things like colors (below)
       return `
         background: #ACC2FE;
         color: black;

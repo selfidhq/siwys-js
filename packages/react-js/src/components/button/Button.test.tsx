@@ -43,4 +43,15 @@ describe("Button Component", () => {
     expect(buttonElement).toHaveStyle("background: black");
     expect(buttonElement).toHaveStyle("color: white");
   });
+
+  it("should have the correct style for a blue color theme", () => {
+    render(
+      <Button colorTheme="blue" onClick={() => {}}>
+        Click Me!
+      </Button>
+    );
+    const buttonElement = screen.getByRole("button");
+    expect(buttonElement).toHaveStyle("background: #ACC2FE");
+    expect(buttonElement).toHaveStyle("color: black");
+  });
 });

@@ -11,9 +11,8 @@ import styled from "styled-components";
 
 const SignInMessage = styled.span`
   display: flex;
+  align-items: center;
   margin-left: 0.5rem;
-  font-size: 1rem;
-  gap: 0.25rem;
 `;
 
 const Button: React.FC<ButtonProps & { type: "signIn" | "connect" }> = ({
@@ -40,7 +39,7 @@ const Button: React.FC<ButtonProps & { type: "signIn" | "connect" }> = ({
       {showBlackIcons && <CircleLogoBlack width="1.5rem" height="1.5rem" />}
       {!showBlackIcons && <CircleLogoWhite width="1.5rem" height="1.5rem" />}
       <SignInMessage>
-        <span>{label}</span>
+        <span style={{ fontSize: "1rem" }}>{label}</span>
         {showBlackIcons && <SelfTextLogoBlack width="4rem" />}
         {!showBlackIcons && <SelfTextLogoWhite width="4rem" />}
       </SignInMessage>

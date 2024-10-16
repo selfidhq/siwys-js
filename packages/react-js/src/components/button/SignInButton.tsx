@@ -20,6 +20,7 @@ const Button: React.FC<ButtonProps & { type: "signIn" | "connect" }> = ({
   onClick,
   type,
   colorTheme,
+  glow,
 }) => {
   const darkModeEnabled = useMemo(() => {
     return (
@@ -36,7 +37,7 @@ const Button: React.FC<ButtonProps & { type: "signIn" | "connect" }> = ({
   const label = type === "signIn" ? "Sign in with your" : "Connect your";
 
   return (
-    <GenericButton colorTheme={colorTheme} onClick={onClick}>
+    <GenericButton colorTheme={colorTheme} onClick={onClick} glow={glow}>
       {showBlackIcons && <CircleLogoBlack width="1.5rem" height="1.5rem" />}
       {!showBlackIcons && <CircleLogoWhite width="1.5rem" height="1.5rem" />}
       <SignInMessage>
@@ -48,12 +49,30 @@ const Button: React.FC<ButtonProps & { type: "signIn" | "connect" }> = ({
   );
 };
 
-const ConnectButton: React.FC<ButtonProps> = ({ onClick, colorTheme }) => {
-  return <Button type="connect" colorTheme={colorTheme} onClick={onClick} />;
+const ConnectButton: React.FC<ButtonProps> = ({
+  onClick,
+  colorTheme,
+  glow,
+}) => {
+  return (
+    <Button
+      type="connect"
+      colorTheme={colorTheme}
+      onClick={onClick}
+      glow={glow}
+    />
+  );
 };
 
-const SignInButton: React.FC<ButtonProps> = ({ onClick, colorTheme }) => {
-  return <Button type="signIn" colorTheme={colorTheme} onClick={onClick} />;
+const SignInButton: React.FC<ButtonProps> = ({ onClick, colorTheme, glow }) => {
+  return (
+    <Button
+      type="signIn"
+      colorTheme={colorTheme}
+      onClick={onClick}
+      glow={glow}
+    />
+  );
 };
 
 export { ConnectButton, SignInButton };

@@ -11,7 +11,7 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
         display: "flex",
         flexDirection: "column",
         padding: "2rem",
-        background: "silver",
+        background: "grey",
         height: "100vh",
         gap: "2rem",
       }}

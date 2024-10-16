@@ -12,6 +12,7 @@ import styled from "styled-components";
 const SignInMessage = styled.span`
   display: flex;
   align-items: center;
+  gap: 0.25rem;
   margin-left: 0.5rem;
 `;
 

@@ -40,8 +40,6 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_ACCESS_TOKEN }}
       - name: Run Unit Tests
         run: yarn test
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_ACCESS_TOKEN }}
       - name: Run builds
         run: yarn build
       - name: Publish canary release

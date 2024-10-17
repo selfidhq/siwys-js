@@ -6,6 +6,7 @@ type ColorTheme = "light" | "dark" | "blue";
 
 export interface ButtonProps {
   onClick: () => void;
+  className?: string;
   colorTheme?: ColorTheme;
   glow?: boolean;
 }
@@ -74,11 +75,12 @@ const StyledButton = styled.button<{
 
 const Button: React.FC<
   ButtonProps & { children: string | React.ReactNode }
-> = ({ children, onClick, colorTheme, glow }) => {
+> = ({ children, onClick, className, colorTheme, glow }) => {
   return (
     <StyledButton
       type="button"
       role="button"
+      className={className}
       onClick={onClick}
       $colorTheme={colorTheme}
       $glow={glow}

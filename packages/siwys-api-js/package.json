@@ -1,6 +1,6 @@
 {
   "name": "@selfidhq/siwys-api-js",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "A React component library",
   "repository": "https://github.com/selfidhq/siwys-js",
   "main": "dist/index.js",
@@ -16,7 +16,6 @@
     "build": "tsup",
     "test": "echo 'no tests yet'"
   },
-  "dependencies": {},
   "devDependencies": {
     "@babel/preset-env": "^7.25.8",
     "@babel/preset-react": "^7.25.7",

@@ -1,0 +1,32 @@
+{
+  "name": "@selfidhq/siwys-api-js",
+  "version": "0.0.0",
+  "description": "A React component library",
+  "repository": "https://github.com/selfidhq/siwys-js",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/selfidhq"
+  },
+  "scripts": {
+    "build": "tsup",
+    "test": "echo 'no tests yet'"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@babel/preset-env": "^7.25.8",
+    "@babel/preset-react": "^7.25.7",
+    "@babel/preset-typescript": "^7.25.7",
+    "@types/jest": "^29.5.13",
+    "@types/react": "^18.3.11",
+    "@types/react-dom": "^18.3.1",
+    "babel-jest": "^29.7.0",
+    "jest": "^29.7.0",
+    "tsup": "^8.3.0",
+    "typescript": "4.9.4"
+  }
+}

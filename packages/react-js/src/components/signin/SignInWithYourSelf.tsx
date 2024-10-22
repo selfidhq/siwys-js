@@ -41,6 +41,7 @@ const InstructionsWrapper = styled.div`
   flex: 2;
 `;
 const List = styled.ol`
+  list-style: decimal;
   line-height: 2rem;
   padding-left: 1rem;
 `;

@@ -17,13 +17,12 @@ const Wrapper = styled.div`
     rgb(0, 0, 0) 99.4%
   );
   gap: 5rem;
-  padding: 10rem;
+  height: 100vh;
+  width: 100vw;
 `;
 
 const Demo: React.FC<{}> = () => {
-  const [challengeUrl, setChallengeUrl] = useState<string>(
-    "https://wallet.mdip.yourself.dev?challenge=did:test:z3v8AuaYk7ogpUhqtz46hfoo4XvgcNDX1c8SEcw5F9S9L4w3N6b"
-  );
+  const [challengeUrl, setChallengeUrl] = useState<string>("");
   const [step, setStep] = useState<number>(1);
 
   return (
@@ -43,7 +42,7 @@ const Demo: React.FC<{}> = () => {
       )}
       {step === 2 && (
         <input
-          placeholder="paste challenge"
+          placeholder="Paste challengeUrl"
           onChange={(e) => {
             setStep(0);
             setChallengeUrl(e.target.value);

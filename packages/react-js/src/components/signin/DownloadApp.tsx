@@ -12,13 +12,12 @@ import {
 const Wrapper = styled.div`
   display: inline-block;
   flex-direction: column;
-  width: Hug (430.07px) px;
-  height: Hug (141px) px;
   gap: 1rem;
   background: #121318;
   border: 1px solid #3d414c;
-  border-radius: 0.5rem;
+  border-radius: 8px;
   padding: 1.5rem 2rem;
+  margin-top: 1rem;
   width: 85%;
 `;
 

@@ -28,6 +28,7 @@ const PaddedDiv = styled.div`
 
 const Header = styled.h1`
   color: white;
+  font-size: 2rem;
   white-space: nowrap;
 `;
 

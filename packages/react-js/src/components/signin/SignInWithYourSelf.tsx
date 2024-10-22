@@ -10,6 +10,14 @@ interface SignInProps {
 }
 
 const Wrapper = styled.div`
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
+const ModalWrapper = styled.div`
   display: flex;
   align-self: center;
 
@@ -40,42 +48,45 @@ const List = styled.ol`
 const SignInWithYourSelf: React.FC<SignInProps> = ({ challengeUrl }) => {
   return (
     <Wrapper>
-      <Challenge challengeUrl={challengeUrl} />
-      <InstructionsWrapper>
-        <div style={{ margin: "2rem 5rem" }}>
-          <p style={{ marginBottom: "2rem" }}>
-            <b>Instructions:</b>
-          </p>
-          <p>
-            <b>
-              If you are signing in on a device that has the SELF app installed:
-            </b>
-            <List>
-              <li>Tap the SELF.id connect button.</li>
-              <li>Approve the connection request within the SELF app.</li>
-            </List>
-          </p>
-          <p>
-            <b>
-              If you are <u>not</u> signing in on a device that has the SELF app
-              installed:
-            </b>
-            <List>
-              <li>Open the SELF app on the device with the app installed.</li>
-              <li>
-                Use the scanning feature in the SELF app to scan the QR code.
-              </li>
-              <li>Approve the connection request within the SELF app.</li>
-            </List>
-          </p>
-          <p style={{ marginTop: "3rem" }}>
-            <b>
-              Don't have the <i>SELF</i> app?
-            </b>
-          </p>
-          <DownloadApp />
-        </div>
-      </InstructionsWrapper>
+      <ModalWrapper>
+        <Challenge challengeUrl={challengeUrl} />
+        <InstructionsWrapper>
+          <div style={{ margin: "2rem 5rem" }}>
+            <p style={{ marginBottom: "2rem" }}>
+              <b>Instructions:</b>
+            </p>
+            <p>
+              <b>
+                If you are signing in on a device that has the SELF app
+                installed:
+              </b>
+              <List>
+                <li>Tap the SELF.id connect button.</li>
+                <li>Approve the connection request within the SELF app.</li>
+              </List>
+            </p>
+            <p>
+              <b>
+                If you are <u>not</u> signing in on a device that has the SELF
+                app installed:
+              </b>
+              <List>
+                <li>Open the SELF app on the device with the app installed.</li>
+                <li>
+                  Use the scanning feature in the SELF app to scan the QR code.
+                </li>
+                <li>Approve the connection request within the SELF app.</li>
+              </List>
+            </p>
+            <p style={{ marginTop: "3rem" }}>
+              <b>
+                Don't have the <i>SELF</i> app?
+              </b>
+            </p>
+            <DownloadApp />
+          </div>
+        </InstructionsWrapper>
+      </ModalWrapper>
     </Wrapper>
   );
 };

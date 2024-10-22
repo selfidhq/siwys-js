@@ -4,7 +4,7 @@ import ReactDOM from "react-dom/client";
 import styled from "styled-components";
 
 import { SignInButton } from "../components/button/SignInButton";
-import SignInWithYourSelf from "../components/signin/SignInWithYourself";
+import SignInWithYourSelf from "../components/signin/SignInWithYourSelf";
 
 const Wrapper = styled.div`
   display: flex;

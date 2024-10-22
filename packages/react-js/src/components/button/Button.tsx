@@ -24,6 +24,7 @@ const StyledButton = styled.button<{
   border: none;
   cursor: pointer;
   padding: 12px 40px 12px 40px;
+  white-space: nowrap;
 
   &:active {
     transform: scale(0.98);

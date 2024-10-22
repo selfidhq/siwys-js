@@ -40,10 +40,15 @@ const InstructionsWrapper = styled.div`
   color: white;
   flex: 2;
 `;
+
+const InstructionsSet = styled.div`
+  margin-bottom: 2rem;
+`;
+
 const List = styled.ol`
   list-style: decimal;
   line-height: 2rem;
-  padding-left: 1rem;
+  padding-left: 1.5rem;
 `;
 
 const SignInWithYourSelf: React.FC<SignInProps> = ({ challengeUrl }) => {
@@ -56,7 +61,7 @@ const SignInWithYourSelf: React.FC<SignInProps> = ({ challengeUrl }) => {
             <p style={{ marginBottom: "2rem" }}>
               <b>Instructions:</b>
             </p>
-            <p>
+            <InstructionsSet>
               <b>
                 If you are signing in on a device that has the SELF app
                 installed:
@@ -65,8 +70,8 @@ const SignInWithYourSelf: React.FC<SignInProps> = ({ challengeUrl }) => {
                 <li>Tap the SELF.id connect button.</li>
                 <li>Approve the connection request within the SELF app.</li>
               </List>
-            </p>
-            <p>
+            </InstructionsSet>
+            <InstructionsSet>
               <b>
                 If you are <u>not</u> signing in on a device that has the SELF
                 app installed:
@@ -78,7 +83,7 @@ const SignInWithYourSelf: React.FC<SignInProps> = ({ challengeUrl }) => {
                 </li>
                 <li>Approve the connection request within the SELF app.</li>
               </List>
-            </p>
+            </InstructionsSet>
             <p style={{ marginTop: "3rem" }}>
               <b>
                 Don't have the <i>SELF</i> app?

@@ -16,6 +16,10 @@
     "build": "tsup",
     "test": "echo 'no tests yet'"
   },
+  "dependencies": {
+    "@mdip/cipher": "^0.3.0",
+    "@mdip/keymaster": "^0.3.0"
+  },
   "devDependencies": {
     "@babel/preset-env": "^7.25.8",
     "@babel/preset-react": "^7.25.7",

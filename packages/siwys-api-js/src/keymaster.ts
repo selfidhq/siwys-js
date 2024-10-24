@@ -1,3 +1,5 @@
+// @ts-ignore
+// @ts-nocheck
 import * as cipher from "@mdip/cipher/node";
 import * as keymaster_lib from "@mdip/keymaster/lib";
 

@@ -17,6 +17,10 @@ const Wrapper = styled.div`
   justify-content: center;
   border-right: 1px solid #3d414c;
   padding: 3rem 6rem;
+
+  @media (max-width: 767px) {
+    border: none;
+  }
 `;
 
 const Header = styled.h1`

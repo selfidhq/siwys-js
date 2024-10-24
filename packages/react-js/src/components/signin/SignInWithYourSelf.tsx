@@ -8,10 +8,9 @@ import DownloadApp from "./DownloadApp";
 import { createGlobalStyle } from "styled-components";
 
 const GlobalStyle = createGlobalStyle`
-  body, #root {
-    width: 100svw;
-    height: 100svh;
+  * {
     margin: 0;
+    padding: 0;
   }
 `;
 
@@ -21,31 +20,27 @@ interface SignInProps {
 
 const Wrapper = styled.div`
   display: flex;
-  justify-self: center;
   justify-content: center;
-  align-self: center;
-  align-items: center;
   background: radial-gradient(
     circle at 24.1% 68.8%,
     rgb(50, 50, 50) 0%,
     rgb(0, 0, 0) 99.4%
   );
-  width: 100%;
-  height: 100%;
   font-weight: 700;
   @media (max-width: 767px) {
-    padding: 10rem 2rem;
+    display: block;
   }
 `;
 
 const ModalWrapper = styled.div`
   display: flex;
   border-radius: 16px;
-  border: 1px solid;
+  border: 1px solid #3d414c;
 
   @media (max-width: 767px) {
     flex-direction: column-reverse;
     border: none;
+    padding: 5rem 2rem;
   }
 `;
 
@@ -53,8 +48,10 @@ const InstructionsWrapper = styled.div`
   display: flex;
   flex-direction: column;
   color: white;
-  flex: 2;
   padding: 2rem 5rem;
+  @media (max-width: 767px) {
+    padding: 0;
+  }
 `;
 
 const InstructionsSet = styled.div`

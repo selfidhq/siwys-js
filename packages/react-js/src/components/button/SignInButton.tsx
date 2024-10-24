@@ -38,7 +38,7 @@ const Button: React.FC<ButtonProps & { type: "signIn" | "connect" }> = ({
   return (
     <GenericButton {...rest}>
       {showBlackIcons && <CircleLogoBlack width="1.5rem" height="1.5rem" />}
-      {!showBlackIcons && <CircleLogoWhite width="1.5rem" height="1.5rem" />}
+      {!showBlackIcons && <CircleLogoWhite width="2rem" height="2rem" />}
       <SignInMessage>
         <span style={{ fontSize: "1rem" }}>{label}</span>
         {showBlackIcons && <SelfTextLogoBlack width="4rem" />}

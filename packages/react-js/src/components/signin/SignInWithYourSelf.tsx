@@ -5,32 +5,48 @@ import styled from "styled-components";
 import Challenge from "./Challenge";
 import DownloadApp from "./DownloadApp";
 
+import { createGlobalStyle } from 'styled-components'
+
+const GlobalStyle = createGlobalStyle`
+  body, #root {
+    width: 100svw;
+    height: 100svh;
+    margin: 0;
+  }
+`
+
 interface SignInProps {
   challengeUrl: string;
 }
 
 const Wrapper = styled.div`
-  height: 100vh;
-  width: 100vw;
   display: flex;
-  align-items: center;
+  justify-self: center;
   justify-content: center;
+  align-self: center;
+  align-items: center;
+  background: radial-gradient(
+    circle at 24.1% 68.8%,
+    rgb(50, 50, 50) 0%,
+    rgb(0, 0, 0) 99.4%
+  );
+  width: 100%;
+  height: 100%;
+  font-weight: 700;
+  @media (max-width: 767px) {
+      padding: 10rem 0;
+  }
 `;
 
 const ModalWrapper = styled.div`
   display: flex;
-  align-self: center;
-
-  background: linear-gradient(
-    123deg,
-    transparent -22.71%,
-    rgba(255, 255, 255, 0.06) 70.04%
-  );
+  align-self: center;  
   border-radius: 16px;
   border: 1px solid;
 
   @media (max-width: 767px) {
-    flex-direction: column-reverse;
+    flex-direction: column-reverse;  
+    border: none;
   }
 `;
 
@@ -49,11 +65,13 @@ const List = styled.ol`
   list-style: decimal;
   line-height: 2rem;
   padding-left: 1.5rem;
+  font-weight: 500;
 `;
 
 const SignInWithYourSelf: React.FC<SignInProps> = ({ challengeUrl }) => {
   return (
     <Wrapper>
+      <GlobalStyle/>
       <ModalWrapper>
         <Challenge challengeUrl={challengeUrl} />
         <InstructionsWrapper>
@@ -62,20 +80,16 @@ const SignInWithYourSelf: React.FC<SignInProps> = ({ challengeUrl }) => {
               <b>Instructions:</b>
             </p>
             <InstructionsSet>
-              <b>
                 If you are signing in on a device that has the SELF app
                 installed:
-              </b>
               <List>
                 <li>Tap the SELF.id connect button.</li>
                 <li>Approve the connection request within the SELF app.</li>
               </List>
             </InstructionsSet>
             <InstructionsSet>
-              <b>
                 If you are <u>not</u> signing in on a device that has the SELF
                 app installed:
-              </b>
               <List>
                 <li>Open the SELF app on the device with the app installed.</li>
                 <li>
@@ -85,9 +99,7 @@ const SignInWithYourSelf: React.FC<SignInProps> = ({ challengeUrl }) => {
               </List>
             </InstructionsSet>
             <p style={{ marginTop: "3rem" }}>
-              <b>
                 Don't have the <i>SELF</i> app?
-              </b>
             </p>
             <DownloadApp />
           </div>

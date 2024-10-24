@@ -5,7 +5,7 @@ import styled from "styled-components";
 import Challenge from "./Challenge";
 import DownloadApp from "./DownloadApp";
 
-import { createGlobalStyle } from 'styled-components'
+import { createGlobalStyle } from "styled-components";
 
 const GlobalStyle = createGlobalStyle`
   body, #root {
@@ -13,7 +13,7 @@ const GlobalStyle = createGlobalStyle`
     height: 100svh;
     margin: 0;
   }
-`
+`;
 
 interface SignInProps {
   challengeUrl: string;
@@ -34,18 +34,17 @@ const Wrapper = styled.div`
   height: 100%;
   font-weight: 700;
   @media (max-width: 767px) {
-      padding: 10rem 0;
+    padding: 10rem 2rem;
   }
 `;
 
 const ModalWrapper = styled.div`
   display: flex;
-  align-self: center;  
   border-radius: 16px;
   border: 1px solid;
 
   @media (max-width: 767px) {
-    flex-direction: column-reverse;  
+    flex-direction: column-reverse;
     border: none;
   }
 `;
@@ -55,6 +54,7 @@ const InstructionsWrapper = styled.div`
   flex-direction: column;
   color: white;
   flex: 2;
+  padding: 2rem 5rem;
 `;
 
 const InstructionsSet = styled.div`
@@ -71,38 +71,35 @@ const List = styled.ol`
 const SignInWithYourSelf: React.FC<SignInProps> = ({ challengeUrl }) => {
   return (
     <Wrapper>
-      <GlobalStyle/>
+      <GlobalStyle />
       <ModalWrapper>
         <Challenge challengeUrl={challengeUrl} />
         <InstructionsWrapper>
-          <div style={{ margin: "2rem 5rem" }}>
-            <p style={{ marginBottom: "2rem" }}>
-              <b>Instructions:</b>
-            </p>
-            <InstructionsSet>
-                If you are signing in on a device that has the SELF app
-                installed:
-              <List>
-                <li>Tap the SELF.id connect button.</li>
-                <li>Approve the connection request within the SELF app.</li>
-              </List>
-            </InstructionsSet>
-            <InstructionsSet>
-                If you are <u>not</u> signing in on a device that has the SELF
-                app installed:
-              <List>
-                <li>Open the SELF app on the device with the app installed.</li>
-                <li>
-                  Use the scanning feature in the SELF app to scan the QR code.
-                </li>
-                <li>Approve the connection request within the SELF app.</li>
-              </List>
-            </InstructionsSet>
-            <p style={{ marginTop: "3rem" }}>
-                Don't have the <i>SELF</i> app?
-            </p>
-            <DownloadApp />
-          </div>
+          <p style={{ marginBottom: "2rem" }}>
+            <b>Instructions:</b>
+          </p>
+          <InstructionsSet>
+            If you are signing in on a device that has the SELF app installed:
+            <List>
+              <li>Tap the SELF.id connect button.</li>
+              <li>Approve the connection request within the SELF app.</li>
+            </List>
+          </InstructionsSet>
+          <InstructionsSet>
+            If you are <u>not</u> signing in on a device that has the SELF app
+            installed:
+            <List>
+              <li>Open the SELF app on the device with the app installed.</li>
+              <li>
+                Use the scanning feature in the SELF app to scan the QR code.
+              </li>
+              <li>Approve the connection request within the SELF app.</li>
+            </List>
+          </InstructionsSet>
+          <p style={{ marginTop: "3rem" }}>
+            Don't have the <i>SELF</i> app?
+          </p>
+          <DownloadApp />
         </InstructionsWrapper>
       </ModalWrapper>
     </Wrapper>

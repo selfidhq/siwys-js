@@ -5,6 +5,9 @@ import * as cipher_web from "@mdip/cipher/web";
 import * as gatekeeper_sdk from "@mdip/gatekeeper/sdk";
 import * as keymaster_lib from "@mdip/keymaster/lib";
 
+import BrowserDb from "./db/browser";
+import BaseDb from "./db/base";
+
 export interface CreateChallengeSpec {
   challenge?: {
     credentials?: [];
@@ -33,27 +36,17 @@ export interface VerifyResponseResponse {
   // ...rest
 }
 
-export interface Wallet {
-  seed: {
-    mnemonic: string;
-    hdkey: {
-      xpriv: string;
-      xpub: string;
-    };
-  };
-  counter: number;
-  ids: any;
-}
+export type WalletDbType = "web";
 
 export interface KeymasterOptions {
   gatekeeperUrl: string;
-  wallet: Wallet;
+  walletDb: WalletDbType;
 }
 
 export class Keymaster {
   private _gatekeeperUrl;
   private _keymaster;
-  private _wallet;
+  private _walletDb: BaseDb;
   private _initialized = false;
 
   constructor(options: KeymasterOptions) {
@@ -61,12 +54,8 @@ export class Keymaster {
     this._gatekeeperUrl = options.gatekeeperUrl;
     this._keymaster = keymaster_lib;
 
-    if (options.wallet) {
-      this._wallet = options.wallet;
-    } else if (process.env.SIWYS_WALLET_JSON) {
-      this._wallet = JSON.parse(process.env.SIWYS_WALLET_JSON);
-    } else {
-      throw new Error("No wallet configured.");
+    if (options.walletDb === "web") {
+      this._walletDb = new BrowserDb();
     }
   }
 
@@ -82,7 +71,7 @@ export class Keymaster {
     await this._keymaster.start({
       gatekeeper: gatekeeper_sdk,
       cipher: cipher_web, // TODO: dynamically pass correct cipher lib
-      wallet: this._wallet,
+      wallet: this._walletDb,
     });
     console.debug(`Started Keymaster.`);
     this._initialized = true;

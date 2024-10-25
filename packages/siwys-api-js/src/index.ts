@@ -6,5 +6,5 @@ export {
   CreateChallengeSpec,
   VerifyResponseOptions,
   VerifyResponseResponse,
-  Wallet,
+  WalletDbType,
 } from "./keymaster";

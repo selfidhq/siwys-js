@@ -37,9 +37,9 @@ export interface VerifyResponseResponse {
 
 export interface GatekeeperConfig {
   url: string;
-  waitUntilReady: boolean;
-  intervalSeconds: number;
-  chatty: boolean;
+  waitUntilReady?: boolean;
+  intervalSeconds?: number;
+  chatty?: boolean;
 }
 
 export interface KeymasterConfig {
@@ -73,7 +73,7 @@ export class Keymaster {
     console.debug(`Initializing Gatekeeper and Keymaster services.`);
     await gatekeeper_sdk.start(this._gatekeeperConfig);
     console.debug(`Started Gatekeeper.`);
-    await this._keymaster.start(this._keymasterConfig);
+    await keymaster_lib.start(this._keymasterConfig);
     console.debug(`Started Keymaster.`);
     this._initialized = true;
   }

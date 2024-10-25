@@ -1,51 +1,61 @@
-import React from "react";
+import React, { useMemo, useState } from "react";
 import ReactDOM from "react-dom/client";
 
-import Component from "./component";
-import { ConnectButton, SignInButton } from "../components/button/SignInButton";
+import styled from "styled-components";
+
+import { SignInButton } from "../components/button/SignInButton";
+import SignInWithYourSelf from "../components/signin/SignInWithYourSelf";
+
+const Wrapper = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  background: radial-gradient(
+    circle at 24.1% 68.8%,
+    rgb(50, 50, 50) 0%,
+    rgb(0, 0, 0) 99.4%
+  );
+  gap: 5rem;
+  height: 100vh;
+  width: 100vw;
+`;
+
+const Demo: React.FC<{}> = () => {
+  const [challengeUrl, setChallengeUrl] = useState<string>("");
+  const [step, setStep] = useState<number>(1);
+
+  return (
+    <Wrapper>
+      {step === 1 && (
+        <SignInButton
+          colorTheme="dark"
+          glow
+          onClick={() => {
+            window.open(
+              "https://auth.mdip.yourself.dev/api/challenge",
+              "_blank"
+            );
+            setStep(2);
+          }}
+        />
+      )}
+      {step === 2 && (
+        <input
+          placeholder="Paste challengeUrl"
+          onChange={(e) => {
+            setStep(0);
+            setChallengeUrl(e.target.value);
+          }}
+        />
+      )}
+      {challengeUrl && <SignInWithYourSelf challengeUrl={challengeUrl} />}
+    </Wrapper>
+  );
+};
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        padding: "2rem",
-        background: "grey",
-        height: "100vh",
-        gap: "2rem",
-      }}
-    >
-      <Component title="Sign In Buttons">
-        <SignInButton
-          colorTheme="light"
-          onClick={() => console.log("Clicked light button!")}
-        />
-        <SignInButton
-          colorTheme="dark"
-          glow
-          onClick={() => console.log("Clicked dark button!")}
-        />
-        <SignInButton
-          colorTheme="blue"
-          onClick={() => console.log("Clicked auto button!")}
-        />
-      </Component>
-      <Component title="Connect Buttons">
-        <ConnectButton
-          colorTheme="light"
-          onClick={() => console.log("Clicked light button!")}
-        />
-        <ConnectButton
-          colorTheme="dark"
-          glow
-          onClick={() => console.log("Clicked dark button!")}
-        />
-        <ConnectButton
-          colorTheme="blue"
-          onClick={() => console.log("Clicked auto button!")}
-        />
-      </Component>
-    </div>
+    <Demo />
   </React.StrictMode>
 );

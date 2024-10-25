@@ -1,4 +1,9 @@
+export { default as AppleAppStore } from "./AppleAppStore";
+export { default as CheckerLogoBlack } from "./CheckerLogoBlack";
+export { default as CheckerLogoWhite } from "./CheckerLogoWhite";
 export { default as CircleLogoBlack } from "./CircleLogoBlack";
 export { default as CircleLogoWhite } from "./CircleLogoWhite";
+export { default as GooglePlayStore } from "./GooglePlayStore";
+export { default as QrCodeLogo } from "./QrCodeLogo";
 export { default as SelfTextLogoBlack } from "./SelfTextLogoBlack";
 export { default as SelfTextLogoWhite } from "./SelfTextLogoWhite";

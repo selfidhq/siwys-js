@@ -1,5 +1,6 @@
 import React from "react";
-import ReactDOMServer from "react-dom/server";
+import { createRoot } from "react-dom/client";
+import { flushSync } from "react-dom";
 
 import styled from "styled-components";
 
@@ -34,10 +35,19 @@ const StyledButton = styled(SignInButton)`
   margin-top: 3rem;
 `;
 
-const qrCodeLogoSrc =
+const convertNodeToString = (node: React.ReactNode): string => {
+  const div = document.createElement("div");
+  const root = createRoot(div);
+  flushSync(() => {
+    root.render(node);
+  });
+  return div.innerHTML;
+};
+
+const qrCodeLogoDataUrl =
   "data:image/svg+xml," +
   encodeURIComponent(
-    ReactDOMServer.renderToStaticMarkup(<QrCodeLogo height={20} width={82} />)
+    convertNodeToString(<QrCodeLogo height={20} width={82} />)
   );
 
 const Challenge: React.FC<ChallengeProps> = ({ challengeUrl }) => {
@@ -57,7 +67,7 @@ const Challenge: React.FC<ChallengeProps> = ({ challengeUrl }) => {
         style={{ marginTop: "3rem", borderRadius: "16px" }}
         marginSize={3}
         imageSettings={{
-          src: qrCodeLogoSrc,
+          src: qrCodeLogoDataUrl,
           height: 24,
           width: 104,
           excavate: true,

@@ -2,7 +2,10 @@ import { Wallet } from "./base";
 
 const walletName = "mdip-keymaster";
 
-async function saveWallet(wallet: Wallet, overwrite: boolean): Promise<void> {
+export async function saveWallet(
+  wallet: Wallet,
+  overwrite: boolean
+): Promise<void> {
   if (!overwrite) {
     const existingWallet = await loadWallet();
     if (existingWallet) {
@@ -14,6 +17,6 @@ async function saveWallet(wallet: Wallet, overwrite: boolean): Promise<void> {
   localStorage.setItem(walletName, JSON.stringify(wallet));
 }
 
-async function loadWallet(): Promise<string | null> {
+export async function loadWallet(): Promise<string | null> {
   return localStorage.getItem(walletName);
 }

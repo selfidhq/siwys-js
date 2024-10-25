@@ -5,6 +5,8 @@
     "@selfidhq:registry": "https://npm.pkg.github.com/selfidhq"
   },
   "scripts": {
+    "bootstrap": "lerna bootstrap",
+    "bootstrap-ci": "for D in packages/*; do yarn --frozen-lockfile --cwd \"${D}\"; done",
     "build": "lerna run build",
     "commit-lint": "commitlint -E HUSKY_GIT_PARAMS",
     "prepare": "husky install && chmod ug+x .husky/*",

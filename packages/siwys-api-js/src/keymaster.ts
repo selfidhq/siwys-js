@@ -1,6 +1,5 @@
 // @ts-ignore
 // @ts-nocheck
-import * as cipher from "@mdip/cipher/node";
 import * as keymaster_lib from "@mdip/keymaster/lib";
 
 export interface CreateChallengeSpec {
@@ -46,7 +45,6 @@ export interface Wallet {
 export interface KeymasterOptions {
   gatekeeperUrl: string;
   wallet?: Wallet;
-  mnemonicDevice?: string;
 }
 
 export class Keymaster {
@@ -54,19 +52,11 @@ export class Keymaster {
 
   constructor(options: KeymasterOptions) {
     console.debug(`Initializing keymaster with config:`, options);
-    let wallet = options.wallet;
+    let wallet =
+      options.wallet || JSON.parse(process.env.SIWYS_WALLET_JSON || {});
 
     if (!wallet) {
-      if (process.env.SIWYS_WALLET_JSON) {
-        console.debug(`Parsing wallet from env:`, wallet);
-        wallet = JSON.parse(process.env.SIWYS_WALLET_JSON);
-      } else {
-        if (!options.mnemonicDevice) {
-          throw new Error("No wallet or mnemonic device configured.");
-        }
-        wallet = this.generateWalletFromMnemonic(options.mnemonicDevice);
-        console.debug(`Generated wallet:`, wallet);
-      }
+      throw new Error("No wallet configured.");
     }
 
     console.debug(`Starting Keymaster...`);
@@ -75,25 +65,6 @@ export class Keymaster {
       cipher: cipher,
       wallet: wallet,
     });
-  }
-
-  private generateWalletFromMnemonic(mnemonic: string): Wallet {
-    const hdkey = cipher.generateHDKey(mnemonic);
-    const keypair = cipher.generateJwk(hdkey.privateKey);
-    const backup = cipher.encryptMessage(
-      keypair.publicJwk,
-      keypair.privateJwk,
-      mnemonic
-    );
-
-    return {
-      seed: {
-        mnemonic: backup,
-        hdkey: hdkey.toJSON(),
-      },
-      counter: 0,
-      ids: {},
-    };
   }
 
   async createChallenge(

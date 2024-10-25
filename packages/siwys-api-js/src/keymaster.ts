@@ -1,6 +1,7 @@
 // @ts-ignore
 // @ts-nocheck
-import * as cipher from "@mdip/cipher";
+import * as cipher_node from "@mdip/cipher/node";
+import * as cipher_web from "@mdip/cipher/web";
 import * as keymaster_lib from "@mdip/keymaster/lib";
 
 export interface CreateChallengeSpec {
@@ -63,7 +64,7 @@ export class Keymaster {
     console.debug(`Starting Keymaster...`);
     this._keymaster = keymaster_lib.start({
       gatekeeper: options.gatekeeperUrl,
-      cipher: cipher,
+      cipher: typeof window !== "undefined" ? cipher_web : cipher_node,
       wallet: wallet,
     });
   }

@@ -51,38 +51,44 @@ export interface KeymasterOptions {
 }
 
 export class Keymaster {
+  private _gatekeeperUrl;
   private _keymaster;
+  private _wallet;
 
   constructor(options: KeymasterOptions) {
-    console.debug(`Initializing keymaster with config:`, options);
-    console.debug(`Starting gatekeeper...`);
+    this._gatekeeperUrl = options.gatekeeperUrl;
+    this._keymaster = keymaster_lib;
+
+    if (!options.wallet || !process.env.SIWYS_WALLET_JSON) {
+      throw new Error("No wallet configured.");
+    }
+
+    this._wallet =
+      options.wallet || JSON.parse(process.env.SIWYS_WALLET_JSON || {});
+  }
+
+  public async init() {
+    console.debug(`Initializing Gatekeeper and Keymaster services.`);
     await gatekeeper_sdk.start({
-      url: options.gatekeeperUrl,
+      url: this._gatekeeperUrl,
       waitUntilReady: true,
       intervalSeconds: 5,
       chatty: true,
     });
-
-    let wallet =
-      options.wallet || JSON.parse(process.env.SIWYS_WALLET_JSON || {});
-
-    if (!wallet) {
-      throw new Error("No wallet configured.");
-    }
-
-    console.debug(`Starting Keymaster...`);
-    keymaster_lib.start({
+    console.debug(`Started Gatekeeper.`);
+    this._keymaster.start({
       gatekeeper: gatekeeper_sdk,
-      cipher: cipher_web,
-      wallet: wallet,
+      cipher: cipher_web, // TODO: dynamically pass correct cipher lib
+      wallet: this._wallet,
     });
+    console.debug(`Started Keymaster.`);
   }
 
   async createChallenge(
     spec?: CreateChallengeSpec,
     options?: CreateChallengeOptions
   ): Promise<CreateChallengeResponse> {
-    const response = await keymaster_lib.createChallenge(spec, options);
+    const response = await this._keymaster.createChallenge(spec, options);
     console.debug("Created challenge:", response);
     return response;
   }
@@ -91,7 +97,7 @@ export class Keymaster {
     did: string,
     options?: VerifyResponseOptions
   ): Promise<VerifyResponseResponse> {
-    const response = await keymaster_lib.verifyResponse(did, options);
+    const response = await this._keymaster.verifyResponse(did, options);
     console.debug("Verified response:", response);
     return response;
   }

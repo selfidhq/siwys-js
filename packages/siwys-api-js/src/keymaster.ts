@@ -2,6 +2,7 @@
 // @ts-nocheck
 //import * as cipher_node from "@mdip/cipher/node";
 import * as cipher_web from "@mdip/cipher/web";
+import * as gatekeeper_sdk from "@mdip/gatekeeper/sdk";
 import * as keymaster_lib from "@mdip/keymaster/lib";
 
 export interface CreateChallengeSpec {
@@ -54,6 +55,14 @@ export class Keymaster {
 
   constructor(options: KeymasterOptions) {
     console.debug(`Initializing keymaster with config:`, options);
+    console.debug(`Starting gatekeeper...`);
+    await gatekeeper_sdk.start({
+      url: options.gatekeeperUrl,
+      waitUntilReady: true,
+      intervalSeconds: 5,
+      chatty: true,
+    });
+
     let wallet =
       options.wallet || JSON.parse(process.env.SIWYS_WALLET_JSON || {});
 
@@ -62,8 +71,8 @@ export class Keymaster {
     }
 
     console.debug(`Starting Keymaster...`);
-    this._keymaster = keymaster_lib.start({
-      gatekeeper: options.gatekeeperUrl,
+    keymaster_lib.start({
+      gatekeeper: gatekeeper_sdk,
       cipher: cipher_web,
       wallet: wallet,
     });
@@ -73,7 +82,7 @@ export class Keymaster {
     spec?: CreateChallengeSpec,
     options?: CreateChallengeOptions
   ): Promise<CreateChallengeResponse> {
-    const response = await this._keymaster.createChallenge(spec, options);
+    const response = await keymaster_lib.createChallenge(spec, options);
     console.debug("Created challenge:", response);
     return response;
   }
@@ -82,7 +91,7 @@ export class Keymaster {
     did: string,
     options?: VerifyResponseOptions
   ): Promise<VerifyResponseResponse> {
-    const response = await this._keymaster.verifyResponse(did, options);
+    const response = await keymaster_lib.verifyResponse(did, options);
     console.debug("Verified response:", response);
     return response;
   }

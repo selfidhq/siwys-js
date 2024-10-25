@@ -5,8 +5,7 @@ import * as cipher_web from "@mdip/cipher/web";
 import * as gatekeeper_sdk from "@mdip/gatekeeper/sdk";
 import * as keymaster_lib from "@mdip/keymaster/lib";
 
-import BrowserDb from "./db/browser";
-import BaseDb from "./db/base";
+import { initalizeWalletDb, DbType } from "./db";
 
 export interface CreateChallengeSpec {
   challenge?: {
@@ -36,43 +35,45 @@ export interface VerifyResponseResponse {
   // ...rest
 }
 
-export type WalletDbType = "web";
+export interface GatekeeperConfig {
+  url: string;
+  waitUntilReady: boolean;
+  intervalSeconds: number;
+  chatty: boolean;
+}
 
-export interface KeymasterOptions {
-  gatekeeperUrl: string;
-  walletDb: WalletDbType;
+export interface KeymasterConfig {
+  gatekeeperConfig: GatekeeperConfig;
+  walletDb: DbType;
 }
 
 export class Keymaster {
-  private _gatekeeperUrl;
-  private _keymaster;
-  private _walletDb: BaseDb;
+  private _gatekeeperConfig;
+  private _keymasterConfig;
   private _initialized = false;
 
-  constructor(options: KeymasterOptions) {
+  constructor(options: KeymasterConfig) {
     console.debug(`Keymaster options:`, options);
-    this._gatekeeperUrl = options.gatekeeperUrl;
-    this._keymaster = keymaster_lib;
-
-    if (options.walletDb === "web") {
-      this._walletDb = new BrowserDb();
-    }
+    this._gatekeeperConfig = {
+      url: options.gatekeeperConfig.url,
+      waitUntilReady: true,
+      intervalSeconds: 5,
+      chatty: true,
+    };
+    console.debug(`Gatekeepr config:`, this._gatekeeperConfig);
+    this._keymasterConfig = {
+      gatekeeper: gatekeeper_sdk,
+      cipher: cipher_web,
+      wallet: initalizeWalletDb(options.walletDb),
+    };
+    console.debug(`Keymaster config:`, this._keymasterConfig);
   }
 
   public async init() {
     console.debug(`Initializing Gatekeeper and Keymaster services.`);
-    await gatekeeper_sdk.start({
-      url: this._gatekeeperUrl,
-      waitUntilReady: true,
-      intervalSeconds: 5,
-      chatty: true,
-    });
+    await gatekeeper_sdk.start(this._gatekeeperConfig);
     console.debug(`Started Gatekeeper.`);
-    await this._keymaster.start({
-      gatekeeper: gatekeeper_sdk,
-      cipher: cipher_web, // TODO: dynamically pass correct cipher lib
-      wallet: this._walletDb,
-    });
+    await this._keymaster.start(this._keymasterConfig);
     console.debug(`Started Keymaster.`);
     this._initialized = true;
   }
@@ -82,10 +83,10 @@ export class Keymaster {
     options?: CreateChallengeOptions
   ): Promise<CreateChallengeResponse> {
     if (!this._initialized) {
-      this.init();
+      await this.init();
     }
 
-    const response = await this._keymaster.createChallenge(spec, options);
+    const response = await keymaster_lib.createChallenge(spec, options);
     console.debug("Created challenge:", response);
     return response;
   }
@@ -95,10 +96,10 @@ export class Keymaster {
     options?: VerifyResponseOptions
   ): Promise<VerifyResponseResponse> {
     if (!this._initialized) {
-      this.init();
+      await this.init();
     }
 
-    const response = await this._keymaster.verifyResponse(did, options);
+    const response = await keymaster_lib.verifyResponse(did, options);
     console.debug("Verified response:", response);
     return response;
   }

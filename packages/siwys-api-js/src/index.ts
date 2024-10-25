@@ -1,10 +1,12 @@
 export {
+  GatekeeperConfig,
   Keymaster,
-  KeymasterOptions,
+  KeymasterConfig,
   CreateChallengeOptions,
   CreateChallengeResponse,
   CreateChallengeSpec,
   VerifyResponseOptions,
   VerifyResponseResponse,
-  WalletDbType,
 } from "./keymaster";
+
+export { DbType } from "./db/index";

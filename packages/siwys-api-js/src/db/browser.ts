@@ -1,4 +1,4 @@
-import { default as BaseDb, Wallet } from "./base";
+import BaseDb, { Wallet } from "./base";
 
 class BrowserDb extends BaseDb {
   private _walletName = "mdip-keymaster";

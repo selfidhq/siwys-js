@@ -6,6 +6,7 @@ import * as gatekeeper_sdk from "@mdip/gatekeeper/sdk";
 import * as keymaster_lib from "@mdip/keymaster/lib";
 
 import { initalizeWalletDb, DbType } from "./db";
+import * as wallet_db from "./db/test";
 
 export interface CreateChallengeSpec {
   challenge?: {
@@ -64,7 +65,7 @@ export class Keymaster {
     this._keymasterConfig = {
       gatekeeper: gatekeeper_sdk,
       cipher: cipher_web,
-      wallet: initalizeWalletDb(options.walletDb),
+      wallet: wallet_db,
     };
     console.debug(`Keymaster config:`, this._keymasterConfig);
     console.debug(`loadWallet:`, this._keymasterConfig.wallet.loadWallet);

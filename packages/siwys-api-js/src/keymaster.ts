@@ -67,14 +67,12 @@ export class Keymaster {
       wallet: initalizeWalletDb(options.walletDb),
     };
     console.debug(`Keymaster config:`, this._keymasterConfig);
+    console.debug(`loadWallet:`, this._keymasterConfig.wallet.loadWallet);
   }
 
   public async init() {
-    console.debug(`Initializing Gatekeeper and Keymaster services.`);
     await gatekeeper_sdk.start(this._gatekeeperConfig);
-    console.debug(`Started Gatekeeper.`);
-    const wallet = await this._keymasterConfig.wallet.loadWallet();
-    console.log(`loadWallet():`, wallet);
+    console.debug(`Starting Keymaster.`);
     await keymaster_lib.start(this._keymasterConfig);
     console.debug(`Started Keymaster.`);
     this._initialized = true;

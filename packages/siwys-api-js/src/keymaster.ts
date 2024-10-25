@@ -73,7 +73,8 @@ export class Keymaster {
     console.debug(`Initializing Gatekeeper and Keymaster services.`);
     await gatekeeper_sdk.start(this._gatekeeperConfig);
     console.debug(`Started Gatekeeper.`);
-    console.log(`loadWallet():`, this._keymasterConfig.wallet.loadWallet());
+    const wallet = await this._keymasterConfig.wallet.loadWallet();
+    console.log(`loadWallet():`, wallet);
     await keymaster_lib.start(this._keymasterConfig);
     console.debug(`Started Keymaster.`);
     this._initialized = true;
@@ -83,6 +84,9 @@ export class Keymaster {
     spec?: CreateChallengeSpec,
     options?: CreateChallengeOptions
   ): Promise<CreateChallengeResponse> {
+    console.log(
+      `Creating Challenge; Keymaster intialized: ${this._initialized}`
+    );
     if (!this._initialized) {
       await this.init();
     }

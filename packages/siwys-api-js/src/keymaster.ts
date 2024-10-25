@@ -73,6 +73,7 @@ export class Keymaster {
     console.debug(`Initializing Gatekeeper and Keymaster services.`);
     await gatekeeper_sdk.start(this._gatekeeperConfig);
     console.debug(`Started Gatekeeper.`);
+    console.log(`loadWallet():`, this._keymasterConfig.wallet.loadWallet());
     await keymaster_lib.start(this._keymasterConfig);
     console.debug(`Started Keymaster.`);
     this._initialized = true;

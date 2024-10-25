@@ -1,5 +1,6 @@
 // @ts-ignore
 // @ts-nocheck
+import * as cipher from "@mdip/cipher";
 import * as keymaster_lib from "@mdip/keymaster/lib";
 
 export interface CreateChallengeSpec {

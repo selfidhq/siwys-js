@@ -1358,7 +1358,7 @@
     "@jridgewell/resolve-uri" "^3.1.0"
     "@jridgewell/sourcemap-codec" "^1.4.14"
 
-"@mdip/cipher@*":
+"@mdip/cipher@*", "@mdip/cipher@0.3.0":
   version "0.3.0"
   resolved "https://registry.yarnpkg.com/@mdip/cipher/-/cipher-0.3.0.tgz#44b6903d5ef83fb65da7227f96bcbd40811be0ef"
   integrity sha512-cBqZQitHyxuE/W38ZZZFCydtuLZqFyzLpKk3XbCkBEtu9VmgCwV8C2g15+V83U8tKl2eaXzPS5BsyQkSeCcAGw==

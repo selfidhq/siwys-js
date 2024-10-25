@@ -6,4 +6,5 @@ export {
   CreateChallengeSpec,
   VerifyResponseOptions,
   VerifyResponseResponse,
+  Wallet,
 } from "./keymaster";

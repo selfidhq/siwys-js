@@ -47,24 +47,27 @@ export interface Wallet {
 
 export interface KeymasterOptions {
   gatekeeperUrl: string;
-  wallet?: Wallet;
+  wallet: Wallet;
 }
 
 export class Keymaster {
   private _gatekeeperUrl;
   private _keymaster;
   private _wallet;
+  private _initialized = false;
 
   constructor(options: KeymasterOptions) {
+    console.debug(`Keymaster options:`, options);
     this._gatekeeperUrl = options.gatekeeperUrl;
     this._keymaster = keymaster_lib;
 
-    if (!options.wallet || !process.env.SIWYS_WALLET_JSON) {
+    if (options.wallet) {
+      this._wallet = options.wallet;
+    } else if (process.env.SIWYS_WALLET_JSON) {
+      this._wallet = JSON.parse(process.env.SIWYS_WALLET_JSON);
+    } else {
       throw new Error("No wallet configured.");
     }
-
-    this._wallet =
-      options.wallet || JSON.parse(process.env.SIWYS_WALLET_JSON || {});
   }
 
   public async init() {
@@ -76,18 +79,23 @@ export class Keymaster {
       chatty: true,
     });
     console.debug(`Started Gatekeeper.`);
-    this._keymaster.start({
+    await this._keymaster.start({
       gatekeeper: gatekeeper_sdk,
       cipher: cipher_web, // TODO: dynamically pass correct cipher lib
       wallet: this._wallet,
     });
     console.debug(`Started Keymaster.`);
+    this._initialized = true;
   }
 
   async createChallenge(
     spec?: CreateChallengeSpec,
     options?: CreateChallengeOptions
   ): Promise<CreateChallengeResponse> {
+    if (!this._initialized) {
+      this.init();
+    }
+
     const response = await this._keymaster.createChallenge(spec, options);
     console.debug("Created challenge:", response);
     return response;
@@ -97,6 +105,10 @@ export class Keymaster {
     did: string,
     options?: VerifyResponseOptions
   ): Promise<VerifyResponseResponse> {
+    if (!this._initialized) {
+      this.init();
+    }
+
     const response = await this._keymaster.verifyResponse(did, options);
     console.debug("Verified response:", response);
     return response;

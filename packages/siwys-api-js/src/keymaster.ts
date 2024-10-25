@@ -50,7 +50,7 @@ export interface KeymasterConfig {
 export class Keymaster {
   private _gatekeeperConfig;
   private _keymasterConfig;
-  private _initialized = false;
+  private _serviceStarted = false;
 
   constructor(options: KeymasterConfig) {
     console.debug(`Keymaster options:`, options);
@@ -70,25 +70,28 @@ export class Keymaster {
     console.debug(`loadWallet:`, this._keymasterConfig.wallet.loadWallet);
   }
 
-  public async init() {
-    await gatekeeper_sdk.start(this._gatekeeperConfig);
-    console.debug(`Starting Keymaster.`);
-    await keymaster_lib.start(this._keymasterConfig);
-    console.debug(`Started Keymaster.`);
-    this._initialized = true;
+  public async start(): Promise<boolean> {
+    try {
+      await gatekeeper_sdk.start(this._gatekeeperConfig);
+      console.debug(`Starting Keymaster.`);
+      await keymaster_lib.start(this._keymasterConfig);
+      console.debug(`Started Keymaster.`);
+      this._serviceStarted = true;
+    } catch (e) {
+      console.error("Error starting Keymaster service:", e);
+    } finally {
+      return this._serviceStarted;
+    }
   }
 
   async createChallenge(
     spec?: CreateChallengeSpec,
     options?: CreateChallengeOptions
   ): Promise<CreateChallengeResponse> {
-    console.log(
-      `Creating Challenge; Keymaster intialized: ${this._initialized}`
-    );
-    if (!this._initialized) {
-      await this.init();
+    if (!this.keymasterStarted()) {
+      return;
     }
-
+    console.log(`Creating Challenge...`);
     const response = await keymaster_lib.createChallenge(spec, options);
     console.debug("Created challenge:", response);
     return response;
@@ -98,12 +101,16 @@ export class Keymaster {
     did: string,
     options?: VerifyResponseOptions
   ): Promise<VerifyResponseResponse> {
-    if (!this._initialized) {
-      await this.init();
+    if (!this.keymasterStarted()) {
+      return;
     }
-
+    console.log(`Verifying response for Challenge...`);
     const response = await keymaster_lib.verifyResponse(did, options);
     console.debug("Verified response:", response);
     return response;
+  }
+
+  private async keymasterStarted(): Promise<boolean> {
+    return this._serviceStarted || (await this.start());
   }
 }

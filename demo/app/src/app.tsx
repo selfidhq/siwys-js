@@ -1,11 +1,8 @@
 import React, { useState } from "react";
-import ReactDOM from "react-dom/client";
 
 import styled from "styled-components";
 
-import { SignInButton } from "../components/button/SignInButton";
-import SignInWithYourSelf from "../components/signin/SignInWithYourSelf";
-
+import { SignInButton, SignInWithYouSelf } from "@selfidhq/react-js";
 
 const Wrapper = styled.div`
   display: flex;
@@ -22,7 +19,7 @@ const Wrapper = styled.div`
   width: 100vw;
 `;
 
-const Demo: React.FC<{}> = () => {
+const App: React.FC<{}> = () => {
   const [challenge, setChallenge] = useState<boolean>(false);
 
   return (
@@ -37,14 +34,10 @@ const Demo: React.FC<{}> = () => {
         />
       )}
       {challenge && (
-        <SignInWithYourSelf challengeUrl="http://localhost:3001/challenges" />
+        <SignInWithYouSelf challengeUrl="http://localhost:3001/challenges" />
       )}
     </Wrapper>
   );
 };
 
-ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
-  <React.Fragment>
-    <Demo />
-  </React.Fragment>
-);
+export default App;

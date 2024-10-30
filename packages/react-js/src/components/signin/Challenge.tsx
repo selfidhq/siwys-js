@@ -1,10 +1,10 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { flushSync } from "react-dom";
 
-import styled from "styled-components";
+import styled, { keyframes } from "styled-components";
 
-import { CircleLogoWhite, QrCodeLogo } from "../../icons";
+import { CircleLogoWhite, QrCodeLoading, QrCodeLogo } from "../../icons";
 import { QRCodeSVG } from "qrcode.react";
 import { SignInButton } from "../button/SignInButton";
 
@@ -35,6 +35,28 @@ const StyledButton = styled(SignInButton)`
   margin-top: 3rem;
 `;
 
+const rotate = keyframes`
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+`;
+
+const LoadingIcon = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 212px;
+  height: 212px;
+
+  & > svg {
+    animation: ${rotate} 2s linear infinite;
+    transform-origin: center;
+  }
+`;
+
 const convertNodeToString = (node: React.ReactNode): string => {
   const div = document.createElement("div");
   const root = createRoot(div);
@@ -51,6 +73,14 @@ const qrCodeLogoDataUrl =
   );
 
 const Challenge: React.FC<ChallengeProps> = ({ challengeUrl }) => {
+  const [challenge, setChallenge] = useState<string>("");
+
+  useEffect(() => {
+    fetch(challengeUrl, {
+      method: "POST",
+    }).then((resp: any) => setChallenge(resp.challengeUrl));
+  }, []);
+
   return (
     <Wrapper>
       <CircleLogoWhite width="4rem" height="4rem" />
@@ -60,19 +90,26 @@ const Challenge: React.FC<ChallengeProps> = ({ challengeUrl }) => {
           SELF<sup style={{ fontSize: "1rem" }}>&trade;</sup>
         </span>
       </Header>
-      <QRCodeSVG
-        value={challengeUrl}
-        size={212}
-        level="M"
-        style={{ marginTop: "3rem", borderRadius: "16px" }}
-        marginSize={3}
-        imageSettings={{
-          src: qrCodeLogoDataUrl,
-          height: 24,
-          width: 104,
-          excavate: true,
-        }}
-      />
+      {!challenge && (
+        <LoadingIcon>
+          <QrCodeLoading width="2rem" height="2rem" />
+        </LoadingIcon>
+      )}
+      {challenge && (
+        <QRCodeSVG
+          value={challengeUrl}
+          size={212}
+          level="M"
+          style={{ marginTop: "3rem", borderRadius: "16px" }}
+          marginSize={3}
+          imageSettings={{
+            src: qrCodeLogoDataUrl,
+            height: 24,
+            width: 104,
+            excavate: true,
+          }}
+        />
+      )}
       <StyledButton
         colorTheme="blue"
         onClick={() => console.log("Open SELF App")}

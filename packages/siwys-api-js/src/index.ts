@@ -7,6 +7,5 @@ export {
   CreateChallengeSpec,
   VerifyResponseOptions,
   VerifyResponseResponse,
+  Wallet,
 } from "./keymaster";
-
-export { DbType } from "./db/index";

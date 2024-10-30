@@ -1,7 +1,6 @@
 // @ts-ignore
 // @ts-nocheck
-//import * as cipher_node from "@mdip/cipher/node";
-import * as cipher_web from "@mdip/cipher/web";
+import * as cipher from "@mdip/cipher/node";
 import * as gatekeeper_sdk from "@mdip/gatekeeper/sdk";
 import * as keymaster_lib from "@mdip/keymaster/lib";
 
@@ -9,9 +8,8 @@ import { initalizeWalletDb, DbType } from "./db";
 import * as wallet_db from "./db/test";
 
 export interface CreateChallengeSpec {
-  challenge?: {
-    credentials?: [];
-  };
+  callbackUrl: string;
+  credentials?: [];
 }
 
 export interface CreateChallengeOptions {
@@ -33,7 +31,18 @@ export interface VerifyResponseResponse {
   match: boolean;
   challenge: string;
   responder: string;
-  // ...rest
+}
+
+export interface Wallet {
+  seed: {
+    mnemonic: string;
+    hdkey: {
+      xpriv: string;
+      xpub: string;
+    };
+  };
+  counter: number;
+  ids: any;
 }
 
 export interface GatekeeperConfig {
@@ -45,7 +54,8 @@ export interface GatekeeperConfig {
 
 export interface KeymasterConfig {
   gatekeeperConfig: GatekeeperConfig;
-  walletDb: DbType;
+  onSaveWallet: (w: Wallet, overwrite?: boolean) => Promise<void>;
+  onLoadWallet: () => Promise<string | null>;
 }
 
 export class Keymaster {
@@ -53,30 +63,27 @@ export class Keymaster {
   private _keymasterConfig;
   private _serviceStarted = false;
 
-  constructor(options: KeymasterConfig) {
-    console.debug(`Keymaster options:`, options);
+  constructor(config: KeymasterConfig) {
     this._gatekeeperConfig = {
-      url: options.gatekeeperConfig.url,
+      url: config.gatekeeperConfig.url,
       waitUntilReady: true,
       intervalSeconds: 5,
       chatty: true,
     };
-    console.debug(`Gatekeepr config:`, this._gatekeeperConfig);
     this._keymasterConfig = {
       gatekeeper: gatekeeper_sdk,
-      cipher: cipher_web,
-      wallet: wallet_db,
+      cipher: cipher,
+      wallet: {
+        saveWallet: config.onSaveWallet,
+        loadWallet: config.onLoadWallet,
+      },
     };
-    console.debug(`Keymaster config:`, this._keymasterConfig);
-    console.debug(`loadWallet:`, this._keymasterConfig.wallet.loadWallet);
   }
 
   public async start(): Promise<boolean> {
     try {
       await gatekeeper_sdk.start(this._gatekeeperConfig);
-      console.debug(`Starting Keymaster.`);
       await keymaster_lib.start(this._keymasterConfig);
-      console.debug(`Started Keymaster.`);
       this._serviceStarted = true;
     } catch (e) {
       console.error("Error starting Keymaster service:", e);
@@ -86,32 +93,39 @@ export class Keymaster {
   }
 
   async createChallenge(
-    spec?: CreateChallengeSpec,
+    spec: CreateChallengeSpec,
     options?: CreateChallengeOptions
   ): Promise<CreateChallengeResponse> {
-    if (!this.keymasterStarted()) {
+    if (!this.serviceRunning()) {
       return;
     }
-    console.log(`Creating Challenge...`);
-    const response = await keymaster_lib.createChallenge(spec, options);
-    console.debug("Created challenge:", response);
-    return response;
+    const challenge: string = await keymaster_lib.createChallenge(
+      spec,
+      options
+    );
+    return {
+      challenge: challenge,
+      challengeUrl: `${callbackUrl}?challenge=${challenge}`,
+    };
   }
 
   async verifyResponse(
     did: string,
     options?: VerifyResponseOptions
   ): Promise<VerifyResponseResponse> {
-    if (!this.keymasterStarted()) {
+    if (!this.serviceRunning()) {
       return;
     }
-    console.log(`Verifying response for Challenge...`);
-    const response = await keymaster_lib.verifyResponse(did, options);
-    console.debug("Verified response:", response);
+    const response: VerifyResponseResponse = await keymaster_lib.verifyResponse(
+      did,
+      options
+    );
     return response;
   }
 
-  private async keymasterStarted(): Promise<boolean> {
+  // TOOD: expose checkAuth
+
+  private async serviceRunning(): Promise<boolean> {
     return this._serviceStarted || (await this.start());
   }
 }

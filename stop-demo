@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+# start auth-demo
+# pushd ../auth-demo
+# ./stop-demo
+# popd
+
+docker compose down

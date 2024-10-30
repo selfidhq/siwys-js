@@ -10,3 +10,6 @@ dist
 
 .npmrc
 **/.npmrc
+
+# demo
+demo/backend/data

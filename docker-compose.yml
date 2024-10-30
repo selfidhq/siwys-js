@@ -1,0 +1,20 @@
+services:
+  app:
+    build:
+      context: ./
+      dockerfile: demo/app/Dockerfile
+    ports:
+      - 5173:5173
+    volumes:
+      - ./demo/app:/demo/app
+      - node_modules:/demo/app/node_modules
+  backend:
+    build:
+      context: ./
+      dockerfile: demo/backend/Dockerfile
+    ports:
+      - 3001:3001
+    volumes:
+      - ./demo/backend/src:/demo/backend/src
+volumes:
+  node_modules: {}

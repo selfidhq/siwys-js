@@ -6,7 +6,7 @@ const SvgQrCodeLogo = (props: SVGProps<SVGSVGElement>) => (
     width="1em"
     height="1em"
     fill="none"
-    viewBox="-5 0 88 19"
+    viewBox="0 0 83 19"
     {...props}
   >
     <path

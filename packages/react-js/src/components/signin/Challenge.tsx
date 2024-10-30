@@ -78,7 +78,9 @@ const Challenge: React.FC<ChallengeProps> = ({ challengeUrl }) => {
   useEffect(() => {
     fetch(challengeUrl, {
       method: "POST",
-    }).then((resp: any) => setChallenge(resp.challengeUrl));
+    })
+      .then((resp) => resp.json())
+      .then((challenge) => setChallenge(challenge.challengeUrl));
   }, []);
 
   return (
@@ -97,7 +99,7 @@ const Challenge: React.FC<ChallengeProps> = ({ challengeUrl }) => {
       )}
       {challenge && (
         <QRCodeSVG
-          value={challengeUrl}
+          value={challenge}
           size={212}
           level="M"
           style={{ marginTop: "3rem", borderRadius: "16px" }}

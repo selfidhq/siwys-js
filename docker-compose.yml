@@ -7,7 +7,8 @@ services:
       - 5173:5173
     volumes:
       - ./demo/app:/demo/app
-      - node_modules:/demo/app/node_modules
+      - ./packages/react-js:/demo/app/node_modules/@selfidhq/react-js
+      - app_node_modules:/demo/app/node_modules
   backend:
     build:
       context: ./
@@ -16,5 +17,8 @@ services:
       - 3001:3001
     volumes:
       - ./demo/backend/src:/demo/backend/src
+      - ./packages/siwys-api-js:/demo/backend/node_modules/@selfidhq/siwys-api-js
+      - backend_node_modules:/demo/backend/node_modules
 volumes:
-  node_modules: {}
+  app_node_modules: {}
+  backend_node_modules: {}

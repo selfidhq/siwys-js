@@ -5,6 +5,6 @@ import preact from "@preact/preset-vite";
 export default defineConfig({
   plugins: [preact()],
   server: {
-    host: "0.0.0.0", // needed for docker
+    host: "0.0.0.0",
   },
 });

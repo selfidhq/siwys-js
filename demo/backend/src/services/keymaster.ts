@@ -24,5 +24,8 @@ export async function startKeymaster(
 }
 
 export function getKeymaster(): Keymaster {
+  if (!KEYMASTER) {
+    console.error("Keymaster service not started.");
+  }
   return KEYMASTER;
 }

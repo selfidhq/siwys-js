@@ -1,5 +1,5 @@
 services:
-  app:
+  siwys-app:
     build:
       context: ./
       dockerfile: demo/app/Dockerfile
@@ -9,7 +9,9 @@ services:
       - ./demo/app:/demo/app
       - ./packages/react-js:/demo/app/node_modules/@selfidhq/react-js
       - app_node_modules:/demo/app/node_modules
-  backend:
+    networks:
+      - kc
+  siwys-backend:
     build:
       context: ./
       dockerfile: demo/backend/Dockerfile
@@ -19,6 +21,12 @@ services:
       - ./demo/backend/src:/demo/backend/src
       - ./packages/siwys-api-js:/demo/backend/node_modules/@selfidhq/siwys-api-js
       - backend_node_modules:/demo/backend/node_modules
+    networks:
+      - kc
 volumes:
   app_node_modules: {}
   backend_node_modules: {}
+networks:
+  kc:
+    name: kc_default
+    external: true

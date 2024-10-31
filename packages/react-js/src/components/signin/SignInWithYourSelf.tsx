@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 import styled from "styled-components";
 
@@ -15,7 +15,8 @@ const GlobalStyle = createGlobalStyle`
 `;
 
 interface SignInProps {
-  challengeUrl: string;
+  createChallengeUrl: string;
+  checkAuthUrl: string;
 }
 
 const Wrapper = styled.div`
@@ -65,7 +66,43 @@ const List = styled.ol`
   font-weight: 500;
 `;
 
-const SignInWithYourSelf: React.FC<SignInProps> = ({ challengeUrl }) => {
+const SignInWithYourSelf: React.FC<SignInProps> = ({
+  createChallengeUrl,
+  checkAuthUrl,
+}) => {
+  const [challengeDid, setChallengeDid] = useState<string>("");
+  const [challengeUrl, setChallengeUrl] = useState<string>("");
+  const [isAuhtenticated, setIsAuthenticated] = useState<boolean>(false);
+
+  useEffect(() => {
+    fetch(createChallengeUrl, {
+      method: "POST",
+    })
+      .then((resp) => resp.json())
+      .then((challenge) => {
+        console.log(`Created challenge:`, challenge);
+        setChallengeDid(challenge.challenge);
+        setChallengeUrl(challenge.challengeUrl);
+      });
+  }, []);
+
+  useEffect(() => {
+    if (!challengeDid) return;
+
+    const interval = setInterval(async () => {
+      fetch(checkAuthUrl + `?challenge=${challengeDid}`)
+        .then((resp) => resp.json())
+        .then((json) => {
+          console.log(`User is authenticated!`);
+          setIsAuthenticated(json.authenticated);
+        })
+        .catch(() => {}); // ignore errors
+    }, 1000 * 10); // check for auth every 10 seconds
+
+    return () => {
+      clearInterval(interval);
+    };
+  }, [challengeDid]);
   return (
     <Wrapper>
       <GlobalStyle />

@@ -8,7 +8,7 @@ import { initalizeWalletDb, DbType } from "./db";
 import * as wallet_db from "./db/test";
 
 export interface CreateChallengeSpec {
-  callbackUrl: string;
+  callback: string;
   credentials?: [];
 }
 
@@ -60,7 +60,7 @@ export interface KeymasterConfig {
 
 export class Keymaster {
   private _gatekeeperConfig;
-  private _keymasterConfig;
+  private _walletDb;
   private _serviceStarted = false;
 
   constructor(config: KeymasterConfig) {
@@ -70,26 +70,28 @@ export class Keymaster {
       intervalSeconds: 5,
       chatty: true,
     };
-    this._keymasterConfig = {
-      gatekeeper: gatekeeper_sdk,
-      cipher: cipher,
-      wallet: {
-        saveWallet: config.onSaveWallet,
-        loadWallet: config.onLoadWallet,
-      },
+    this._walletDb = {
+      saveWallet: config.onSaveWallet,
+      loadWallet: config.onLoadWallet,
     };
+    gatekeeper_sdk.setURL(config.gatekeeperConfig.url);
   }
 
   public async start(): Promise<boolean> {
     try {
-      await gatekeeper_sdk.start(this._gatekeeperConfig);
-      await keymaster_lib.start(this._keymasterConfig);
+      await gatekeeper_sdk.waitUntilReady();
+    } catch (e) {
+      console.error("Error starting Gatekeeper service:", e);
+    }
+
+    try {
+      await keymaster_lib.start(gatekeeper_sdk, this._walletDb, cipher);
       this._serviceStarted = true;
     } catch (e) {
       console.error("Error starting Keymaster service:", e);
-    } finally {
-      return this._serviceStarted;
     }
+
+    return this._serviceStarted;
   }
 
   async createChallenge(
@@ -99,13 +101,14 @@ export class Keymaster {
     if (!this.serviceRunning()) {
       return;
     }
+    const challengeSpec = { challenge: spec };
     const challenge: string = await keymaster_lib.createChallenge(
-      spec,
+      challengeSpec,
       options
     );
     return {
       challenge: challenge,
-      challengeUrl: `${callbackUrl}?challenge=${challenge}`,
+      challengeUrl: `${spec.callback}?challenge=${challenge}`,
     };
   }
 

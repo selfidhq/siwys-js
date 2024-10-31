@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@selfidhq/siwys-api-js": "file:../../packages/siwys-api-js",
+    "cors": "^2.8.5",
     "express": "^4.21.1"
   },
   "scripts": {

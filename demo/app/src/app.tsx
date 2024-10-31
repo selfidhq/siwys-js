@@ -34,7 +34,10 @@ const App: React.FC<{}> = () => {
         />
       )}
       {challenge && (
-        <SignInWithYouSelf challengeUrl="http://localhost:3001/challenges" />
+        <SignInWithYouSelf
+          createChallengeUrl="http://localhost:3001/challenges"
+          checkAuthUrl="http://localhost:3001/check-auth"
+        />
       )}
     </Wrapper>
   );

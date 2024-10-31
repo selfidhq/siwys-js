@@ -73,16 +73,6 @@ const qrCodeLogoDataUrl =
   );
 
 const Challenge: React.FC<ChallengeProps> = ({ challengeUrl }) => {
-  const [challenge, setChallenge] = useState<string>("");
-
-  useEffect(() => {
-    fetch(challengeUrl, {
-      method: "POST",
-    })
-      .then((resp) => resp.json())
-      .then((challenge) => setChallenge(challenge.challengeUrl));
-  }, []);
-
   return (
     <Wrapper>
       <CircleLogoWhite width="4rem" height="4rem" />
@@ -92,14 +82,14 @@ const Challenge: React.FC<ChallengeProps> = ({ challengeUrl }) => {
           SELF<sup style={{ fontSize: "1rem" }}>&trade;</sup>
         </span>
       </Header>
-      {!challenge && (
+      {!challengeUrl && (
         <LoadingIcon>
           <QrCodeLoading width="2rem" height="2rem" />
         </LoadingIcon>
       )}
-      {challenge && (
+      {challengeUrl && (
         <QRCodeSVG
-          value={challenge}
+          value={challengeUrl}
           size={212}
           level="M"
           style={{ marginTop: "3rem", borderRadius: "16px" }}

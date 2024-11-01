@@ -32,6 +32,7 @@ const Footer = styled.div`
   justify-content: space-evenly;
   align-items: flex-end;
   gap: 0.5rem;
+  margin-top: 1rem;
 `;
 
 const Box = styled.div<{ $background: string }>`
@@ -67,13 +68,13 @@ const DownloadApp: React.FC<{}> = ({}) => {
         <AppleAppStore
           width="8rem"
           height="2.5rem"
-          onClick={() => console.log(`Update with iOS App URL`)}
+          onClick={() => console.log(`TODO: Update with iOS App URL`)}
           style={{ cursor: "pointer" }}
         />
         <GooglePlayStore
           width="8rem"
           height="2.5rem"
-          onClick={() => console.log(`Update with Google Play URL`)}
+          onClick={() => console.log(`TODO: Update with Google Play URL`)}
           style={{ cursor: "pointer" }}
         />
       </Footer>

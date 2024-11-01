@@ -6,7 +6,6 @@ import styled from "styled-components";
 import { SignInButton } from "../components/button/SignInButton";
 import SignInWithYourSelf from "../components/signin/SignInWithYourSelf";
 
-
 const Wrapper = styled.div`
   display: flex;
   align-items: center;
@@ -37,7 +36,10 @@ const Demo: React.FC<{}> = () => {
         />
       )}
       {challenge && (
-        <SignInWithYourSelf challengeUrl="http://localhost:3001/challenges" />
+        <SignInWithYourSelf
+          checkAuthUrl="http://localhost:3001/check-auth"
+          createChallengeUrl="http://localhost:3001/challenges"
+        />
       )}
     </Wrapper>
   );

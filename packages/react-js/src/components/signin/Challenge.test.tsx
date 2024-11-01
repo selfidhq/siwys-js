@@ -13,13 +13,13 @@ beforeEach(() => {
       },
     })
   );
-  window.matchMedia = jest.fn().mockImplementation((query) => ({
+  window.matchMedia = jest.fn().mockImplementation(() => ({
     matches: false,
   }));
 });
 
 describe("Challenge Component", () => {
-  it("should not render the QR code unless the challenge has been generated", () => {
+  it("should not render the QR code unless the challengeUrl exists", () => {
     window.fetch = jest.fn().mockImplementation(() =>
       Promise.resolve({
         ok: true,
@@ -29,7 +29,7 @@ describe("Challenge Component", () => {
       })
     );
 
-    render(<Challenge challengeUrl="http://challenge-api-url" />);
+    render(<Challenge challengeUrl="" />);
     const imgs = screen.queryAllByRole("img");
     expect(imgs.length).toBe(0);
   });

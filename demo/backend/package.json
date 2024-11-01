@@ -16,6 +16,6 @@
     "express": "^4.21.1"
   },
   "scripts": {
-    "start": "nodemon --exec tsx src/index.ts"
+    "start": "nodemon --exec tsx src/index.ts --ignore \"data/*.json\""
   }
 }

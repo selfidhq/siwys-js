@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 
-# start auth-demo
-# pushd ../auth-demo
-# ./start-demo
-# popd
+# start gatekeeper
+pushd ../kc
+docker compose build "$@"
+docker compose up "$@" -d
+popd
 
 yarn build
 

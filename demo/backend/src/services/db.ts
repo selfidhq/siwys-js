@@ -1,4 +1,3 @@
-import { VerifyResponseResponse } from "@selfidhq/siwys-api-js";
 import fs from "fs";
 
 const dbName = "data/db.json";

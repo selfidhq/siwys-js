@@ -32,7 +32,7 @@ app.get("/check-auth", async (req, res) => {
   if (challenge && typeof challenge === "string" && LOGINS[challenge]) {
     res.json(LOGINS[challenge]);
   } else {
-    res.status(404).send();
+    res.status(204).send();
   }
 });
 
@@ -40,11 +40,10 @@ app.post("/login", async (req, res) => {
   const keymaster = getKeymaster();
   try {
     const { response } = req.body;
-    console.log("Verifying response DID", response);
     const verify = await keymaster.verifyResponse(response);
     if (verify.match) {
       console.log("Authentication successful!");
-      // writeToDb(verify.responder);
+      writeToDb(verify.responder);
       LOGINS[verify.challenge] = { response, ...verify };
       res.json({ authenticated: verify.match });
     } else {

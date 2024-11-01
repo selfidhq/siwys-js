@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
+docker compose down
+
 # stop gatekeeper
 pushd ../kc
 ./stop-node
 popd
-
-docker compose down

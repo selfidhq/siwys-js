@@ -56,3 +56,21 @@ Each commit, and the PR title, must follow the semantic release commit formattin
 ## Pull Requests
 
 Due to our use of lerna's auto versioning and publishing, our pull request titles must also adhere to the commitlint rules. Any PR titles that do not adhere to the formatting rules will fail validation.
+
+## Local Demo
+
+Start with:
+
+```
+./start-demo
+```
+
+Stop with:
+
+```
+./stop-demo
+```
+
+View SIWYS demo at http://localhost:5173
+
+See [demo/README.md](demo/README.md) for more information.

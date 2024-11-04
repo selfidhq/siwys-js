@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 import styled from "styled-components";
 
@@ -6,6 +6,7 @@ import Challenge from "./Challenge";
 import DownloadApp from "./DownloadApp";
 
 import { createGlobalStyle } from "styled-components";
+import Success from "./Success";
 
 const GlobalStyle = createGlobalStyle`
   * {
@@ -15,7 +16,8 @@ const GlobalStyle = createGlobalStyle`
 `;
 
 interface SignInProps {
-  challengeUrl: string;
+  createChallengeUrl: string;
+  checkAuthUrl: string;
 }
 
 const Wrapper = styled.div`
@@ -26,6 +28,7 @@ const Wrapper = styled.div`
     rgb(50, 50, 50) 0%,
     rgb(0, 0, 0) 99.4%
   );
+  border-radius: 16px;
   font-weight: 700;
   @media (max-width: 767px) {
     display: block;
@@ -65,39 +68,92 @@ const List = styled.ol`
   font-weight: 500;
 `;
 
-const SignInWithYourSelf: React.FC<SignInProps> = ({ challengeUrl }) => {
+const SignInWithYourSelf: React.FC<SignInProps> = ({
+  createChallengeUrl,
+  checkAuthUrl,
+}) => {
+  const [challengeDid, setChallengeDid] = useState<string>("");
+  const [challengeUrl, setChallengeUrl] = useState<string>("");
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+
+  useEffect(() => {
+    fetch(createChallengeUrl, {
+      method: "POST",
+    })
+      .then((resp) => resp.json())
+      .then((json) => {
+        console.debug(`Create challenge response:`, json);
+        setChallengeDid(json.challenge);
+        setChallengeUrl(json.challengeUrl);
+      });
+  }, []);
+
+  useEffect(() => {
+    if (!challengeDid || isAuthenticated) return;
+
+    const interval = setInterval(async () => {
+      fetch(checkAuthUrl + `?challenge=${challengeDid}`)
+        .then((resp) => {
+          if (resp.status === 200) {
+            return resp.json();
+          }
+          return { match: false };
+        })
+        .then((json) => {
+          if (json.match) {
+            console.log("Check auth response:", json);
+            setIsAuthenticated(json.match);
+          }
+        })
+        .catch(() => {});
+    }, 5000); // every 5 seconds
+
+    return () => {
+      clearInterval(interval);
+    };
+  }, [challengeDid, isAuthenticated]);
+
   return (
     <Wrapper>
       <GlobalStyle />
       <ModalWrapper>
-        <Challenge challengeUrl={challengeUrl} />
-        <InstructionsWrapper>
-          <p style={{ marginBottom: "2rem" }}>
-            <b>Instructions:</b>
-          </p>
-          <InstructionsSet>
-            If you are signing in on a device that has the SELF app installed:
-            <List>
-              <li>Tap the SELF.id connect button.</li>
-              <li>Approve the connection request within the SELF app.</li>
-            </List>
-          </InstructionsSet>
-          <InstructionsSet>
-            If you are <u>not</u> signing in on a device that has the SELF app
-            installed:
-            <List>
-              <li>Open the SELF app on the device with the app installed.</li>
-              <li>
-                Use the scanning feature in the SELF app to scan the QR code.
-              </li>
-              <li>Approve the connection request within the SELF app.</li>
-            </List>
-          </InstructionsSet>
-          <p style={{ marginTop: "3rem" }}>
-            Don't have the <i>SELF</i> app?
-          </p>
-          <DownloadApp />
-        </InstructionsWrapper>
+        {isAuthenticated && <Success />}
+        {!isAuthenticated && (
+          <>
+            <Challenge challengeUrl={challengeUrl} />
+            <InstructionsWrapper>
+              <p style={{ marginBottom: "2rem" }}>
+                <b>Instructions:</b>
+              </p>
+              <InstructionsSet>
+                If you are signing in on a device that has the SELF app
+                installed:
+                <List>
+                  <li>Tap the SELF.id connect button.</li>
+                  <li>Approve the connection request within the SELF app.</li>
+                </List>
+              </InstructionsSet>
+              <InstructionsSet>
+                If you are <u>not</u> signing in on a device that has the SELF
+                app installed:
+                <List>
+                  <li>
+                    Open the SELF app on the device with the app installed.
+                  </li>
+                  <li>
+                    Use the scanning feature in the SELF app to scan the QR
+                    code.
+                  </li>
+                  <li>Approve the connection request within the SELF app.</li>
+                </List>
+              </InstructionsSet>
+              <p style={{ marginTop: "3rem" }}>
+                Don't have the <i>SELF</i> app?
+              </p>
+              <DownloadApp />
+            </InstructionsWrapper>
+          </>
+        )}
       </ModalWrapper>
     </Wrapper>
   );

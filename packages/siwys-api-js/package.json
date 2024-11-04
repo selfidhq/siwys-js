@@ -6,6 +6,7 @@
   "main": "dist/index.js",
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
+  "type": "module",
   "files": [
     "dist"
   ],
@@ -15,6 +16,11 @@
   "scripts": {
     "build": "tsup",
     "test": "echo 'no tests yet'"
+  },
+  "dependencies": {
+    "@mdip/cipher": "0.3.0",
+    "@mdip/keymaster": "0.3.0",
+    "@mdip/gatekeeper": "0.3.0"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.25.8",

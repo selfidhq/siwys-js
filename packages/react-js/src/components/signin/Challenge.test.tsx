@@ -5,23 +5,46 @@ import { render, screen } from "@testing-library/react";
 import Challenge from "./Challenge";
 
 beforeEach(() => {
-  window.matchMedia = jest.fn().mockImplementation((query) => ({
+  window.fetch = jest.fn().mockImplementation(() =>
+    Promise.resolve({
+      ok: true,
+      json: () => {
+        return { challengeUrl: "http://challenge-url" };
+      },
+    })
+  );
+  window.matchMedia = jest.fn().mockImplementation(() => ({
     matches: false,
   }));
 });
 
 describe("Challenge Component", () => {
-  it("should render the QR code for the challengeUrl", () => {
-    render(<Challenge challengeUrl="http://test-url" />);
-    const qrCode = screen.getAllByRole("img")[0];
-    expect(qrCode).toBeInTheDocument();
+  it("should not render the QR code unless the challengeUrl exists", () => {
+    window.fetch = jest.fn().mockImplementation(() =>
+      Promise.resolve({
+        ok: true,
+        json: () => {
+          return {}; // no challengeUrl returned
+        },
+      })
+    );
+
+    render(<Challenge challengeUrl="" />);
+    const imgs = screen.queryAllByRole("img");
+    expect(imgs.length).toBe(0);
   });
 
-  it("should embed the SELF logo inside the QR code", () => {
-    render(<Challenge challengeUrl="http://test-url" />);
-    const qrCode = screen.getAllByRole("img")[0];
+  it("should render the QR code for the challengeUrl", async () => {
+    render(<Challenge challengeUrl="http://challenge-api-url" />);
+    const imgs = await screen.findAllByRole("img");
+    expect(imgs[0]).toBeInTheDocument();
+  });
+
+  it("should embed the SELF logo inside the QR code", async () => {
+    render(<Challenge challengeUrl="http://challenge-api-url" />);
+    const imgs = await screen.findAllByRole("img");
     // find the logo based on its encoded dataUrl
-    const logo = qrCode.querySelector(`[href^="data:image/svg+xml"]`);
+    const logo = imgs[0].querySelector(`[href^="data:image/svg+xml"]`);
     expect(logo).toBeInTheDocument();
   });
 });

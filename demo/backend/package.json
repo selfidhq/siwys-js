@@ -1,0 +1,21 @@
+{
+  "name": "poc",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "type": "module",
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "nodemon": "^3.1.7",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.19.2"
+  },
+  "dependencies": {
+    "@selfidhq/siwys-api-js": "file:../../packages/siwys-api-js",
+    "cors": "^2.8.5",
+    "express": "^4.21.1"
+  },
+  "scripts": {
+    "start": "nodemon --exec tsx src/index.ts --ignore \"data/*.json\""
+  }
+}

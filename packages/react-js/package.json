@@ -1,5 +1,5 @@
 {
-  "name": "@selfidhq/siwys-react-js",
+  "name": "@yourself_id/siwys-react-js",
   "version": "0.0.17",
   "description": "A React component library",
   "repository": "https://github.com/selfidhq/siwys-js",
@@ -10,7 +10,7 @@
     "dist"
   ],
   "publishConfig": {
-    "registry": "https://npm.pkg.github.com/selfidhq"
+    "registry": "https://registry.npmjs.org/"
   },
   "jest": {
     "testEnvironment": "jsdom"

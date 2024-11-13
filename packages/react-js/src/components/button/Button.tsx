@@ -77,7 +77,6 @@ const StyledButton = styled.button<{
 const Button: React.FC<
   ButtonProps & { children: string | React.ReactNode }
 > = ({ children, onClick, className, colorTheme, glow }) => {
-  console.log("Button rendered");
   return (
     <StyledButton
       type="button"

@@ -58,5 +58,5 @@ jobs:
             --exact \
             --dist-tag ${{ steps.use_branch_name.outputs.sanitized-branch-name }}  \
             --preid ${{ steps.use_branch_name.outputs.sanitized-branch-name }}  \
-            --yes
+            --yes \
             --access public

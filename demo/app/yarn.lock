@@ -487,14 +487,6 @@
   resolved "https://registry.yarnpkg.com/@rollup/rollup-win32-x64-msvc/-/rollup-win32-x64-msvc-4.24.3.tgz#7687335781efe6bee14d6ed8eff9746a9f24c9cd"
   integrity sha512-HGZgRFFYrMrP3TJlq58nR1xy8zHKId25vhmm5S9jETEfDf6xybPxsavFTJaufe2zgOGYJBskGlj49CwtEuFhWQ==
 
-"@selfidhq/react-js@file:../../packages/react-js":
-  version "0.0.16"
-  dependencies:
-    qrcode.react "^4.0.1"
-    react "^18.3.1"
-    react-dom "^18.3.1"
-    styled-components "^6.1.13"
-
 "@types/estree@1.0.6":
   version "1.0.6"
   resolved "https://registry.yarnpkg.com/@types/estree/-/estree-1.0.6.tgz#628effeeae2064a1b4e79f78e81d87b7e5fc7b50"
@@ -504,6 +496,14 @@
   version "4.2.5"
   resolved "https://registry.yarnpkg.com/@types/stylis/-/stylis-4.2.5.tgz#1daa6456f40959d06157698a653a9ab0a70281df"
   integrity sha512-1Xve+NMN7FWjY14vLoY5tL3BVEQ/n42YLwaqJIPYhotZ9uBHt87VceMwWQpzmdEt2TNXIorIFG+YeCUUW7RInw==
+
+"@yourself_id/react-js@file:../../packages/react-js":
+  version "0.0.18"
+  dependencies:
+    qrcode.react "^4.0.1"
+    react "^18.3.1"
+    react-dom "^18.3.1"
+    styled-components "^6.1.13"
 
 babel-plugin-transform-hook-names@^1.0.2:
   version "1.0.2"

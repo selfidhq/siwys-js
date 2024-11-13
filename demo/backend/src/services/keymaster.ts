@@ -1,4 +1,4 @@
-import { Keymaster, KeymasterConfig } from "@selfidhq/siwys-api-js";
+import { Keymaster, KeymasterConfig } from "@yourself_id/siwys-api-js";
 
 let KEYMASTER: Keymaster;
 

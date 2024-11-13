@@ -7,7 +7,7 @@ services:
       - 5173:5173
     volumes:
       - ./demo/app:/demo/app
-      - ./packages/react-js:/demo/app/node_modules/@selfidhq/react-js
+      - ./packages/react-js:/demo/app/node_modules/@yourself_id/react-js
       - app_node_modules:/demo/app/node_modules
     networks:
       - kc
@@ -19,7 +19,7 @@ services:
       - 3001:3001
     volumes:
       - ./demo/backend/src:/demo/backend/src
-      - ./packages/siwys-api-js:/demo/backend/node_modules/@selfidhq/siwys-api-js
+      - ./packages/siwys-api-js:/demo/backend/node_modules/@yourself_id/siwys-api-js
       - backend_node_modules:/demo/backend/node_modules
     networks:
       - kc

@@ -11,7 +11,7 @@
     "tsx": "^4.19.2"
   },
   "dependencies": {
-    "@selfidhq/siwys-api-js": "file:../../packages/siwys-api-js",
+    "@yourself_id/siwys-api-js": "file:../../packages/siwys-api-js",
     "cors": "^2.8.5",
     "express": "^4.21.1"
   },

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 
 import styled from "styled-components";
 
-import { SignInButton, SignInWithYouSelf } from "@selfidhq/react-js";
+import { SignInButton, SignInWithYouSelf } from "@yourself_id/react-js";
 
 const Wrapper = styled.div`
   display: flex;

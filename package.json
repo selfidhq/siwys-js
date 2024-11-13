@@ -2,6 +2,7 @@
   "name": "siwys-js",
   "repository": "https://github.com/selfidhq/siwys-js",
   "publishConfig": {
+    "access": "public",
     "registry": "https://registry.npmjs.org/"
   },
   "scripts": {

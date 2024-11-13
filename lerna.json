@@ -1,7 +1,8 @@
 {
   "command": {
     "publish": {
-      "registry": "https://npm.pkg.github.com/selfidhq"
+      "access": "public",
+      "registry": "https://registry.npmjs.org/"
     },
     "version": {
       "allowBranch": ["main", "sapp-76-react-js-sdk"],

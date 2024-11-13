@@ -1,5 +1,5 @@
 {
-  "name": "@selfidhq/siwys-api-js",
+  "name": "@yourself_id/siwys-api-js",
   "version": "0.0.4",
   "description": "A React component library",
   "repository": "https://github.com/selfidhq/siwys-js",
@@ -11,7 +11,8 @@
     "dist"
   ],
   "publishConfig": {
-    "registry": "https://npm.pkg.github.com/selfidhq"
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
   },
   "scripts": {
     "build": "tsup",

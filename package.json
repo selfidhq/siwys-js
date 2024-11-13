@@ -2,7 +2,8 @@
   "name": "siwys-js",
   "repository": "https://github.com/selfidhq/siwys-js",
   "publishConfig": {
-    "@selfidhq:registry": "https://npm.pkg.github.com/selfidhq"
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
   },
   "scripts": {
     "bootstrap": "lerna bootstrap",

@@ -18,8 +18,14 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: "20.x"
-          registry-url: "https://npm.pkg.github.com"
-          scope: "@selfidhq"
+          registry-url: "https://registry.npmjs.org/"
+          scope: "@yourself_id"
+          always-auth: true
+      - name: NPM Registry Setup
+        run: |
+          npm set //registry.npmjs.org/:_authToken=$NPM_TOKEN
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_ACCESS_TOKEN }}
       - name: Use Yarn Cache
         uses: actions/cache@v3
         with:

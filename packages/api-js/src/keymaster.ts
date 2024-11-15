@@ -33,14 +33,16 @@ export interface VerifyResponseResponse {
   responder: string;
 }
 
-export interface Wallet {
-  seed: {
-    mnemonic: string;
-    hdkey: {
-      xpriv: string;
-      xpub: string;
-    };
+export interface WalletSeed {
+  mnemonic: string;
+  hdkey: {
+    xpriv: string;
+    xpub: string;
   };
+}
+
+export interface Wallet {
+  seed: WalletSeed;
   counter: number;
   ids: any;
   current?: string;

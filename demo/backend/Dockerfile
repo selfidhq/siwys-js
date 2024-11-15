@@ -1,6 +1,6 @@
 FROM node:latest
 
-COPY packages/siwys-api-js /packages/siwys-api-js
+COPY packages/api-js /packages/api-js
 
 WORKDIR /demo/backend
 

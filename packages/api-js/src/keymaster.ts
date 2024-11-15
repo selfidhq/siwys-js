@@ -43,6 +43,7 @@ export interface Wallet {
   };
   counter: number;
   ids: any;
+  current?: string;
 }
 
 export interface GatekeeperConfig {
@@ -52,14 +53,22 @@ export interface GatekeeperConfig {
   chatty?: boolean;
 }
 
+export interface WalletConfig {
+  id: string;
+  mnemonic?: string;
+  registry?: string;
+}
+
 export interface KeymasterConfig {
   gatekeeperConfig: GatekeeperConfig;
+  walletConfig: WalletConfig;
   onSaveWallet: (w: Wallet, overwrite?: boolean) => Promise<void>;
-  onLoadWallet: () => Promise<string | null>;
+  onLoadWallet: () => Promise<Wallet | null>;
 }
 
 export class Keymaster {
   private _gatekeeperConfig;
+  private _walletConfig;
   private _walletDb;
   private _serviceStarted = false;
 
@@ -70,6 +79,7 @@ export class Keymaster {
       intervalSeconds: 5,
       chatty: true,
     };
+    this._walletConfig = config.walletConfig;
     this._walletDb = {
       saveWallet: config.onSaveWallet,
       loadWallet: config.onLoadWallet,
@@ -89,6 +99,12 @@ export class Keymaster {
       this._serviceStarted = true;
     } catch (e) {
       console.error("Error starting Keymaster service:", e);
+    }
+
+    try {
+      await this.ensureWalletExists();
+    } catch (e) {
+      console.error("Error verifying existing wallet:", e);
     }
 
     return this._serviceStarted;
@@ -126,7 +142,27 @@ export class Keymaster {
     return response;
   }
 
-  // TOOD: expose checkAuth
+  private async ensureWalletExists(): Promise<void> {
+    const existing: Wallet = await keymaster_lib.loadWallet();
+    if (existing.current) {
+      // pre-existing wallet has current ID set
+      console.log(`Using existing wallet with ID ${existing.current}`);
+      return;
+    }
+
+    console.log(`Creating wallet with ID ${this._walletConfig.id}`);
+    // wallet was just created, recreate based on config
+    if (this._walletConfig.mnemonic) {
+      // create the wallet with a custom mnemonic first
+      await keymaster_lib.newWallet(spec.mnenomic, true);
+    }
+    // create ID and set as current, createId() will save wallet
+    await keymaster_lib.createId(
+      this._walletConfig.id,
+      this._walletConfig.registry
+    );
+    console.log(`Created wallet with ID ${this._walletConfig.id}`);
+  }
 
   private async serviceRunning(): Promise<boolean> {
     return this._serviceStarted || (await this.start());

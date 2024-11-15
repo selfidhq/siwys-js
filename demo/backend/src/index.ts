@@ -4,6 +4,7 @@ import cors from "cors";
 import { getKeymaster, startKeymaster } from "./services/keymaster";
 import { loadWallet, saveWallet } from "./services/wallet";
 import { writeToDb } from "./services/db";
+import { Wallet } from "@yourself_id/siwys-api-js";
 
 const app = express();
 const port = 3001;
@@ -44,6 +45,7 @@ app.post("/login", async (req, res) => {
     if (verify.match) {
       console.log("Authentication successful!");
       writeToDb(verify.responder);
+      // @ts-ignore
       LOGINS[verify.challenge] = { response, ...verify };
       res.json({ authenticated: verify.match });
     } else {
@@ -55,10 +57,13 @@ app.post("/login", async (req, res) => {
   }
 });
 
-app.listen(port, () => {
-  startKeymaster({
+app.listen(port, async () => {
+  await startKeymaster({
     gatekeeperConfig: {
       url: "http://gatekeeper:4224",
+    },
+    walletConfig: {
+      id: "demo-wallet",
     },
     onSaveWallet: saveWallet,
     onLoadWallet: loadWallet,

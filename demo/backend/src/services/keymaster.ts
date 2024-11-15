@@ -9,11 +9,7 @@ export async function startKeymaster(
     return KEYMASTER;
   }
 
-  const keymaster = new Keymaster({
-    gatekeeperConfig: config.gatekeeperConfig,
-    onSaveWallet: config.onSaveWallet,
-    onLoadWallet: config.onLoadWallet,
-  });
+  const keymaster = new Keymaster(config);
 
   const initialized = await keymaster.start();
   if (initialized) {

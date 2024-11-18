@@ -60,6 +60,9 @@ app.listen(port, () => {
     gatekeeperConfig: {
       url: "http://gatekeeper:4224",
     },
+    walletConfig: {
+      id: "demo-wallet",
+    },
     onSaveWallet: saveWallet,
     onLoadWallet: loadWallet,
   });

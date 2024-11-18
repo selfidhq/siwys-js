@@ -8,4 +8,6 @@ export {
   VerifyResponseOptions,
   VerifyResponseResponse,
   Wallet,
+  WalletConfig,
+  WalletSeed,
 } from "./keymaster";

@@ -19,7 +19,7 @@ services:
       - 3001:3001
     volumes:
       - ./demo/backend/src:/demo/backend/src
-      - ./packages/siwys-api-js:/demo/backend/node_modules/@yourself_id/siwys-api-js
+      - ./packages/api-js:/demo/backend/node_modules/@yourself_id/siwys-api-js
       - backend_node_modules:/demo/backend/node_modules
     networks:
       - kc

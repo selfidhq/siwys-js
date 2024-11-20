@@ -99,6 +99,7 @@ export class Keymaster {
     try {
       await keymaster_lib.start(gatekeeper_sdk, this._walletDb, cipher);
       this._serviceStarted = true;
+      console.log("*example");
     } catch (e) {
       console.error("Error starting Keymaster service:", e);
     }

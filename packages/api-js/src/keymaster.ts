@@ -146,8 +146,8 @@ export class Keymaster {
   }
 
   private async ensureWalletExists(): Promise<void> {
-    const existing: Wallet = await keymaster_lib.loadWallet();
-    if (existing.current) {
+    const existing: Wallet | null = await keymaster_lib.loadWallet();
+    if (existing?.current) {
       // pre-existing wallet has current ID set
       console.log(`Using existing wallet with ID ${existing.current}`);
       return;

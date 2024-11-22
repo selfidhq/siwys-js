@@ -86,7 +86,6 @@ export class Keymaster {
       saveWallet: config.onSaveWallet,
       loadWallet: config.onLoadWallet,
     };
-    gatekeeper_sdk.setURL(config.gatekeeperConfig.url);
   }
 
   public async start(): Promise<boolean> {

@@ -91,15 +91,18 @@ export class Keymaster {
 
   public async start(): Promise<boolean> {
     try {
-      await gatekeeper_sdk.waitUntilReady();
+      await gatekeeper_sdk.start(this._gatekeeperConfig);
     } catch (e) {
       console.error("Error starting Gatekeeper service:", e);
     }
 
     try {
-      await keymaster_lib.start(gatekeeper_sdk, this._walletDb, cipher);
+      await keymaster_lib.start({
+        gatekeeper: gatekeeper_sdk,
+        wallet: this._walletDb,
+        cipher: cipher,
+      });
       this._serviceStarted = true;
-      console.log("*example");
     } catch (e) {
       console.error("Error starting Keymaster service:", e);
     }

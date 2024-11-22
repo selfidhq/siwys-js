@@ -86,20 +86,22 @@ export class Keymaster {
       saveWallet: config.onSaveWallet,
       loadWallet: config.onLoadWallet,
     };
-    gatekeeper_sdk.setURL(config.gatekeeperConfig.url);
   }
 
   public async start(): Promise<boolean> {
     try {
-      await gatekeeper_sdk.waitUntilReady();
+      await gatekeeper_sdk.start(this._gatekeeperConfig);
     } catch (e) {
       console.error("Error starting Gatekeeper service:", e);
     }
 
     try {
-      await keymaster_lib.start(gatekeeper_sdk, this._walletDb, cipher);
+      await keymaster_lib.start({
+        gatekeeper: gatekeeper_sdk,
+        wallet: this._walletDb,
+        cipher: cipher,
+      });
       this._serviceStarted = true;
-      console.log("*example");
     } catch (e) {
       console.error("Error starting Keymaster service:", e);
     }
@@ -146,8 +148,8 @@ export class Keymaster {
   }
 
   private async ensureWalletExists(): Promise<void> {
-    const existing: Wallet = await keymaster_lib.loadWallet();
-    if (existing.current) {
+    const existing: Wallet | null = await keymaster_lib.loadWallet();
+    if (existing?.current) {
       // pre-existing wallet has current ID set
       console.log(`Using existing wallet with ID ${existing.current}`);
       return;

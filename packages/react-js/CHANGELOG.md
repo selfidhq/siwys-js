@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 0.0.22 (2024-11-25)
+
+
+### Bug Fixes
+
+* **challenge:** fix QR code logo URL initialization ([#15](https://github.com/selfidhq/siwys-js/issues/15)) ([14f6509](https://github.com/selfidhq/siwys-js/commit/14f6509480ff09c12b0ebd0502cb3a9289fb4bdf))
+
+
+
+
+
 ## 0.0.21 (2024-11-22)
 
 **Note:** Version bump only for package @yourself_id/siwys-react-js

@@ -66,13 +66,13 @@ const convertNodeToString = (node: React.ReactNode): string => {
   return div.innerHTML;
 };
 
-const qrCodeLogoDataUrl =
-  "data:image/svg+xml," +
-  encodeURIComponent(
-    convertNodeToString(<QrCodeLogo height={20} width={82} />)
-  );
-
 const Challenge: React.FC<ChallengeProps> = ({ challengeUrl }) => {
+  const qrCodeLogoDataUrl =
+    "data:image/svg+xml," +
+    encodeURIComponent(
+      convertNodeToString(<QrCodeLogo height={20} width={82} />)
+    );
+
   return (
     <Wrapper>
       <CircleLogoWhite width="4rem" height="4rem" />

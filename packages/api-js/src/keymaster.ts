@@ -64,7 +64,7 @@ export interface WalletConfig {
 export interface KeymasterConfig {
   gatekeeperConfig: GatekeeperConfig;
   walletConfig: WalletConfig;
-  onSaveWallet: (w: Wallet, overwrite?: boolean) => Promise<void>;
+  onSaveWallet: (w: Wallet, overwrite?: boolean) => Promise<boolean>;
   onLoadWallet: () => Promise<Wallet | null>;
 }
 
@@ -148,9 +148,8 @@ export class Keymaster {
   }
 
   private async ensureWalletExists(): Promise<void> {
-    const existing: Wallet | null = await keymaster_lib.loadWallet();
-    if (existing?.current) {
-      // pre-existing wallet has current ID set
+    const existing: Wallet | null = await this._walletDb.loadWallet();
+    if (!!existing?.current) {
       console.log(`Using existing wallet with ID ${existing.current}`);
       return;
     }

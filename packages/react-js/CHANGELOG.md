@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 0.0.23 (2024-12-03)
+
+
+### Bug Fixes
+
+* **keymaster:** update config and call provided loadWallet() on startup ([#17](https://github.com/selfidhq/siwys-js/issues/17)) ([b3cf5d1](https://github.com/selfidhq/siwys-js/commit/b3cf5d16d510358bb0a05b267605460f5bacc5a1))
+
+
+
+
+
 ## 0.0.22 (2024-11-25)
 
 

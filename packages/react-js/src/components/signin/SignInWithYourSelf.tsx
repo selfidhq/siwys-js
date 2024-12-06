@@ -82,7 +82,6 @@ const SignInWithYourSelf: React.FC<SignInProps> = ({
     })
       .then((resp) => resp.json())
       .then((json) => {
-        console.debug(`Create challenge response:`, json);
         setChallengeDid(json.challenge);
         setChallengeUrl(json.challengeUrl);
       });
@@ -101,7 +100,6 @@ const SignInWithYourSelf: React.FC<SignInProps> = ({
         })
         .then((json) => {
           if (json.match) {
-            console.log("Check auth response:", json);
             setIsAuthenticated(json.match);
           }
         })

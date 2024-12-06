@@ -1,13 +1,15 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 
-import { default as GenericButton, ButtonProps } from "./Button";
+import styled from "styled-components";
+
+import Button, { ButtonProps } from "./Button";
 import {
   CircleLogoBlack,
   CircleLogoWhite,
+  LoadingIndicator,
   SelfTextLogoBlack,
   SelfTextLogoWhite,
 } from "../../icons";
-import styled from "styled-components";
 
 const SignInMessage = styled.span`
   display: flex;
@@ -16,11 +18,18 @@ const SignInMessage = styled.span`
   margin-left: 0.5rem;
 `;
 
-const Button: React.FC<ButtonProps & { type: "signIn" | "connect" }> = ({
+const StyledButton = styled(Button)`
+  width: 305px; // fixed width to support loading indicator
+`;
+
+const SignInButton: React.FC<ButtonProps & { type: "signIn" | "connect" }> = ({
   type,
   ...rest
 }) => {
-  const { colorTheme } = rest;
+  const { colorTheme, onClick } = rest;
+
+  const [clicked, setClicked] = useState<boolean>(false);
+
   const darkModeEnabled = useMemo(() => {
     return (
       typeof window !== "undefined" &&
@@ -35,25 +44,37 @@ const Button: React.FC<ButtonProps & { type: "signIn" | "connect" }> = ({
 
   const label = type === "signIn" ? "Sign in with your" : "Connect your";
 
+  const handleClick = () => {
+    setClicked(true);
+    onClick();
+  };
+
   return (
-    <GenericButton {...rest}>
-      {showBlackIcons && <CircleLogoBlack width="1.5rem" height="1.5rem" />}
-      {!showBlackIcons && <CircleLogoWhite width="2rem" height="2rem" />}
-      <SignInMessage>
-        <span style={{ fontSize: "1rem" }}>{label}</span>
-        {showBlackIcons && <SelfTextLogoBlack width="4rem" />}
-        {!showBlackIcons && <SelfTextLogoWhite width="4rem" />}
-      </SignInMessage>
-    </GenericButton>
+    <StyledButton {...rest} disabled={clicked} onClick={handleClick}>
+      {!clicked && (
+        <>
+          {showBlackIcons && <CircleLogoBlack width="1.5rem" height="1.5rem" />}
+          {!showBlackIcons && <CircleLogoWhite width="2rem" height="2rem" />}
+          <SignInMessage>
+            <span style={{ fontSize: "1rem" }}>{label}</span>
+            {showBlackIcons && <SelfTextLogoBlack width="4rem" />}
+            {!showBlackIcons && <SelfTextLogoWhite width="4rem" />}
+          </SignInMessage>
+        </>
+      )}
+      {clicked && (
+        <LoadingIndicator fill={showBlackIcons ? "black" : "white"} />
+      )}
+    </StyledButton>
   );
 };
 
-const ConnectButton: React.FC<ButtonProps> = ({ ...props }) => {
-  return <Button type="connect" {...props} />;
+const CysButton: React.FC<ButtonProps> = ({ ...props }) => {
+  return <SignInButton type="connect" {...props} />;
 };
 
-const SignInButton: React.FC<ButtonProps> = ({ ...props }) => {
-  return <Button type="signIn" {...props} />;
+const SiwysButton: React.FC<ButtonProps> = ({ ...props }) => {
+  return <SignInButton type="signIn" {...props} />;
 };
 
-export { ConnectButton, SignInButton };
+export { CysButton, SiwysButton };

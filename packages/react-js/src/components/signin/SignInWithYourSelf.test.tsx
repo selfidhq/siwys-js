@@ -2,7 +2,7 @@ import React from "react";
 import "@testing-library/jest-dom";
 import { render, waitFor } from "@testing-library/react";
 
-import { SignInWithYouSelf } from "../..";
+import { SignInWithYourSelf } from "../..";
 
 const checkAuthUrl = "http//backend/auth";
 const createChallengeUrl = "http//backend/challenges";
@@ -11,7 +11,6 @@ const challengeDid = "did:challenge";
 let fetchMock: any;
 
 const fetchMockImpl = (input: URL) => {
-  console.log(`fetch mock url`, input);
   const url = input.toString();
   if (url.indexOf("/auth") >= 0) {
     return Promise.resolve({
@@ -47,7 +46,7 @@ beforeEach(() => {
 describe("SignInWithYourSelf Component", () => {
   it("should call the createChallengeUrl to generate a Challange", async () => {
     render(
-      <SignInWithYouSelf
+      <SignInWithYourSelf
         checkAuthUrl={checkAuthUrl}
         createChallengeUrl={createChallengeUrl}
       />
@@ -63,7 +62,7 @@ describe("SignInWithYourSelf Component", () => {
   it("should call the checkAuthUrl after receiving Challenge", async () => {
     jest.useFakeTimers();
     render(
-      <SignInWithYouSelf
+      <SignInWithYourSelf
         checkAuthUrl={checkAuthUrl}
         createChallengeUrl={createChallengeUrl}
       />

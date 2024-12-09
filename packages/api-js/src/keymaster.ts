@@ -76,71 +76,78 @@ export interface ExternalKeymasterConfig {
 
 export interface KeymasterConfig {
   /**
-   * Config for connecting to an external Keymaster service when
-   * the consuming applciation is connecting to an external Keymaster.
+   * Config for connecting to an external Keymaster service
+   * when the consuming applciation is connecting to an external Keymaster.
    */
   keymasterConfig?: SdkConfig;
   /**
-   * All of the following are required when the consuming application
-   * is acting as its own (integrated) Keymaster service.
-   *
-   * The service must connect to an external gatekeeper and provide
-   * the necessary configuration for persisting its own wallet.
+   * Config for connecting to an external Keymaster service when
+   * the consuming applciation is acting as its own (integrated) Keymaster service.
    */
   gatekeeperConfig?: SdkConfig;
+  /**
+   * Config for custom user-defined values of the underlying wallet.
+   *
+   * Required for an integrated Keymaster.
+   */
   walletConfig?: WalletConfig;
+  /**
+   * Config that contains the callbacks for persisting a
+   * wallet to a backing Database.
+   */
   walletDb?: WalletDb;
 }
 
 export class Keymaster {
-  private _config: KeymasterConfig;
+  private config: KeymasterConfig;
   /**
    * Underlying Keymaster libray based on the use-case:
+   *
    * Integrated Keymaster = keymaster_lib
+   *
    * External Keymaster = keymaster_sdk
    */
-  private _keymasterService;
-  private _serviceStarted = false;
+  private keymasterService;
+  private serviceStarted = false;
   constructor(config: KeymasterConfig) {
     this.validateConfig(config);
 
-    this._config = config;
+    this.config = config;
   }
 
   public async start(): Promise<boolean> {
-    if (this._config.gatekeeperConfig) {
+    if (this.config.gatekeeperConfig) {
       console.log(`Starting integrated Keymaster service`);
-      this._serviceStarted = await this.startIntegratedKeymaster();
+      this.serviceStarted = await this.startIntegratedKeymaster();
       console.log(`Started integrated Keymaster service`);
-    } else if (this._config.keymasterConfig) {
+    } else if (this.config.keymasterConfig) {
       console.log(`Starting external Keymaster service`);
-      this._serviceStarted = this.startExternalKeymaster();
-      this._keymasterService = keymaster_sdk;
+      this.serviceStarted = this.startExternalKeymaster();
+      this.keymasterService = keymaster_sdk;
       console.log(`Started external Keymaster service`);
     } else {
       throw "Missing Gatekeeper or Keymaster config";
     }
-    return this._serviceStarted;
+    return this.serviceStarted;
   }
 
   private async startIntegratedKeymaster(): Promise<boolean> {
     try {
       const gatekeeper_sdk = await import("@mdip/gatekeeper/sdk");
-      await gatekeeper_sdk.start(this._config.gatekeeperConfig);
+      await gatekeeper_sdk.start(this.config.gatekeeperConfig);
     } catch (e) {
       console.error("Error starting Gatekeeper service:", e);
       return false;
     }
 
     try {
-      const keymaster_lib = await import("@mdip/keymaster/lib");
       const cipher = await import("@mdip/cipher/node");
-      await keymaster_lib.start({
+      this.keymasterService = await import("@mdip/keymaster/lib");
+      await this.keymasterService.start({
         gatekeeper: gatekeeper_sdk,
-        wallet: this._config.walletDb,
+        wallet: this.config.walletDb,
         cipher: cipher,
       });
-      this._keymasterService = keymaster_lib;
     } catch (e) {
       console.error("Error starting Keymaster service:", e);
       return false;
@@ -158,9 +165,8 @@ export class Keymaster {
 
   private async startExternalKeymaster(): Promise<boolean> {
     try {
-      const keymaster_sdk = await import("@mdip/keymaster/sdk");
-      await keymaster_sdk.start(this._config.keymasterConfig);
-      this._keymasterService = keymaster_sdk;
+      this.keymasterService = await import("@mdip/keymaster/sdk");
+      await this.keymasterService.start(this.config.keymasterConfig);
     } catch (e) {
       console.error(`Error starting ${serviceType}:`, e);
       return false;
@@ -177,7 +183,7 @@ export class Keymaster {
       return;
     }
     const challengeSpec = { challenge: spec };
-    const challenge: string = await this._keymasterService.createChallenge(
+    const challenge: string = await this.keymasterService.createChallenge(
       challengeSpec,
       options
     );
@@ -191,7 +197,7 @@ export class Keymaster {
     if (!this.serviceRunning()) {
       return;
     }
-    return this._keymasterService.decryptMnemonic();
+    return this.keymasterService.decryptMnemonic();
   }
 
   async verifyResponse(
@@ -202,26 +208,26 @@ export class Keymaster {
       return;
     }
     const response: VerifyResponseResponse =
-      await this._keymasterService.verifyResponse(did, options);
+      await this.keymasterService.verifyResponse(did, options);
     return response;
   }
 
   private async ensureWalletExists(): Promise<void> {
-    const existing: Wallet | null = await this._config.walletDb.loadWallet();
+    const existing: Wallet | null = await this.config.walletDb.loadWallet();
     if (existing?.current) {
       console.log(`Using existing wallet with ID ${existing.current}`);
       return;
     }
 
-    const walletConfig = this._config.walletConfig;
+    const walletConfig = this.config.walletConfig;
     console.log(`Creating wallet with ID ${walletConfig.id}`);
     // wallet was just created, recreate based on config
     if (walletConfig.mnemonic) {
       // create the wallet with a custom mnemonic first
-      await this._keymasterService.newWallet(spec.mnenomic, true);
+      await this.keymasterService.newWallet(spec.mnenomic, true);
     }
     // create ID and set as current, createId() will save wallet
-    await this._keymasterService.createId(
+    await this.keymasterService.createId(
       walletConfig.id,
       walletConfig.registry
     );
@@ -229,7 +235,7 @@ export class Keymaster {
   }
 
   private async serviceRunning(): Promise<boolean> {
-    return this._serviceStarted || (await this.start());
+    return this.serviceStarted || (await this.start());
   }
 
   private validateConfig(config: KeymasterConfig): void {

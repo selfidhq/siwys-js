@@ -59,8 +59,8 @@ export interface WalletConfig {
 }
 
 export interface WalletDb {
-  onSaveWallet: (w: Wallet, overwrite?: boolean) => Promise<boolean>;
-  onLoadWallet: () => Promise<Wallet | null>;
+  loadWallet: () => Promise<Wallet | null>;
+  saveWallet: (w: Wallet, overwrite?: boolean) => Promise<boolean>;
 }
 
 export interface KeymasterConfig {
@@ -101,7 +101,6 @@ export class Keymaster {
 
   constructor(config: KeymasterConfig) {
     this.validateConfig(config);
-
     this.config = config;
   }
 
@@ -129,13 +128,9 @@ export class Keymaster {
       await this.keymasterService.start({
         cipher: cipher,
         gatekeeper: gatekeeper_sdk,
-        wallet: {
-          loadWallet: this.config.walletDb?.onLoadWallet,
-          saveWallet: this.config.walletDb?.onSaveWallet,
-        },
+        wallet: this.config.walletDb,
       });
 
-      // ensure wallet exists on startup
       await this.ensureWalletExists();
     } catch (e) {
       console.error("Error starting Keymaster service:", e);
@@ -230,13 +225,13 @@ export class Keymaster {
 
     if (config.gatekeeperConfig) {
       if (!config.walletConfig) {
-        throw new Error("Missing walletConfig");
+        throw new Error("Missing wallet config");
       }
-      if (!config.walletDb?.onSaveWallet) {
-        throw new Error("Missing onSaveWallet callback");
+      if (!config.walletDb?.loadWallet) {
+        throw new Error("Missing load wallet callback");
       }
-      if (!config.walletDb?.onSaveWallet) {
-        throw new Error("Missing onLoadWallet callback");
+      if (!config.walletDb?.saveWallet) {
+        throw new Error("Missing save wallet callback");
       }
     }
   }

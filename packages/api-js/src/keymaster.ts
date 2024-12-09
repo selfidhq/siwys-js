@@ -129,7 +129,10 @@ export class Keymaster {
       await this.keymasterService.start({
         cipher: cipher,
         gatekeeper: gatekeeper_sdk,
-        wallet: this.config.walletDb,
+        wallet: {
+          loadWallet: this.config.walletDb?.onLoadWallet,
+          saveWallet: this.config.walletDb?.onSaveWallet,
+        },
       });
 
       // ensure wallet exists on startup

@@ -9,5 +9,6 @@ export {
   VerifyResponseResponse,
   Wallet,
   WalletConfig,
+  WalletDb,
   WalletSeed,
 } from "./keymaster";

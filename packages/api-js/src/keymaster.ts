@@ -63,17 +63,6 @@ export interface WalletDb {
   onLoadWallet: () => Promise<Wallet | null>;
 }
 
-export interface IntegratedKeymasterConfig {
-  gatekeeperConfig: SdkConfig;
-  walletConfig: WalletConfig;
-  onSaveWallet: (w: Wallet, overwrite?: boolean) => Promise<boolean>;
-  onLoadWallet: () => Promise<Wallet | null>;
-}
-
-export interface ExternalKeymasterConfig {
-  keymasterConfig: SdkConfig;
-}
-
 export interface KeymasterConfig {
   /**
    * Config for connecting to an external Keymaster service
@@ -109,6 +98,7 @@ export class Keymaster {
    */
   private keymasterService;
   private serviceStarted = false;
+
   constructor(config: KeymasterConfig) {
     this.validateConfig(config);
 
@@ -166,7 +156,7 @@ export class Keymaster {
       this.keymasterService = await import("@mdip/keymaster/sdk");
       await this.keymasterService.start(this.config.keymasterConfig);
     } catch (e) {
-      console.error(`Error starting ${serviceType}:`, e);
+      console.error(`Error starting Keymaster serivce:`, e);
       return false;
     }
 
@@ -246,10 +236,10 @@ export class Keymaster {
       if (!config.walletConfig) {
         throw new Error("Missing walletConfig");
       }
-      if (!config.onSaveWallet) {
+      if (!config.walletDb?.onSaveWallet) {
         throw new Error("Missing onSaveWallet callback");
       }
-      if (!config.onLoadWallet) {
+      if (!config.walletDb?.onSaveWallet) {
         throw new Error("Missing onLoadWallet callback");
       }
     }

@@ -147,7 +147,7 @@ export class Keymaster {
       this.keymasterService = await import("@mdip/keymaster/sdk");
       await this.keymasterService.start(this.config.keymasterConfig);
     } catch (e) {
-      console.error(`Error starting Keymaster serivce:`, e);
+      console.error(`Error starting Keymaster service:`, e);
       return false;
     }
 

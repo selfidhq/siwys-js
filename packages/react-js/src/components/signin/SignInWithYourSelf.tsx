@@ -17,7 +17,8 @@ const GlobalStyle = createGlobalStyle`
 
 interface SignInProps {
   createChallengeUrl: string;
-  checkAuthUrl: string;
+  pollForAuthUrl?: string;
+  pollingIntervalSec?: number;
 }
 
 const Wrapper = styled.div`
@@ -70,7 +71,8 @@ const List = styled.ol`
 
 const SignInWithYourSelf: React.FC<SignInProps> = ({
   createChallengeUrl,
-  checkAuthUrl,
+  pollForAuthUrl,
+  pollingIntervalSec = 5,
 }) => {
   const [challengeDid, setChallengeDid] = useState<string>("");
   const [challengeUrl, setChallengeUrl] = useState<string>("");
@@ -82,17 +84,16 @@ const SignInWithYourSelf: React.FC<SignInProps> = ({
     })
       .then((resp) => resp.json())
       .then((json) => {
-        console.debug(`Create challenge response:`, json);
         setChallengeDid(json.challenge);
         setChallengeUrl(json.challengeUrl);
       });
   }, []);
 
   useEffect(() => {
-    if (!challengeDid || isAuthenticated) return;
+    if (!pollForAuthUrl || !challengeDid || isAuthenticated) return;
 
     const interval = setInterval(async () => {
-      fetch(checkAuthUrl + `?challenge=${challengeDid}`)
+      fetch(pollForAuthUrl + `?challenge=${challengeDid}`)
         .then((resp) => {
           if (resp.status === 200) {
             return resp.json();
@@ -101,17 +102,16 @@ const SignInWithYourSelf: React.FC<SignInProps> = ({
         })
         .then((json) => {
           if (json.match) {
-            console.log("Check auth response:", json);
             setIsAuthenticated(json.match);
           }
         })
         .catch(() => {});
-    }, 5000); // every 5 seconds
+    }, pollingIntervalSec * 1000);
 
     return () => {
       clearInterval(interval);
     };
-  }, [challengeDid, isAuthenticated]);
+  }, [challengeDid, isAuthenticated, pollForAuthUrl]);
 
   return (
     <Wrapper>

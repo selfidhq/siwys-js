@@ -1,12 +1,10 @@
-import React, { useEffect, useState } from "react";
-import { createRoot } from "react-dom/client";
-import { flushSync } from "react-dom";
+import React from "react";
 
 import styled, { keyframes } from "styled-components";
 
-import { CircleLogoWhite, QrCodeLoading, QrCodeLogo } from "../../icons";
-import { QRCodeSVG } from "qrcode.react";
-import { SignInButton } from "../button/SignInButton";
+import { CircleLogoWhite, QrCodeLoading } from "../../icons";
+import { SiwysButton } from "../button/SignInButton";
+import QRCode from "./QrCode";
 
 interface ChallengeProps {
   challengeUrl: string;
@@ -31,7 +29,7 @@ const Header = styled.h1`
   white-space: nowrap;
 `;
 
-const StyledButton = styled(SignInButton)`
+const StyledButton = styled(SiwysButton)`
   margin-top: 3rem;
 `;
 
@@ -57,22 +55,7 @@ const LoadingIcon = styled.div`
   }
 `;
 
-const convertNodeToString = (node: React.ReactNode): string => {
-  const div = document.createElement("div");
-  const root = createRoot(div);
-  flushSync(() => {
-    root.render(node);
-  });
-  return div.innerHTML;
-};
-
 const Challenge: React.FC<ChallengeProps> = ({ challengeUrl }) => {
-  const qrCodeLogoDataUrl =
-    "data:image/svg+xml," +
-    encodeURIComponent(
-      convertNodeToString(<QrCodeLogo height={20} width={82} />)
-    );
-
   return (
     <Wrapper>
       <CircleLogoWhite width="4rem" height="4rem" />
@@ -88,19 +71,9 @@ const Challenge: React.FC<ChallengeProps> = ({ challengeUrl }) => {
         </LoadingIcon>
       )}
       {challengeUrl && (
-        <QRCodeSVG
-          value={challengeUrl}
-          size={212}
-          level="M"
-          style={{ marginTop: "3rem", borderRadius: "16px" }}
-          marginSize={3}
-          imageSettings={{
-            src: qrCodeLogoDataUrl,
-            height: 24,
-            width: 104,
-            excavate: true,
-          }}
-        />
+        <div style={{ marginTop: "3rem" }}>
+          <QRCode challengeUrl={challengeUrl} size={212} level="M" />
+        </div>
       )}
       <StyledButton
         colorTheme="blue"

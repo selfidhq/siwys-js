@@ -9,11 +9,13 @@ export interface ButtonProps {
   className?: string;
   colorTheme?: ColorTheme;
   glow?: boolean;
+  disabled?: boolean;
 }
 
 const StyledButton = styled.button<{
   $colorTheme?: ColorTheme;
   $glow?: boolean;
+  $disabled?: boolean;
 }>`
   display: flex;
   justify-content: center;
@@ -22,13 +24,21 @@ const StyledButton = styled.button<{
   width: fit-content;
   border-radius: 60px;
   border: none;
-  cursor: pointer;
   padding: 12px 40px 12px 40px;
   white-space: nowrap;
 
-  &:active {
-    transform: scale(0.98);
-  }
+  ${(props) => {
+    if (!props.$disabled) {
+      return `
+        cursor: pointer;
+        &:active {
+          transform: scale(0.98);
+        }
+      `;
+    } else {
+      return "cursor: default;";
+    }
+  }}
 
   ${(props) => {
     if (props.$glow) {
@@ -76,15 +86,17 @@ const StyledButton = styled.button<{
 
 const Button: React.FC<
   ButtonProps & { children: string | React.ReactNode }
-> = ({ children, onClick, className, colorTheme, glow }) => {
+> = ({ children, onClick, className, colorTheme, glow, disabled }) => {
   return (
     <StyledButton
       type="button"
       role="button"
       className={className}
       onClick={onClick}
+      disabled={disabled}
+      $disabled={disabled}
       $colorTheme={colorTheme}
-      $glow={glow}
+      $glow={glow && !disabled}
     >
       {children}
     </StyledButton>

@@ -4,6 +4,7 @@ export { default as CheckerLogoWhite } from "./CheckerLogoWhite";
 export { default as CircleLogoBlack } from "./CircleLogoBlack";
 export { default as CircleLogoWhite } from "./CircleLogoWhite";
 export { default as GooglePlayStore } from "./GooglePlayStore";
+export { default as LoadingIndicator } from "./LoadingIndicator";
 export { default as QrCodeLoading } from "./QrCodeLoading";
 export { default as QrCodeLogo } from "./QrCodeLogo";
 export { default as SelfTextLogoBlack } from "./SelfTextLogoBlack";

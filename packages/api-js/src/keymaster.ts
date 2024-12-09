@@ -118,31 +118,24 @@ export class Keymaster {
 
   private async startIntegratedKeymaster(): Promise<boolean> {
     console.log(`Starting integrated Keymaster service`);
+
     try {
       const gatekeeper_sdk = await import("@mdip/gatekeeper/sdk");
       await gatekeeper_sdk.start(this.config.gatekeeperConfig);
-    } catch (e) {
-      console.error("Error starting Gatekeeper service:", e);
-      return false;
-    }
 
-    try {
       const cipher = await import("@mdip/cipher/node");
+
       this.keymasterService = await import("@mdip/keymaster/lib");
       await this.keymasterService.start({
+        cipher: cipher,
         gatekeeper: gatekeeper_sdk,
         wallet: this.config.walletDb,
-        cipher: cipher,
       });
-    } catch (e) {
-      console.error("Error starting Keymaster service:", e);
-      return false;
-    }
 
-    try {
+      // ensure wallet exists on startup
       await this.ensureWalletExists();
     } catch (e) {
-      console.error("Error verifying existing wallet:", e);
+      console.error("Error starting Keymaster service:", e);
       return false;
     }
 

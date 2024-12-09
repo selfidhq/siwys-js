@@ -117,13 +117,9 @@ export class Keymaster {
 
   public async start(): Promise<boolean> {
     if (this.config.gatekeeperConfig) {
-      console.log(`Starting integrated Keymaster service`);
       this.serviceStarted = await this.startIntegratedKeymaster();
-      console.log(`Started integrated Keymaster service`);
     } else if (this.config.keymasterConfig) {
-      console.log(`Starting external Keymaster service`);
       this.serviceStarted = this.startExternalKeymaster();
-      console.log(`Started external Keymaster service`);
     } else {
       throw "Missing Gatekeeper or Keymaster config";
     }
@@ -131,6 +127,7 @@ export class Keymaster {
   }
 
   private async startIntegratedKeymaster(): Promise<boolean> {
+    console.log(`Starting integrated Keymaster service`);
     try {
       const gatekeeper_sdk = await import("@mdip/gatekeeper/sdk");
       await gatekeeper_sdk.start(this.config.gatekeeperConfig);
@@ -159,10 +156,12 @@ export class Keymaster {
       return false;
     }
 
+    console.log(`Started integrated Keymaster service`);
     return true;
   }
 
   private async startExternalKeymaster(): Promise<boolean> {
+    console.log(`Starting external Keymaster service`);
     try {
       this.keymasterService = await import("@mdip/keymaster/sdk");
       await this.keymasterService.start(this.config.keymasterConfig);
@@ -171,6 +170,7 @@ export class Keymaster {
       return false;
     }
 
+    console.log(`Started external Keymaster service`);
     return true;
   }
 

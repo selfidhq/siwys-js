@@ -47,8 +47,8 @@ describe("SignInWithYourSelf Component", () => {
   it("should call the createChallengeUrl to generate a Challange", async () => {
     render(
       <SignInWithYourSelf
-        checkAuthUrl={checkAuthUrl}
         createChallengeUrl={createChallengeUrl}
+        pollForAuthUrl={checkAuthUrl}
       />
     );
 
@@ -59,12 +59,12 @@ describe("SignInWithYourSelf Component", () => {
     );
   });
 
-  it("should call the checkAuthUrl after receiving Challenge", async () => {
+  it("should call the auth URL after receiving Challenge", async () => {
     jest.useFakeTimers();
     render(
       <SignInWithYourSelf
-        checkAuthUrl={checkAuthUrl}
         createChallengeUrl={createChallengeUrl}
+        pollForAuthUrl={checkAuthUrl}
       />
     );
 
@@ -72,6 +72,20 @@ describe("SignInWithYourSelf Component", () => {
     await waitFor(
       () => {
         expect(fetchMock).toHaveBeenLastCalledWith(
+          `${checkAuthUrl}?challenge=${challengeDid}`
+        );
+      },
+      { timeout: 6000 }
+    );
+  });
+
+  it("should not call the auth URL if not configured", async () => {
+    jest.useFakeTimers();
+    render(<SignInWithYourSelf createChallengeUrl={createChallengeUrl} />);
+
+    await waitFor(
+      () => {
+        expect(fetchMock).not.toHaveBeenLastCalledWith(
           `${checkAuthUrl}?challenge=${challengeDid}`
         );
       },

@@ -123,7 +123,6 @@ export class Keymaster {
     } else if (this.config.keymasterConfig) {
       console.log(`Starting external Keymaster service`);
       this.serviceStarted = this.startExternalKeymaster();
-      this.keymasterService = keymaster_sdk;
       console.log(`Started external Keymaster service`);
     } else {
       throw "Missing Gatekeeper or Keymaster config";

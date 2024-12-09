@@ -1,9 +1,5 @@
 // @ts-ignore
 // @ts-nocheck
-import * as cipher from "@mdip/cipher/node";
-import * as gatekeeper_sdk from "@mdip/gatekeeper/sdk";
-import * as keymaster_lib from "@mdip/keymaster/lib";
-
 import { initalizeWalletDb, DbType } from "./db";
 import * as wallet_db from "./db/test";
 
@@ -48,7 +44,8 @@ export interface Wallet {
   current?: string;
 }
 
-export interface GatekeeperConfig {
+// config for connecting to an external Gatekeeper or Keymaster
+export interface SdkConfig {
   url: string;
   waitUntilReady?: boolean;
   intervalSeconds?: number;
@@ -61,58 +58,115 @@ export interface WalletConfig {
   registry?: string;
 }
 
-export interface KeymasterConfig {
-  gatekeeperConfig: GatekeeperConfig;
+export interface WalletDb {
+  onSaveWallet: (w: Wallet, overwrite?: boolean) => Promise<boolean>;
+  onLoadWallet: () => Promise<Wallet | null>;
+}
+
+export interface IntegratedKeymasterConfig {
+  gatekeeperConfig: SdkConfig;
   walletConfig: WalletConfig;
   onSaveWallet: (w: Wallet, overwrite?: boolean) => Promise<boolean>;
   onLoadWallet: () => Promise<Wallet | null>;
 }
 
-export class Keymaster {
-  private _gatekeeperConfig;
-  private _walletConfig;
-  private _walletDb;
-  private _serviceStarted = false;
+export interface ExternalKeymasterConfig {
+  keymasterConfig: SdkConfig;
+}
 
+export interface KeymasterConfig {
+  /**
+   * Config for connecting to an external Keymaster service when
+   * the consuming applciation is connecting to an external Keymaster.
+   */
+  keymasterConfig?: SdkConfig;
+  /**
+   * All of the following are required when the consuming application
+   * is acting as its own (integrated) Keymaster service.
+   *
+   * The service must connect to an external gatekeeper and provide
+   * the necessary configuration for persisting its own wallet.
+   */
+  gatekeeperConfig?: SdkConfig;
+  walletConfig?: WalletConfig;
+  walletDb?: WalletDb;
+}
+
+export class Keymaster {
+  private _config: KeymasterConfig;
+  /**
+   * Underlying Keymaster libray based on the use-case:
+   * Integrated Keymaster = keymaster_lib
+   * External Keymaster = keymaster_sdk
+   */
+  private _keymasterService;
+  private _serviceStarted = false;
   constructor(config: KeymasterConfig) {
-    this._gatekeeperConfig = {
-      url: config.gatekeeperConfig.url,
-      waitUntilReady: true,
-      intervalSeconds: 5,
-      chatty: true,
-    };
-    this._walletConfig = config.walletConfig;
-    this._walletDb = {
-      saveWallet: config.onSaveWallet,
-      loadWallet: config.onLoadWallet,
-    };
+    this.validateConfig(config);
+
+    this._config = config;
   }
 
   public async start(): Promise<boolean> {
+    if (this._config.gatekeeperConfig) {
+      console.log(`Starting integrated Keymaster service`);
+      this._serviceStarted = await this.startIntegratedKeymaster();
+      console.log(`Started integrated Keymaster service`);
+    } else if (this._config.keymasterConfig) {
+      console.log(`Starting external Keymaster service`);
+      this._serviceStarted = this.startExternalKeymaster();
+      this._keymasterService = keymaster_sdk;
+      console.log(`Started external Keymaster service`);
+    } else {
+      throw "Missing Gatekeeper or Keymaster config";
+    }
+    return this._serviceStarted;
+  }
+
+  private async startIntegratedKeymaster(): Promise<boolean> {
     try {
-      await gatekeeper_sdk.start(this._gatekeeperConfig);
+      const gatekeeper_sdk = await import("@mdip/gatekeeper/sdk");
+      await gatekeeper_sdk.start(this._config.gatekeeperConfig);
     } catch (e) {
       console.error("Error starting Gatekeeper service:", e);
+      return false;
     }
 
     try {
+      const keymaster_lib = await import("@mdip/keymaster/lib");
+      const cipher = await import("@mdip/cipher/node");
       await keymaster_lib.start({
         gatekeeper: gatekeeper_sdk,
-        wallet: this._walletDb,
+        wallet: this._config.walletDb,
         cipher: cipher,
       });
-      this._serviceStarted = true;
+      this._keymasterService = keymaster_lib;
     } catch (e) {
       console.error("Error starting Keymaster service:", e);
+      return false;
     }
 
     try {
       await this.ensureWalletExists();
     } catch (e) {
       console.error("Error verifying existing wallet:", e);
+      return false;
     }
 
-    return this._serviceStarted;
+    return true;
+  }
+
+  private async startExternalKeymaster(): Promise<boolean> {
+    try {
+      const keymaster_sdk = await import("@mdip/keymaster/sdk");
+      await keymaster_sdk.start(this._config.keymasterConfig);
+      this._keymasterService = keymaster_sdk;
+    } catch (e) {
+      console.error(`Error starting ${serviceType}:`, e);
+      return false;
+    }
+
+    return true;
   }
 
   async createChallenge(
@@ -123,7 +177,7 @@ export class Keymaster {
       return;
     }
     const challengeSpec = { challenge: spec };
-    const challenge: string = await keymaster_lib.createChallenge(
+    const challenge: string = await this._keymasterService.createChallenge(
       challengeSpec,
       options
     );
@@ -133,6 +187,13 @@ export class Keymaster {
     };
   }
 
+  async showMnemonic(): Promise<string> {
+    if (!this.serviceRunning()) {
+      return;
+    }
+    return this._keymasterService.decryptMnemonic();
+  }
+
   async verifyResponse(
     did: string,
     options?: VerifyResponseOptions
@@ -140,35 +201,52 @@ export class Keymaster {
     if (!this.serviceRunning()) {
       return;
     }
-    const response: VerifyResponseResponse = await keymaster_lib.verifyResponse(
-      did,
-      options
-    );
+    const response: VerifyResponseResponse =
+      await this._keymasterService.verifyResponse(did, options);
     return response;
   }
 
   private async ensureWalletExists(): Promise<void> {
-    const existing: Wallet | null = await this._walletDb.loadWallet();
+    const existing: Wallet | null = await this._config.walletDb.loadWallet();
     if (existing?.current) {
       console.log(`Using existing wallet with ID ${existing.current}`);
       return;
     }
 
-    console.log(`Creating wallet with ID ${this._walletConfig.id}`);
+    const walletConfig = this._config.walletConfig;
+    console.log(`Creating wallet with ID ${walletConfig.id}`);
     // wallet was just created, recreate based on config
-    if (this._walletConfig.mnemonic) {
+    if (walletConfig.mnemonic) {
       // create the wallet with a custom mnemonic first
-      await keymaster_lib.newWallet(spec.mnenomic, true);
+      await this._keymasterService.newWallet(spec.mnenomic, true);
     }
     // create ID and set as current, createId() will save wallet
-    await keymaster_lib.createId(
-      this._walletConfig.id,
-      this._walletConfig.registry
+    await this._keymasterService.createId(
+      walletConfig.id,
+      walletConfig.registry
     );
-    console.log(`Created wallet with ID ${this._walletConfig.id}`);
+    console.log(`Created wallet with ID ${walletConfig.id}`);
   }
 
   private async serviceRunning(): Promise<boolean> {
     return this._serviceStarted || (await this.start());
+  }
+
+  private validateConfig(config: KeymasterConfig): void {
+    if (config.gatekeeperConfig && config.keymasterConfig) {
+      throw new Error("Cannot provide both a Gatekeeper and Keymaster config");
+    }
+
+    if (config.gatekeeperConfig) {
+      if (!config.walletConfig) {
+        throw new Error("Missing walletConfig");
+      }
+      if (!config.onSaveWallet) {
+        throw new Error("Missing onSaveWallet callback");
+      }
+      if (!config.onLoadWallet) {
+        throw new Error("Missing onLoadWallet callback");
+      }
+    }
   }
 }

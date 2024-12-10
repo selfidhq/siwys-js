@@ -60,7 +60,7 @@ const Challenge: React.FC<ChallengeProps> = ({ challengeUrl }) => {
     <Wrapper>
       <CircleLogoWhite width="4rem" height="4rem" />
       <Header>
-        Sign in with your{" "}
+        Sign in with your SELF
         <span style={{ color: "#D8EE4F" }}>
           SELF<sup style={{ fontSize: "1rem" }}>&trade;</sup>
         </span>

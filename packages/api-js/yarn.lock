@@ -2164,10 +2164,10 @@
   resolved "https://registry.yarnpkg.com/@mdip/exceptions/-/exceptions-0.3.0.tgz#50065a184cbdfcae83c0582edcf73e60460296ff"
   integrity sha512-MsIfzAkr5OX+FFxtNi6ryWqldUa+4tFcGvpLnq9FofQ8B+wVbCXiRvBds/SEWr/IbiSk76Bqtd4gO4vZmb1P4g==
 
-"@mdip/gatekeeper@0.4.0":
-  version "0.4.0"
-  resolved "https://registry.yarnpkg.com/@mdip/gatekeeper/-/gatekeeper-0.4.0.tgz#d74919de63e4a288447c5d99886eb77af6d077b9"
-  integrity sha512-BSTlBVCWEBZGh+6w2QB0547eJFHHIlydlV+PdoP/+asJWN5pPQH3HT8LYqWMA/JDcYeoD9bJcfrD4fO1dSvGkw==
+"@mdip/gatekeeper@0.4.1":
+  version "0.4.1"
+  resolved "https://registry.yarnpkg.com/@mdip/gatekeeper/-/gatekeeper-0.4.1.tgz#45e81609ea1122f3000e22ea2874fd6917aaf016"
+  integrity sha512-D3E+YmCyxqI3kd2arODNd80dSqelvPv/eUsbzLv4uIrNQCwrZlgyPz5cggVQHM3m2rPvEBsBuzeFnGS7CnIR/Q==
   dependencies:
     "@mdip/cipher" "*"
     "@mdip/exceptions" "*"
@@ -2191,10 +2191,10 @@
     helia "^3.0.0"
     multiformats "^13.0.0"
 
-"@mdip/keymaster@0.4.0":
-  version "0.4.0"
-  resolved "https://registry.yarnpkg.com/@mdip/keymaster/-/keymaster-0.4.0.tgz#c3ca9d59e57bc5ba6e4b408ca852bed82ae2388a"
-  integrity sha512-tOOM4LlV9hca7p8UY6EqvTJI/01g5ZLyRPwbtjEDgJtrHEcnkeTczxALjqCh0oclwwVEfJTysyjhVHJ8qgvnkQ==
+"@mdip/keymaster@0.4.1":
+  version "0.4.1"
+  resolved "https://registry.yarnpkg.com/@mdip/keymaster/-/keymaster-0.4.1.tgz#6412d33ef72f88e78ce4d4338de88cc9c61e0f72"
+  integrity sha512-bGT+ZupmMxRMwBBED1jX2C3o21c4KLxxVWple429C/35YcHk2twEnR6iSmPCJdIDF0Gt3kZF2yDGa/Oj08Drbg==
   dependencies:
     "@mdip/exceptions" "*"
     axios "^1.7.7"

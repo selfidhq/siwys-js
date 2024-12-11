@@ -162,11 +162,14 @@ export class Keymaster {
     if (!this.serviceRunning()) {
       return;
     }
-    const challengeSpec = { challenge: spec };
-    return this.keymasterService.createChallenge(
-      challengeSpec,
+    const challenge: string = await this.keymasterService.createChallenge(
+      spec,
       options
     );
+    return {
+      challenge: challenge,
+      challengeUrl: `${spec.callback}?challenge=${challenge}`,
+    };
   }
 
   async showMnemonic(): Promise<string> {

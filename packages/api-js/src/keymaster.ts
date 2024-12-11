@@ -163,14 +163,10 @@ export class Keymaster {
       return;
     }
     const challengeSpec = { challenge: spec };
-    const challenge: string = await this.keymasterService.createChallenge(
+    return this.keymasterService.createChallenge(
       challengeSpec,
       options
     );
-    return {
-      challenge: challenge,
-      challengeUrl: `${spec.callback}?challenge=${challenge}`,
-    };
   }
 
   async showMnemonic(): Promise<string> {

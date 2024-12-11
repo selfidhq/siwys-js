@@ -162,9 +162,8 @@ export class Keymaster {
     if (!this.serviceRunning()) {
       return;
     }
-    const challengeSpec = { challenge: spec };
     const challenge: string = await this.keymasterService.createChallenge(
-      challengeSpec,
+      spec,
       options
     );
     return {

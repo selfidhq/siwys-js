@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 0.0.14 (2024-12-11)
+
+
+### Bug Fixes
+
+* **wallet:** remove nested challenge ([#25](https://github.com/selfidhq/siwys-js/issues/25)) ([804a195](https://github.com/selfidhq/siwys-js/commit/804a1959f2b03a668211cfbf52ca93d465e68f47))
+
+
+
+
+
 ## 0.0.13 (2024-12-10)
 
 **Note:** Version bump only for package @yourself_id/siwys-api-js

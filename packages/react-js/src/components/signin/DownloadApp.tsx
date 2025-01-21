@@ -47,6 +47,17 @@ const Box = styled.div<{ $background: string }>`
 `;
 
 const DownloadApp: React.FC<{}> = ({}) => {
+  const openIOSLink = () => {
+    const url = "https://apps.apple.com/app/id.yourself.selfid";
+    window.open(url, "_blank");
+  };
+
+  const openAndroidLink = () => {
+    const url =
+      "https://play.google.com/store/apps/details?id=prod.id.yourself.selfid";
+    window.open(url, "_blank");
+  };
+
   return (
     <Wrapper>
       <Header>
@@ -68,13 +79,13 @@ const DownloadApp: React.FC<{}> = ({}) => {
         <AppleAppStore
           width="8rem"
           height="2.5rem"
-          onClick={() => console.log(`TODO: Update with iOS App URL`)}
+          onClick={openIOSLink}
           style={{ cursor: "pointer" }}
         />
         <GooglePlayStore
           width="8rem"
           height="2.5rem"
-          onClick={() => console.log(`TODO: Update with Google Play URL`)}
+          onClick={openAndroidLink}
           style={{ cursor: "pointer" }}
         />
       </Footer>

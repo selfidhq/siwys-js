@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 0.0.15 (2025-01-21)
+
+
+### Bug Fixes
+
+* updating download links ([#27](https://github.com/selfidhq/siwys-js/issues/27)) ([af7ae64](https://github.com/selfidhq/siwys-js/commit/af7ae646f2dd2c7e2082ea118a57f9363da16974))
+
+
+
+
+
 ## 0.0.14 (2024-12-11)
 
 

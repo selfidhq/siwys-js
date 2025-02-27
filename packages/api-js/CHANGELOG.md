@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# 0.1.0 (2025-02-27)
+
+
+### Features
+
+* **sapp-127:** updated kc versions, prepare to support challenge specifics schemas/issuers ([#28](https://github.com/selfidhq/siwys-js/issues/28)) ([e647b55](https://github.com/selfidhq/siwys-js/commit/e647b5587b20261367e5703d6136a4575f85de43))
+
+
+
+
+
 ## 0.0.15 (2025-01-21)
 
 

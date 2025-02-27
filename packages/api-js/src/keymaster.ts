@@ -2,10 +2,9 @@
 // @ts-nocheck
 import { initalizeWalletDb, DbType } from "./db";
 import * as wallet_db from "./db/test";
-
 export interface CreateChallengeSpec {
   callback: string;
-  credentials?: [];
+  credentials?: { schema: string; issuers: string[] }[];
 }
 
 export interface CreateChallengeOptions {
@@ -119,13 +118,13 @@ export class Keymaster {
     console.log(`Starting integrated Keymaster service`);
 
     try {
-      const gatekeeper_sdk = await import("@mdip/gatekeeper/sdk");
-      await gatekeeper_sdk.start(this.config.gatekeeperConfig);
+      const gatekeeper_sdk = await import("@mdip/gatekeeper/client");
+      await gatekeeper_sdk.connect(this.config.gatekeeperConfig);
 
       const cipher = await import("@mdip/cipher/node");
 
-      this.keymasterService = await import("@mdip/keymaster/lib");
-      await this.keymasterService.start({
+      const keymaster = await import("@mdip/keymaster");
+      this.keymasterService = await new keymaster({
         cipher: cipher,
         gatekeeper: gatekeeper_sdk,
         wallet: this.config.walletDb,
@@ -144,7 +143,7 @@ export class Keymaster {
   private async startExternalKeymaster(): Promise<boolean> {
     console.log(`Starting external Keymaster service`);
     try {
-      this.keymasterService = await import("@mdip/keymaster/sdk");
+      this.keymasterService = await import("@mdip/keymaster");
       await this.keymasterService.start(this.config.keymasterConfig);
     } catch (e) {
       console.error(`Error starting Keymaster service:`, e);

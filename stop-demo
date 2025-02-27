@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-docker compose down
+docker-compose down
 
 # stop gatekeeper
 pushd ../kc

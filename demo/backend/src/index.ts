@@ -15,11 +15,11 @@ app.use(express.json());
 
 app.post("/challenges", async (_, res) => {
   const keymaster = getKeymaster();
-  const callbackUrl = "http://localhost:3001/login";
+  const challengeDTO = {
+    callback: "http://localhost:3001/login",
+  };
   try {
-    const challenge = await keymaster.createChallenge({
-      callback: callbackUrl,
-    });
+    const challenge = await keymaster.createChallenge(challengeDTO);
     res.json(challenge);
   } catch (err) {
     console.error("Exception generating challenge:", err);
@@ -30,9 +30,9 @@ app.post("/challenges", async (_, res) => {
 app.get("/check-auth", async (req, res) => {
   const challenge = req.query.challenge;
   if (challenge && typeof challenge === "string" && LOGINS[challenge]) {
-    res.json(LOGINS[challenge]);
+    res.json({ ...LOGINS[challenge] });
   } else {
-    res.status(204).send();
+    res.status(404).send({ error: "Challenge: " + challenge + " not found" });
   }
 });
 
@@ -47,23 +47,25 @@ app.post("/login", async (req, res) => {
       LOGINS[verify.challenge] = { response, ...verify };
       res.json({ authenticated: verify.match });
     } else {
-      res.send(401);
+      res.status(401).send({ error: "Response: " + response + " not found" });
     }
   } catch (err) {
     console.error("Exception verifying response:", err);
-    res.status(500);
+    res.status(500).send();
   }
 });
 
 app.listen(port, () => {
   startKeymaster({
     gatekeeperConfig: {
-      url: "http://gatekeeper:4224",
+      url: "http://localhost:4224",
     },
     walletConfig: {
       id: "demo-wallet",
     },
-    onSaveWallet: saveWallet,
-    onLoadWallet: loadWallet,
+    walletDb: {
+      saveWallet: saveWallet,
+      loadWallet: loadWallet,
+    },
   });
 });

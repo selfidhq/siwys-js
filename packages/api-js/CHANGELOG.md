@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# 0.3.0 (2025-02-27)
+
+
+### Features
+
+* **sapp-127:** updated kc integration ([#30](https://github.com/selfidhq/siwys-js/issues/30)) ([b6c452a](https://github.com/selfidhq/siwys-js/commit/b6c452a875947299cfa24e06224175aded0a0655))
+
+
+
+
+
 # 0.2.0 (2025-02-27)
 
 

@@ -2,6 +2,10 @@
 // @ts-nocheck
 import { initalizeWalletDb, DbType } from "./db";
 import * as wallet_db from "./db/test";
+import GatekeeperClient from "@mdip/gatekeeper/client";
+import WalletJson from "@mdip/keymaster/wallet/json";
+import CipherNode from "@mdip/cipher/node";
+import Keymaster from "@mdip/keymaster";
 export interface CreateChallengeSpec {
   callback: string;
   credentials?: { schema: string; issuers: string[] }[];
@@ -118,16 +122,15 @@ export class Keymaster {
     console.log(`Starting integrated Keymaster service`);
 
     try {
-      const gatekeeper_sdk = await import("@mdip/gatekeeper/client");
+      const gatekeeper_sdk = new GatekeeperClient();
       await gatekeeper_sdk.connect(this.config.gatekeeperConfig);
 
-      const cipher = await import("@mdip/cipher/node");
+      const cipher = new CipherNode();
 
-      const keymaster = await import("@mdip/keymaster");
-      this.keymasterService = await new keymaster({
-        cipher: cipher,
+      this.keymasterService = await new Keymaster({
         gatekeeper: gatekeeper_sdk,
         wallet: this.config.walletDb,
+        cipher,
       });
 
       await this.ensureWalletExists();

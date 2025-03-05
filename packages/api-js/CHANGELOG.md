@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# 0.4.0 (2025-03-05)
+
+
+### Features
+
+* **sapp-127:** updating [@mdip](https://github.com/mdip) versions ([#31](https://github.com/selfidhq/siwys-js/issues/31)) ([5f3db2e](https://github.com/selfidhq/siwys-js/commit/5f3db2e069c576b69b951cf22f1ad53f965159cd))
+
+
+
+
+
 # 0.3.0 (2025-02-27)
 
 

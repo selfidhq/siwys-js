@@ -20,10 +20,15 @@ export interface VerifyResponseOptions {
   retries?: number;
   delay?: number;
 }
+
+export interface Credential {
+  vp: string;
+}
 export interface VerifyResponseResponse {
   match: boolean;
   challenge: string;
   responder: string;
+  credentials?: Credential[];
 }
 export interface WalletSeed {
   mnemonic: string;

@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# 0.5.0 (2025-03-06)
+
+
+### Features
+
+* **sapp-127:** added vp credential as verify response dto ([#32](https://github.com/selfidhq/siwys-js/issues/32)) ([6f91121](https://github.com/selfidhq/siwys-js/commit/6f91121ec864f1ffa7143809cabcf3f6b45916ad))
+
+
+
+
+
 # 0.4.0 (2025-03-05)
 
 

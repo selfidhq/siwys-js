@@ -9,3 +9,5 @@ export { default as QrCodeLoading } from "./QrCodeLoading";
 export { default as QrCodeLogo } from "./QrCodeLogo";
 export { default as SelfTextLogoBlack } from "./SelfTextLogoBlack";
 export { default as SelfTextLogoWhite } from "./SelfTextLogoWhite";
+export { default as AppIconDark } from "./IconDark";
+export { default as AppIconLight } from "./IconLight";

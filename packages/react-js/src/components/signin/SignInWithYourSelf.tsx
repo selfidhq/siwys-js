@@ -1,160 +1,296 @@
-import React, { useEffect, useState } from "react";
-
+import React from "react";
 import styled from "styled-components";
+import QRCode from "./QrCode";
+import { CysButton, SiwysButton } from "../button/SignInButton";
 
-import Challenge from "./Challenge";
-import DownloadApp from "./DownloadApp";
-
-import { createGlobalStyle } from "styled-components";
-import Success from "./Success";
-
-const GlobalStyle = createGlobalStyle`
-  * {
-    margin: 0;
-    padding: 0;
-  }
-`;
-
+import {
+  AppleAppStore,
+  GooglePlayStore,
+  CircleLogoWhite,
+  SelfTextLogoWhite,
+  AppIconDark,
+  AppIconLight,
+} from "../../icons";
 interface SignInProps {
-  createChallengeUrl: string;
-  pollForAuthUrl?: string;
-  pollingIntervalSec?: number;
+  challengeUrl: string;
+  onSiwysPress: () => void;
+  isCYS?: boolean;
 }
 
 const Wrapper = styled.div`
-  display: flex;
-  justify-content: center;
-  background: radial-gradient(
-    circle at 24.1% 68.8%,
-    rgb(50, 50, 50) 0%,
-    rgb(0, 0, 0) 99.4%
-  );
-  border-radius: 16px;
-  font-weight: 700;
-  @media (max-width: 767px) {
-    display: block;
-  }
-`;
-
-const ModalWrapper = styled.div`
-  display: flex;
-  border-radius: 16px;
-  border: 1px solid #3d414c;
-
-  @media (max-width: 767px) {
-    flex-direction: column-reverse;
-    border: none;
-    padding: 5rem 2rem;
-  }
-`;
-
-const InstructionsWrapper = styled.div`
+  position: relative;
   display: flex;
   flex-direction: column;
-  color: white;
-  padding: 2rem 5rem;
-  @media (max-width: 767px) {
-    padding: 0;
+  align-items: center;
+  justify-content: center;
+  gap: 20%;
+  padding-bottom: 40px;
+  z-index: 10;
+
+  @media (min-width: 1024px) {
+    flex-direction: row;
+    gap: 196px;
+    padding-bottom: 0px;
   }
 `;
 
-const InstructionsSet = styled.div`
-  margin-bottom: 2rem;
+const SignInContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding-bottom: 40px;
+
+  @media (min-width: 1024px) {
+    padding-bottom: 0;
+  }
 `;
 
-const List = styled.ol`
-  list-style: decimal;
-  line-height: 2rem;
-  padding-left: 1.5rem;
+const TitleContainer = styled.div`
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+  margin-bottom: 70px;
+  align-items: center;
+  margin-top: 24px;
+`;
+
+const QRContainer = styled.div`
+  margin-bottom: 70px;
+`;
+
+const Title = styled.h4`
+  font-family: "Inter", sans-serif;
+  margin-top: 0px;
+  margin-bottom: 0px;
+  font-weight: 400;
+  font-size: 20px;
+  line-height: 95%;
+  color: #ffffff;
+  @media (min-width: 1024px) {
+    font-size: 28px;
+  }
+`;
+
+const InstructionsContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 24px;
+  margin-right: 24px;
+  margin-left: 24px;
+  @media (min-width: 1024px) {
+    margin-right: 0px;
+    margin-left: 0px;
+  }
+`;
+
+const InstructionsTitle = styled.h4`
+  font-family: "Inter", sans-serif;
+  margin-top: 0px;
+  margin-bottom: 0px;
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 140%;
+  letter-spacing: 0.025em;
+  color: #ffffff;
+`;
+
+const InstructionstSubtitle = styled.p`
+  font-family: "Inter", sans-serif;
+  margin-top: 0px;
+  margin-bottom: 0px;
   font-weight: 500;
+  font-size: 14px;
+  letter-spacing: 0.025em;
+  margin-bottom: 8px;
+  color: #ffffff;
+`;
+
+const InstructionsDescription = styled.ul`
+  font-family: "Inter", sans-serif;
+  list-style-type: decimal;
+  padding-left: 20px;
+  margin-top: 0px;
+  margin-bottom: 0px;
+  font-weight: 400;
+  font-size: 14px;
+  letter-spacing: 0.025em;
+  color: #c4ccd4;
+`;
+
+const InstructionsDescriptionItem = styled.li`
+  margin-bottom: 8px;
+`;
+
+const DownloadTitleContainer = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  margin-bottom: 8px;
+`;
+
+const DownloadContainer = styled.div`
+  display: flex;
+  flex-direction: row;
+  background: #121114;
+  border: 1px solid #3d414c;
+  border-radius: 8px;
+  padding: 20px;
+  gap: 20px;
+  width: 100%;
+  box-sizing: border-box;
+  @media (min-width: 1024px) {
+      flex-direction: column;
+      padding-left: 53px;
+      padding-right: 53px;
+      max-width: 446px;
+    }
+  }
+`;
+
+const DownloadContainerFlex = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 100%;
+  gap: 16px;
+  @media (min-width: 1024px) {
+    flex-direction: row;
+    align-items: center;
+  }
+`;
+
+const DownloadAppTitle = styled.p`
+  font-family: "Inter", sans-serif;
+  font-weight: 500;
+  margin-top: 0px;
+  margin-bottom: 0px;
+  font-size: 15px;
+  line-height: 126%;
+  letter-spacing: 0.025em;
+  max-width: 128px;
+  color: #c4ccd4;
+`;
+
+const AppIconsContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  @media (min-width: 1024px) {
+    flex-direction: row;
+  }
 `;
 
 const SignInWithYourSelf: React.FC<SignInProps> = ({
-  createChallengeUrl,
-  pollForAuthUrl,
-  pollingIntervalSec = 5,
+  challengeUrl,
+  onSiwysPress,
+  isCYS = false,
 }) => {
-  const [challengeDid, setChallengeDid] = useState<string>("");
-  const [challengeUrl, setChallengeUrl] = useState<string>("");
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const redirectToPlayStore = () => {
+    const playStoreURL =
+      "https://play.google.com/store/apps/details?id=id.selfid";
+    window.open(playStoreURL, "_blank");
+  };
 
-  useEffect(() => {
-    fetch(createChallengeUrl, {
-      method: "POST",
-    })
-      .then((resp) => resp.json())
-      .then((json) => {
-        setChallengeDid(json.challenge);
-        setChallengeUrl(json.challengeUrl);
-      });
-  }, []);
-
-  useEffect(() => {
-    if (!pollForAuthUrl || !challengeDid || isAuthenticated) return;
-
-    const interval = setInterval(async () => {
-      fetch(pollForAuthUrl + `?challenge=${challengeDid}`)
-        .then((resp) => {
-          if (resp.status === 200) {
-            return resp.json();
-          }
-          return { match: false };
-        })
-        .then((json) => {
-          if (json.match) {
-            setIsAuthenticated(json.match);
-          }
-        })
-        .catch(() => {});
-    }, pollingIntervalSec * 1000);
-
-    return () => {
-      clearInterval(interval);
-    };
-  }, [challengeDid, isAuthenticated, pollForAuthUrl]);
+  const redirectToAppStore = () => {
+    const appStoreURL = "https://apps.apple.com/us/app/self-id/id1663745416";
+    window.open(appStoreURL, "_blank");
+  };
 
   return (
     <Wrapper>
-      <GlobalStyle />
-      <ModalWrapper>
-        {isAuthenticated && <Success />}
-        {!isAuthenticated && (
-          <>
-            <Challenge challengeUrl={challengeUrl} />
-            <InstructionsWrapper>
-              <p style={{ marginBottom: "2rem" }}>
-                <b>Instructions:</b>
-              </p>
-              <InstructionsSet>
-                If you are signing in on a device that has the SELF app
-                installed:
-                <List>
-                  <li>Tap the SELF.id connect button.</li>
-                  <li>Approve the connection request within the SELF app.</li>
-                </List>
-              </InstructionsSet>
-              <InstructionsSet>
-                If you are <u>not</u> signing in on a device that has the SELF
-                app installed:
-                <List>
-                  <li>
-                    Open the SELF app on the device with the app installed.
-                  </li>
-                  <li>
-                    Use the scanning feature in the SELF app to scan the QR
-                    code.
-                  </li>
-                  <li>Approve the connection request within the SELF app.</li>
-                </List>
-              </InstructionsSet>
-              <p style={{ marginTop: "3rem" }}>
-                Don't have the <i>SELF</i> app?
-              </p>
-              <DownloadApp />
-            </InstructionsWrapper>
-          </>
+      <SignInContainer>
+        <CircleLogoWhite width="48" height="48" />
+        <TitleContainer>
+          <Title>{isCYS ? "Connect your" : "Sign in with your"}</Title>
+          <SelfTextLogoWhite width="102" height="22" />
+        </TitleContainer>
+        <QRContainer>
+          <QRCode challengeUrl={challengeUrl} size={200} level="H" />
+        </QRContainer>
+        {isCYS ? (
+          <CysButton colorTheme="light" onClick={onSiwysPress} glow />
+        ) : (
+          <SiwysButton colorTheme="light" onClick={onSiwysPress} glow />
         )}
-      </ModalWrapper>
+      </SignInContainer>
+      <InstructionsContainer>
+        <InstructionsTitle>
+          {isCYS
+            ? "Connect your SELF™ Guide:"
+            : "Sign in with your SELF™ Guide:"}
+        </InstructionsTitle>
+        <div>
+          <InstructionstSubtitle>
+            {isCYS
+              ? "If you have the SELF® mobile app:"
+              : "If you are signing in on a device that has the SELF® app installed:"}
+          </InstructionstSubtitle>
+          <InstructionsDescription>
+            <InstructionsDescriptionItem>
+              {isCYS
+                ? "Use scanning feature in the SELF® app to scan the QR code."
+                : 'Tap the "Sign in with your SELF™" button.'}
+            </InstructionsDescriptionItem>
+            <InstructionsDescriptionItem>
+              Approve the connection request within the SELF® app.
+            </InstructionsDescriptionItem>
+          </InstructionsDescription>
+        </div>
+        <div>
+          <InstructionstSubtitle>
+            {isCYS
+              ? "If you do not have the SELF® mobile app:"
+              : "If you are not signing in on a device that has the SELF® app installed:"}
+          </InstructionstSubtitle>
+          <InstructionsDescription>
+            <InstructionsDescriptionItem>
+              {isCYS
+                ? "Download and open the SELF® ID app from the App Store."
+                : "Open the SELF® app on the device with the app installed."}
+            </InstructionsDescriptionItem>
+            <InstructionsDescriptionItem>
+              Use the scanning feature in the SELF® app to scan the QR code.
+            </InstructionsDescriptionItem>
+            <InstructionsDescriptionItem>
+              Approve the connection request within the SELF® app.
+            </InstructionsDescriptionItem>
+          </InstructionsDescription>
+        </div>
+        <div>
+          <DownloadTitleContainer>
+            <InstructionsTitle>{"Don’t have the"}</InstructionsTitle>
+            <SelfTextLogoWhite width="58" height="12" />
+            <InstructionsTitle>{" app?"}</InstructionsTitle>
+          </DownloadTitleContainer>
+          <DownloadContainer>
+            <DownloadContainerFlex>
+              <DownloadAppTitle>Available to download now:</DownloadAppTitle>
+              <AppIconsContainer>
+                <AppIconDark width="56" height="56" />
+                <AppIconLight width="56" height="56" />
+              </AppIconsContainer>
+            </DownloadContainerFlex>
+            <DownloadContainerFlex>
+              <AppleAppStore
+                width="8rem"
+                height="2.5rem"
+                onClick={redirectToAppStore}
+                style={{ cursor: "pointer" }}
+              />
+              <GooglePlayStore
+                width="8rem"
+                height="2.5rem"
+                onClick={redirectToPlayStore}
+                style={{ cursor: "pointer" }}
+              />
+            </DownloadContainerFlex>
+          </DownloadContainer>
+        </div>
+      </InstructionsContainer>
     </Wrapper>
   );
 };

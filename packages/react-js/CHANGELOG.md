@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# 0.6.0 (2025-03-25)
+
+
+### Features
+
+* **sapp-159:** update siwys markup to match designs ([#33](https://github.com/selfidhq/siwys-js/issues/33)) ([84a017c](https://github.com/selfidhq/siwys-js/commit/84a017c5b969de596d6873fc8f587a0f980e6cb2))
+
+
+
+
+
 # 0.5.0 (2025-03-06)
 
 

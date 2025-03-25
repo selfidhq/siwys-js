@@ -96,7 +96,7 @@ const InstructionsTitle = styled.h4`
   color: #ffffff;
 `;
 
-const InstructionstSubtitle = styled.p`
+const InstructionsSubtitle = styled.p`
   font-family: "Inter", sans-serif;
   margin-top: 0px;
   margin-bottom: 0px;
@@ -224,11 +224,11 @@ const SignInWithYourSelf: React.FC<SignInProps> = ({
             : "Sign in with your SELF™ Guide:"}
         </InstructionsTitle>
         <div>
-          <InstructionstSubtitle>
+          <InstructionsSubtitle>
             {isCYS
               ? "If you have the SELF® mobile app:"
               : "If you are signing in on a device that has the SELF® app installed:"}
-          </InstructionstSubtitle>
+          </InstructionsSubtitle>
           <InstructionsDescription>
             <InstructionsDescriptionItem>
               {isCYS
@@ -241,11 +241,11 @@ const SignInWithYourSelf: React.FC<SignInProps> = ({
           </InstructionsDescription>
         </div>
         <div>
-          <InstructionstSubtitle>
+          <InstructionsSubtitle>
             {isCYS
               ? "If you do not have the SELF® mobile app:"
               : "If you are not signing in on a device that has the SELF® app installed:"}
-          </InstructionstSubtitle>
+          </InstructionsSubtitle>
           <InstructionsDescription>
             <InstructionsDescriptionItem>
               {isCYS

@@ -11,5 +11,7 @@ dist
 .npmrc
 **/.npmrc
 
+/packages/*/yarn-error.log
+
 # demo
 demo/backend/data

@@ -3,8 +3,8 @@ import ReactDOM from "react-dom/client";
 
 import styled from "styled-components";
 
-import { SignInButton } from "../components/button/SignInButton";
-import SignInWithYourSelf from "../components/signin/SignInWithYourSelf";
+import { SiwysButton } from "../components/button/SignInButton";
+import QRCode from "../components/signin/QrCode";
 
 const Wrapper = styled.div`
   display: flex;
@@ -27,7 +27,7 @@ const Demo: React.FC<{}> = () => {
   return (
     <Wrapper>
       {!challenge && (
-        <SignInButton
+        <SiwysButton
           colorTheme="dark"
           glow
           onClick={() => {
@@ -36,9 +36,10 @@ const Demo: React.FC<{}> = () => {
         />
       )}
       {challenge && (
-        <SignInWithYourSelf
-          checkAuthUrl="http://localhost:3001/check-auth"
-          createChallengeUrl="http://localhost:3001/challenges"
+        <QRCode
+          challengeUrl="http://localhost:3001/challenges"
+          size={212}
+          level="H"
         />
       )}
     </Wrapper>

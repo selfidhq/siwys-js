@@ -1,61 +1,150 @@
 import React from "react";
 import "@testing-library/jest-dom";
-import { render, waitFor } from "@testing-library/react";
-
+import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { SignInWithYourSelf } from "../..";
 
+const challengeUrl = "http://challenge-url";
+const onSiwysPress = jest.fn();
+const challengeDid = "did:challenge";
 const checkAuthUrl = "http//backend/auth";
 const createChallengeUrl = "http//backend/challenges";
-const challengeDid = "did:challenge";
-
 let fetchMock: any;
 
-const fetchMockImpl = (input: URL) => {
+const fetchMockImpl = (input: RequestInfo | URL) => {
   const url = input.toString();
-  if (url.indexOf("/auth") >= 0) {
+
+  if (url.includes("/auth")) {
     return Promise.resolve({
-      ok: true,
-      json: () => {
-        return {
-          match: true,
-        };
-      },
-    });
-  } else if (url.indexOf("/challenges") >= 0) {
-    return Promise.resolve({
-      ok: true,
-      json: () => {
-        return {
-          challenge: challengeDid,
-          challengeUrl: "http://challenge-url",
-        };
-      },
+      status: 200,
+      json: () => Promise.resolve({ match: true }),
     });
   }
+
+  if (url.includes("/challenges")) {
+    return Promise.resolve({
+      status: 200,
+      json: () =>
+        Promise.resolve({
+          challenge: challengeDid,
+          challengeUrl: "http://challenge-url",
+        }),
+    });
+  }
+
+  return Promise.resolve({
+    status: 404,
+    json: () => Promise.resolve({ error: "Not Found" }),
+  });
 };
 
-beforeEach(() => {
-  window.fetch = jest.fn().mockImplementation(fetchMockImpl);
-  window.matchMedia = jest.fn().mockImplementation(() => ({
-    matches: false,
-  }));
-  // @ts-ignore
-  fetchMock = jest.spyOn(window, "fetch").mockImplementation(fetchMockImpl);
-});
-
 describe("SignInWithYourSelf Component", () => {
+  beforeEach(() => {
+    window.fetch = jest.fn().mockImplementation(fetchMockImpl);
+
+    Object.defineProperty(window, "matchMedia", {
+      writable: true,
+      value: jest.fn().mockImplementation((query) => ({
+        matches: false,
+        media: query,
+        onchange: null,
+        addListener: jest.fn(),
+        removeListener: jest.fn(),
+        addEventListener: jest.fn(),
+        removeEventListener: jest.fn(),
+        dispatchEvent: jest.fn(),
+      })),
+    });
+    // @ts-ignore
+    fetchMock = jest.spyOn(window, "fetch").mockImplementation(fetchMockImpl);
+    jest.clearAllMocks();
+  });
+
   it("should call the createChallengeUrl to generate a Challange", async () => {
     render(
       <SignInWithYourSelf
         createChallengeUrl={createChallengeUrl}
         pollForAuthUrl={checkAuthUrl}
+        challengeUrl={challengeUrl}
+        onSiwysPress={onSiwysPress}
+        successComponent={<div>Success</div>}
       />
     );
-
     await waitFor(() =>
       expect(fetchMock).toHaveBeenCalledWith(createChallengeUrl, {
         method: "POST",
       })
+    );
+  });
+
+  it("renders the QR code with the provided challenge URL", () => {
+    render(
+      <SignInWithYourSelf
+        challengeUrl={challengeUrl}
+        onSiwysPress={onSiwysPress}
+      />
+    );
+    expect(screen.getByTestId("qr-code")).toBeInTheDocument();
+  });
+
+  it("calls onSiwysPress when the sign-in button is clicked", async () => {
+    render(
+      <SignInWithYourSelf
+        challengeUrl={challengeUrl}
+        onSiwysPress={onSiwysPress}
+      />
+    );
+    const signInButton = screen.getByRole("button", {
+      name: /Sign in with your/i,
+    });
+    await userEvent.click(signInButton);
+    expect(onSiwysPress).toHaveBeenCalledTimes(1);
+  });
+
+  it("renders CysButton instead of SiwysButton when isCYS is true", () => {
+    render(
+      <SignInWithYourSelf
+        challengeUrl={challengeUrl}
+        onSiwysPress={onSiwysPress}
+        isCYS
+      />
+    );
+    expect(
+      screen.getByRole("button", { name: /Connect your/i })
+    ).toBeInTheDocument();
+  });
+
+  it("opens the App Store when Apple button is clicked", async () => {
+    global.window.open = jest.fn();
+    render(
+      <SignInWithYourSelf
+        challengeUrl={challengeUrl}
+        onSiwysPress={onSiwysPress}
+      />
+    );
+    const appStoreButton = screen.getByTestId("apple-store-svg");
+    expect(appStoreButton).toBeInTheDocument();
+    await userEvent.click(appStoreButton);
+    expect(global.window.open).toHaveBeenCalledWith(
+      "https://apps.apple.com/us/app/self-id/id1663745416",
+      "_blank"
+    );
+  });
+
+  it("opens the Play Store when Google Play button is clicked", async () => {
+    global.window.open = jest.fn();
+    render(
+      <SignInWithYourSelf
+        challengeUrl={challengeUrl}
+        onSiwysPress={onSiwysPress}
+      />
+    );
+    const playStoreButton = screen.getByTestId("play-store-svg");
+    expect(playStoreButton).toBeInTheDocument();
+    await userEvent.click(playStoreButton);
+    expect(global.window.open).toHaveBeenCalledWith(
+      "https://play.google.com/store/apps/details?id=id.selfid",
+      "_blank"
     );
   });
 
@@ -65,10 +154,11 @@ describe("SignInWithYourSelf Component", () => {
       <SignInWithYourSelf
         createChallengeUrl={createChallengeUrl}
         pollForAuthUrl={checkAuthUrl}
+        challengeUrl={challengeUrl}
+        onSiwysPress={onSiwysPress}
+        successComponent={<div>Success</div>}
       />
     );
-
-    expect(fetchMock).not.toHaveBeenCalledWith(checkAuthUrl);
     await waitFor(
       () => {
         expect(fetchMock).toHaveBeenLastCalledWith(
@@ -79,9 +169,46 @@ describe("SignInWithYourSelf Component", () => {
     );
   });
 
+  it("should call the auth URL after receiving Challenge and render success component on authentication", async () => {
+    jest.useFakeTimers();
+    render(
+      <SignInWithYourSelf
+        createChallengeUrl={createChallengeUrl}
+        pollForAuthUrl={checkAuthUrl}
+        challengeUrl={challengeUrl}
+        onSiwysPress={onSiwysPress}
+        successComponent={<div data-testid="success">Success</div>}
+      />
+    );
+
+    expect(fetchMock).not.toHaveBeenCalledWith(checkAuthUrl);
+
+    await waitFor(
+      () => {
+        expect(fetchMock).toHaveBeenLastCalledWith(
+          `${checkAuthUrl}?challenge=${challengeDid}`
+        );
+      },
+      { timeout: 6000 }
+    );
+
+    // Move time forward to trigger authentication
+    jest.advanceTimersByTime(5000);
+
+    await waitFor(() => {
+      expect(screen.getByTestId("success")).toBeInTheDocument();
+    });
+  });
+
   it("should not call the auth URL if not configured", async () => {
     jest.useFakeTimers();
-    render(<SignInWithYourSelf createChallengeUrl={createChallengeUrl} />);
+    render(
+      <SignInWithYourSelf
+        challengeUrl={challengeUrl}
+        onSiwysPress={onSiwysPress}
+        createChallengeUrl={createChallengeUrl}
+      />
+    );
 
     await waitFor(
       () => {

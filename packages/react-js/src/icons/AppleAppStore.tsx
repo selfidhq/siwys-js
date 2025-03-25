@@ -2,6 +2,7 @@ import * as React from "react";
 import type { SVGProps } from "react";
 const SvgAppleAppStore = (props: SVGProps<SVGSVGElement>) => (
   <svg
+    data-testid="apple-store-svg"
     xmlns="http://www.w3.org/2000/svg"
     width="1em"
     height="1em"

@@ -13,7 +13,13 @@ const Wrapper = styled.div`
     rgb(0, 0, 0) 99.4%
   );
   gap: 5rem;
-  height: 100vh;
+  min-height: 100vh;
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+  @media (min-width: 1024px) {
+    padding-top: 0px;
+    padding-bottom: 0px;
+  }
   width: 100vw;
 `;
 

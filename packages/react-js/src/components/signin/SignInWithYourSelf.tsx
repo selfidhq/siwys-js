@@ -29,11 +29,14 @@ const Wrapper = styled.div`
   gap: 20%;
   padding-bottom: 40px;
   z-index: 10;
-
+  margin-right: 16px;
+  margin-left: 16px;
   @media (min-width: 1024px) {
     flex-direction: row;
     gap: 196px;
     padding-bottom: 0px;
+    margin-right: 0px;
+    margin-left: 0px;
   }
 `;
 
@@ -80,12 +83,6 @@ const InstructionsContainer = styled.div`
   flex-direction: column;
   align-items: flex-start;
   gap: 24px;
-  margin-right: 24px;
-  margin-left: 24px;
-  @media (min-width: 1024px) {
-    margin-right: 0px;
-    margin-left: 0px;
-  }
 `;
 
 const InstructionsTitle = styled.h4`
@@ -135,9 +132,18 @@ const DownloadTitleContainer = styled.div`
   margin-bottom: 8px;
 `;
 
+const ParentDownloadContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  @media (min-width: 1024px) {
+    width: auto;
+  }
+`;
+
 const DownloadContainer = styled.div`
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   background: #121114;
   border: 1px solid #3d414c;
   border-radius: 8px;
@@ -146,7 +152,6 @@ const DownloadContainer = styled.div`
   width: 100%;
   box-sizing: border-box;
   @media (min-width: 1024px) {
-      flex-direction: column;
       padding-left: 53px;
       padding-right: 53px;
       max-width: 446px;
@@ -156,12 +161,12 @@ const DownloadContainer = styled.div`
 
 const DownloadContainerFlex = styled.div`
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   justify-content: space-between;
   width: 100%;
-  gap: 16px;
+  gap: 8px;
   @media (min-width: 1024px) {
-    flex-direction: row;
+    gap: 16px;
     align-items: center;
   }
 `;
@@ -180,10 +185,10 @@ const DownloadAppTitle = styled.p`
 
 const AppIconsContainer = styled.div`
   display: flex;
-  flex-direction: column;
-  gap: 16px;
+  flex-direction: row;
+  gap: 8px;
   @media (min-width: 1024px) {
-    flex-direction: row;
+    gap: 16px;
   }
 `;
 
@@ -311,7 +316,7 @@ const SignInWithYourSelf: React.FC<SignInProps> = ({
             </InstructionsDescriptionItem>
           </InstructionsDescription>
         </div>
-        <div>
+        <ParentDownloadContainer>
           <DownloadTitleContainer>
             <InstructionsTitle>{"Don’t have the"}</InstructionsTitle>
             <SelfTextLogoWhite width="58" height="12" />
@@ -340,7 +345,7 @@ const SignInWithYourSelf: React.FC<SignInProps> = ({
               />
             </DownloadContainerFlex>
           </DownloadContainer>
-        </div>
+        </ParentDownloadContainer>
       </InstructionsContainer>
     </Wrapper>
   );

@@ -24,6 +24,7 @@ const SelfSvg = `
 const QRCode: React.FC<QRCodeProps> = (props: QRCodeProps) => {
   return (
     <QRCodeSVG
+      data-testid="qr-code"
       value={props.challengeUrl}
       size={props.size}
       level={props.level || "M"}

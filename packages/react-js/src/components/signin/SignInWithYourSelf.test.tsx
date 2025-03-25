@@ -1,14 +1,47 @@
 import React from "react";
 import "@testing-library/jest-dom";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { SignInWithYourSelf } from "../..";
 
 const challengeUrl = "http://challenge-url";
 const onSiwysPress = jest.fn();
+const challengeDid = "did:challenge";
+const checkAuthUrl = "http//backend/auth";
+const createChallengeUrl = "http//backend/challenges";
+let fetchMock: any;
+
+const fetchMockImpl = (input: RequestInfo | URL) => {
+  const url = input.toString();
+
+  if (url.includes("/auth")) {
+    return Promise.resolve({
+      status: 200,
+      json: () => Promise.resolve({ match: true }),
+    });
+  }
+
+  if (url.includes("/challenges")) {
+    return Promise.resolve({
+      status: 200,
+      json: () =>
+        Promise.resolve({
+          challenge: challengeDid,
+          challengeUrl: "http://challenge-url",
+        }),
+    });
+  }
+
+  return Promise.resolve({
+    status: 404,
+    json: () => Promise.resolve({ error: "Not Found" }),
+  });
+};
 
 describe("SignInWithYourSelf Component", () => {
   beforeEach(() => {
+    window.fetch = jest.fn().mockImplementation(fetchMockImpl);
+
     Object.defineProperty(window, "matchMedia", {
       writable: true,
       value: jest.fn().mockImplementation((query) => ({
@@ -22,7 +55,26 @@ describe("SignInWithYourSelf Component", () => {
         dispatchEvent: jest.fn(),
       })),
     });
+    // @ts-ignore
+    fetchMock = jest.spyOn(window, "fetch").mockImplementation(fetchMockImpl);
     jest.clearAllMocks();
+  });
+
+  it("should call the createChallengeUrl to generate a Challange", async () => {
+    render(
+      <SignInWithYourSelf
+        createChallengeUrl={createChallengeUrl}
+        pollForAuthUrl={checkAuthUrl}
+        challengeUrl={challengeUrl}
+        onSiwysPress={onSiwysPress}
+        successComponent={<div>Success</div>}
+      />
+    );
+    await waitFor(() =>
+      expect(fetchMock).toHaveBeenCalledWith(createChallengeUrl, {
+        method: "POST",
+      })
+    );
   });
 
   it("renders the QR code with the provided challenge URL", () => {
@@ -93,6 +145,78 @@ describe("SignInWithYourSelf Component", () => {
     expect(global.window.open).toHaveBeenCalledWith(
       "https://play.google.com/store/apps/details?id=id.selfid",
       "_blank"
+    );
+  });
+
+  it("should call the auth URL after receiving Challenge", async () => {
+    jest.useFakeTimers();
+    render(
+      <SignInWithYourSelf
+        createChallengeUrl={createChallengeUrl}
+        pollForAuthUrl={checkAuthUrl}
+        challengeUrl={challengeUrl}
+        onSiwysPress={onSiwysPress}
+        successComponent={<div>Success</div>}
+      />
+    );
+    await waitFor(
+      () => {
+        expect(fetchMock).toHaveBeenLastCalledWith(
+          `${checkAuthUrl}?challenge=${challengeDid}`
+        );
+      },
+      { timeout: 6000 }
+    );
+  });
+
+  it("should call the auth URL after receiving Challenge and render success component on authentication", async () => {
+    jest.useFakeTimers();
+    render(
+      <SignInWithYourSelf
+        createChallengeUrl={createChallengeUrl}
+        pollForAuthUrl={checkAuthUrl}
+        challengeUrl={challengeUrl}
+        onSiwysPress={onSiwysPress}
+        successComponent={<div data-testid="success">Success</div>}
+      />
+    );
+
+    expect(fetchMock).not.toHaveBeenCalledWith(checkAuthUrl);
+
+    await waitFor(
+      () => {
+        expect(fetchMock).toHaveBeenLastCalledWith(
+          `${checkAuthUrl}?challenge=${challengeDid}`
+        );
+      },
+      { timeout: 6000 }
+    );
+
+    // Move time forward to trigger authentication
+    jest.advanceTimersByTime(5000);
+
+    await waitFor(() => {
+      expect(screen.getByTestId("success")).toBeInTheDocument();
+    });
+  });
+
+  it("should not call the auth URL if not configured", async () => {
+    jest.useFakeTimers();
+    render(
+      <SignInWithYourSelf
+        challengeUrl={challengeUrl}
+        onSiwysPress={onSiwysPress}
+        createChallengeUrl={createChallengeUrl}
+      />
+    );
+
+    await waitFor(
+      () => {
+        expect(fetchMock).not.toHaveBeenLastCalledWith(
+          `${checkAuthUrl}?challenge=${challengeDid}`
+        );
+      },
+      { timeout: 6000 }
     );
   });
 });

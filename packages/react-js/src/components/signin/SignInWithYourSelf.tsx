@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import QRCode from "./QrCode";
 import { CysButton, SiwysButton } from "../button/SignInButton";
@@ -15,6 +15,9 @@ interface SignInProps {
   challengeUrl: string;
   onSiwysPress: () => void;
   isCYS?: boolean;
+  createChallengeUrl?: string;
+  pollForAuthUrl?: string;
+  successComponent?: React.ReactNode;
 }
 
 const Wrapper = styled.div`
@@ -185,10 +188,54 @@ const AppIconsContainer = styled.div`
 `;
 
 const SignInWithYourSelf: React.FC<SignInProps> = ({
-  challengeUrl,
+  challengeUrl: challengeUrlParam,
   onSiwysPress,
   isCYS = false,
+  createChallengeUrl = undefined,
+  pollForAuthUrl = undefined,
+  successComponent,
 }) => {
+  const [challengeUrl, setChallengeUrl] = useState<string>(challengeUrlParam);
+  const [challengeDid, setChallengeDid] = useState<string>("");
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (createChallengeUrl) {
+      fetch(createChallengeUrl, {
+        method: "POST",
+      })
+        .then((resp) => resp.json())
+        .then((json) => {
+          setChallengeDid(json.challenge);
+          setChallengeUrl(json.challengeUrl);
+        });
+    }
+  }, [createChallengeUrl]);
+
+  useEffect(() => {
+    if (!pollForAuthUrl || !challengeDid || isAuthenticated) return;
+
+    const interval = setInterval(async () => {
+      fetch(pollForAuthUrl + `?challenge=${challengeDid}`)
+        .then((resp) => {
+          if (resp.status === 200) {
+            return resp.json();
+          }
+          return { match: false };
+        })
+        .then((json) => {
+          if (json.match) {
+            setIsAuthenticated(json.match);
+          }
+        })
+        .catch(() => {});
+    }, 5000);
+
+    return () => {
+      clearInterval(interval);
+    };
+  }, [challengeDid, isAuthenticated, pollForAuthUrl]);
+
   const redirectToPlayStore = () => {
     const playStoreURL =
       "https://play.google.com/store/apps/details?id=id.selfid";
@@ -199,6 +246,10 @@ const SignInWithYourSelf: React.FC<SignInProps> = ({
     const appStoreURL = "https://apps.apple.com/us/app/self-id/id1663745416";
     window.open(appStoreURL, "_blank");
   };
+
+  if (isAuthenticated) {
+    return <Wrapper>{successComponent}</Wrapper>;
+  }
 
   return (
     <Wrapper>

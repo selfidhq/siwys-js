@@ -15,7 +15,7 @@ describe("SignInWithYourSelf Component", () => {
         matches: false,
         media: query,
         onchange: null,
-        addListener: jest.fn(), // Método obsoleto pero algunas libs lo usan
+        addListener: jest.fn(),
         removeListener: jest.fn(),
         addEventListener: jest.fn(),
         removeEventListener: jest.fn(),

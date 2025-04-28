@@ -67,21 +67,21 @@ const TitleContainer = styled.div`
   margin-top: 24px;
 `;
 
-const QRContainer = styled.div<{ colorTheme: ThemeProp }>`
+const QRContainer = styled.div<{ $theme: ThemeProp }>`
   margin-bottom: 70px;
-  ${(props) => (props.colorTheme === "dark" ? "border: 10px black solid" : "")};
-  ${(props) => (props.colorTheme === "dark" ? "border-radius: 26px" : "")};
-  ${(props) => (props.colorTheme === "dark" ? "line-height: 0" : "")};
+  ${(props) => (props.$theme === "dark" ? "border: 10px black solid" : "")};
+  ${(props) => (props.$theme === "dark" ? "border-radius: 26px" : "")};
+  ${(props) => (props.$theme === "dark" ? "line-height: 0" : "")};
 `;
 
-const Title = styled.h4<{ colorTheme: ThemeProp }>`
+const Title = styled.h4<{ $theme: ThemeProp }>`
   font-family: "Inter", sans-serif;
   margin-top: 0px;
   margin-bottom: 0px;
   font-weight: 400;
   font-size: 20px;
   line-height: 95%;
-  color: ${(props) => (props.colorTheme === "dark" ? "#0F0F10" : "#ffffff")};
+  color: ${(props) => (props.$theme === "dark" ? "#0F0F10" : "#ffffff")};
   @media (min-width: 1024px) {
     font-size: 28px;
   }
@@ -94,7 +94,7 @@ const InstructionsContainer = styled.div`
   gap: 24px;
 `;
 
-const InstructionsTitle = styled.h4<{ colorTheme: ThemeProp }>`
+const InstructionsTitle = styled.h4<{ $theme: ThemeProp }>`
   font-family: "Inter", sans-serif;
   margin-top: 0px;
   margin-bottom: 0px;
@@ -102,10 +102,10 @@ const InstructionsTitle = styled.h4<{ colorTheme: ThemeProp }>`
   font-size: 16px;
   line-height: 140%;
   letter-spacing: 0.025em;
-  color: ${(props) => (props.colorTheme === "dark" ? "#0F0F10" : "#ffffff")};
+  color: ${(props) => (props.$theme === "dark" ? "#0F0F10" : "#ffffff")};
 `;
 
-const InstructionsSubtitle = styled.p<{ colorTheme: ThemeProp }>`
+const InstructionsSubtitle = styled.p<{ $theme: ThemeProp }>`
   font-family: "Inter", sans-serif;
   margin-top: 0px;
   margin-bottom: 0px;
@@ -113,10 +113,10 @@ const InstructionsSubtitle = styled.p<{ colorTheme: ThemeProp }>`
   font-size: 14px;
   letter-spacing: 0.025em;
   margin-bottom: 8px;
-  color: ${(props) => (props.colorTheme === "dark" ? "#0F0F10" : "#ffffff")};
+  color: ${(props) => (props.$theme === "dark" ? "#0F0F10" : "#ffffff")};
 `;
 
-const InstructionsDescription = styled.ul<{ colorTheme: ThemeProp }>`
+const InstructionsDescription = styled.ul<{ $theme: ThemeProp }>`
   font-family: "Inter", sans-serif;
   list-style-type: decimal;
   padding-left: 20px;
@@ -125,7 +125,7 @@ const InstructionsDescription = styled.ul<{ colorTheme: ThemeProp }>`
   font-weight: 400;
   font-size: 14px;
   letter-spacing: 0.025em;
-  color: ${(props) => (props.colorTheme === "dark" ? "#292D36" : "#c4ccd4")};
+  color: ${(props) => (props.$theme === "dark" ? "#292D36" : "#c4ccd4")};
 `;
 
 const InstructionsDescriptionItem = styled.li`
@@ -275,7 +275,7 @@ const SignInWithYourSelf: React.FC<SignInProps> = ({
           <CircleLogoWhite width="48" height="48" />
         )}
         <TitleContainer>
-          <Title colorTheme={theme}>
+          <Title $theme={theme}>
             {isCYS ? "Connect your" : "Sign in with your"}
           </Title>
           {theme === "dark" ? (
@@ -285,7 +285,7 @@ const SignInWithYourSelf: React.FC<SignInProps> = ({
           )}
         </TitleContainer>
         {}
-        <QRContainer colorTheme={theme}>
+        <QRContainer $theme={theme}>
           <QRCode challengeUrl={challengeUrl} size={200} level="H" />
         </QRContainer>
         {isCYS ? (
@@ -295,18 +295,18 @@ const SignInWithYourSelf: React.FC<SignInProps> = ({
         )}
       </SignInContainer>
       <InstructionsContainer>
-        <InstructionsTitle colorTheme={theme}>
+        <InstructionsTitle $theme={theme}>
           {isCYS
             ? "Connect your SELF™ Guide:"
             : "Sign in with your SELF™ Guide:"}
         </InstructionsTitle>
         <div>
-          <InstructionsSubtitle colorTheme={theme}>
+          <InstructionsSubtitle $theme={theme}>
             {isCYS
               ? "If you have the SELF® mobile app:"
               : "If you are signing in on a device that has the SELF® app installed:"}
           </InstructionsSubtitle>
-          <InstructionsDescription colorTheme={theme}>
+          <InstructionsDescription $theme={theme}>
             <InstructionsDescriptionItem>
               {isCYS
                 ? "Use scanning feature in the SELF® app to scan the QR code."
@@ -318,12 +318,12 @@ const SignInWithYourSelf: React.FC<SignInProps> = ({
           </InstructionsDescription>
         </div>
         <div>
-          <InstructionsSubtitle colorTheme={theme}>
+          <InstructionsSubtitle $theme={theme}>
             {isCYS
               ? "If you do not have the SELF® mobile app:"
               : "If you are not signing in on a device that has the SELF® app installed:"}
           </InstructionsSubtitle>
-          <InstructionsDescription colorTheme={theme}>
+          <InstructionsDescription $theme={theme}>
             <InstructionsDescriptionItem>
               {isCYS
                 ? "Download and open the SELF® ID app from the App Store."
@@ -339,7 +339,7 @@ const SignInWithYourSelf: React.FC<SignInProps> = ({
         </div>
         <ParentDownloadContainer>
           <DownloadTitleContainer>
-            <InstructionsTitle colorTheme={theme}>
+            <InstructionsTitle $theme={theme}>
               {"Don’t have the"}
             </InstructionsTitle>
             {theme === "dark" ? (
@@ -347,7 +347,7 @@ const SignInWithYourSelf: React.FC<SignInProps> = ({
             ) : (
               <SelfTextLogoWhite width="58" height="12" />
             )}
-            <InstructionsTitle colorTheme={theme}>{" app?"}</InstructionsTitle>
+            <InstructionsTitle $theme={theme}>{" app?"}</InstructionsTitle>
           </DownloadTitleContainer>
           <DownloadContainer>
             <DownloadContainerFlex>

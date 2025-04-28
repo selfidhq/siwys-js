@@ -7,10 +7,15 @@ import {
   AppleAppStore,
   GooglePlayStore,
   CircleLogoWhite,
+  CircleLogoBlack,
   SelfTextLogoWhite,
+  SelfTextLogoBlack,
   AppIconDark,
   AppIconLight,
 } from "../../icons";
+
+type ThemeProp = "light" | "dark";
+
 interface SignInProps {
   challengeUrl: string;
   onSiwysPress: () => void;
@@ -18,6 +23,7 @@ interface SignInProps {
   createChallengeUrl?: string;
   pollForAuthUrl?: string;
   successComponent?: React.ReactNode;
+  theme?: ThemeProp;
 }
 
 const Wrapper = styled.div`
@@ -61,18 +67,21 @@ const TitleContainer = styled.div`
   margin-top: 24px;
 `;
 
-const QRContainer = styled.div`
+const QRContainer = styled.div<{ colorTheme: ThemeProp }>`
   margin-bottom: 70px;
+  ${(props) => (props.colorTheme === "dark" ? "border: 10px black solid" : "")};
+  ${(props) => (props.colorTheme === "dark" ? "border-radius: 26px" : "")};
+  ${(props) => (props.colorTheme === "dark" ? "line-height: 0" : "")};
 `;
 
-const Title = styled.h4`
+const Title = styled.h4<{ colorTheme: ThemeProp }>`
   font-family: "Inter", sans-serif;
   margin-top: 0px;
   margin-bottom: 0px;
   font-weight: 400;
   font-size: 20px;
   line-height: 95%;
-  color: #ffffff;
+  color: ${(props) => (props.colorTheme === "dark" ? "#0F0F10" : "#ffffff")};
   @media (min-width: 1024px) {
     font-size: 28px;
   }
@@ -85,7 +94,7 @@ const InstructionsContainer = styled.div`
   gap: 24px;
 `;
 
-const InstructionsTitle = styled.h4`
+const InstructionsTitle = styled.h4<{ colorTheme: ThemeProp }>`
   font-family: "Inter", sans-serif;
   margin-top: 0px;
   margin-bottom: 0px;
@@ -93,10 +102,10 @@ const InstructionsTitle = styled.h4`
   font-size: 16px;
   line-height: 140%;
   letter-spacing: 0.025em;
-  color: #ffffff;
+  color: ${(props) => (props.colorTheme === "dark" ? "#0F0F10" : "#ffffff")};
 `;
 
-const InstructionsSubtitle = styled.p`
+const InstructionsSubtitle = styled.p<{ colorTheme: ThemeProp }>`
   font-family: "Inter", sans-serif;
   margin-top: 0px;
   margin-bottom: 0px;
@@ -104,10 +113,10 @@ const InstructionsSubtitle = styled.p`
   font-size: 14px;
   letter-spacing: 0.025em;
   margin-bottom: 8px;
-  color: #ffffff;
+  color: ${(props) => (props.colorTheme === "dark" ? "#0F0F10" : "#ffffff")};
 `;
 
-const InstructionsDescription = styled.ul`
+const InstructionsDescription = styled.ul<{ colorTheme: ThemeProp }>`
   font-family: "Inter", sans-serif;
   list-style-type: decimal;
   padding-left: 20px;
@@ -116,7 +125,7 @@ const InstructionsDescription = styled.ul`
   font-weight: 400;
   font-size: 14px;
   letter-spacing: 0.025em;
-  color: #c4ccd4;
+  color: ${(props) => (props.colorTheme === "dark" ? "#292D36" : "#c4ccd4")};
 `;
 
 const InstructionsDescriptionItem = styled.li`
@@ -180,7 +189,7 @@ const DownloadAppTitle = styled.p`
   line-height: 126%;
   letter-spacing: 0.025em;
   max-width: 128px;
-  color: #c4ccd4;
+  color: #ffffff;
 `;
 
 const AppIconsContainer = styled.div`
@@ -199,6 +208,7 @@ const SignInWithYourSelf: React.FC<SignInProps> = ({
   createChallengeUrl = undefined,
   pollForAuthUrl = undefined,
   successComponent,
+  theme = "light",
 }) => {
   const [challengeUrl, setChallengeUrl] = useState<string>(challengeUrlParam);
   const [challengeDid, setChallengeDid] = useState<string>("");
@@ -259,33 +269,44 @@ const SignInWithYourSelf: React.FC<SignInProps> = ({
   return (
     <Wrapper>
       <SignInContainer>
-        <CircleLogoWhite width="48" height="48" />
+        {theme === "dark" ? (
+          <CircleLogoBlack width="48" height="48" />
+        ) : (
+          <CircleLogoWhite width="48" height="48" />
+        )}
         <TitleContainer>
-          <Title>{isCYS ? "Connect your" : "Sign in with your"}</Title>
-          <SelfTextLogoWhite width="102" height="22" />
+          <Title colorTheme={theme}>
+            {isCYS ? "Connect your" : "Sign in with your"}
+          </Title>
+          {theme === "dark" ? (
+            <SelfTextLogoBlack width="102" height="22" />
+          ) : (
+            <SelfTextLogoWhite width="102" height="22" />
+          )}
         </TitleContainer>
-        <QRContainer>
+        {}
+        <QRContainer colorTheme={theme}>
           <QRCode challengeUrl={challengeUrl} size={200} level="H" />
         </QRContainer>
         {isCYS ? (
-          <CysButton colorTheme="light" onClick={onSiwysPress} glow />
+          <CysButton colorTheme={"light"} onClick={onSiwysPress} glow />
         ) : (
-          <SiwysButton colorTheme="light" onClick={onSiwysPress} glow />
+          <SiwysButton colorTheme={"light"} onClick={onSiwysPress} glow />
         )}
       </SignInContainer>
       <InstructionsContainer>
-        <InstructionsTitle>
+        <InstructionsTitle colorTheme={theme}>
           {isCYS
             ? "Connect your SELF™ Guide:"
             : "Sign in with your SELF™ Guide:"}
         </InstructionsTitle>
         <div>
-          <InstructionsSubtitle>
+          <InstructionsSubtitle colorTheme={theme}>
             {isCYS
               ? "If you have the SELF® mobile app:"
               : "If you are signing in on a device that has the SELF® app installed:"}
           </InstructionsSubtitle>
-          <InstructionsDescription>
+          <InstructionsDescription colorTheme={theme}>
             <InstructionsDescriptionItem>
               {isCYS
                 ? "Use scanning feature in the SELF® app to scan the QR code."
@@ -297,12 +318,12 @@ const SignInWithYourSelf: React.FC<SignInProps> = ({
           </InstructionsDescription>
         </div>
         <div>
-          <InstructionsSubtitle>
+          <InstructionsSubtitle colorTheme={theme}>
             {isCYS
               ? "If you do not have the SELF® mobile app:"
               : "If you are not signing in on a device that has the SELF® app installed:"}
           </InstructionsSubtitle>
-          <InstructionsDescription>
+          <InstructionsDescription colorTheme={theme}>
             <InstructionsDescriptionItem>
               {isCYS
                 ? "Download and open the SELF® ID app from the App Store."
@@ -318,9 +339,15 @@ const SignInWithYourSelf: React.FC<SignInProps> = ({
         </div>
         <ParentDownloadContainer>
           <DownloadTitleContainer>
-            <InstructionsTitle>{"Don’t have the"}</InstructionsTitle>
-            <SelfTextLogoWhite width="58" height="12" />
-            <InstructionsTitle>{" app?"}</InstructionsTitle>
+            <InstructionsTitle colorTheme={theme}>
+              {"Don’t have the"}
+            </InstructionsTitle>
+            {theme === "dark" ? (
+              <SelfTextLogoBlack width="58" height="12" />
+            ) : (
+              <SelfTextLogoWhite width="58" height="12" />
+            )}
+            <InstructionsTitle colorTheme={theme}>{" app?"}</InstructionsTitle>
           </DownloadTitleContainer>
           <DownloadContainer>
             <DownloadContainerFlex>

@@ -289,9 +289,9 @@ const SignInWithYourSelf: React.FC<SignInProps> = ({
           <QRCode challengeUrl={challengeUrl} size={200} level="H" />
         </QRContainer>
         {isCYS ? (
-          <CysButton colorTheme={"light"} onClick={onSiwysPress} glow />
+          <CysButton colorTheme={theme} onClick={onSiwysPress} glow />
         ) : (
-          <SiwysButton colorTheme={"light"} onClick={onSiwysPress} glow />
+          <SiwysButton colorTheme={theme} onClick={onSiwysPress} glow />
         )}
       </SignInContainer>
       <InstructionsContainer>

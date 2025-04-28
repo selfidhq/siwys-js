@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# 0.9.0 (2025-04-28)
+
+
+### Features
+
+* **sapp-189:** update styles for black theme ([#36](https://github.com/selfidhq/siwys-js/issues/36)) ([b9b94ea](https://github.com/selfidhq/siwys-js/commit/b9b94eab4c774171ed4a1633cc244e14f903d637))
+
+
+
+
+
 # 0.8.0 (2025-04-28)
 
 

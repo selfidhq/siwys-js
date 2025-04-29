@@ -12,6 +12,13 @@ export interface CreateChallengeOptions {
   registry?: string;
   validUntil?: string; // ISO string
 }
+
+export interface Signature {
+  signer?: string;
+  signed: string;
+  hash: string;
+  value: string;
+}
 export interface CreateChallengeResponse {
   challenge: string; // DID
   challengeUrl: string;
@@ -19,6 +26,19 @@ export interface CreateChallengeResponse {
 export interface VerifyResponseOptions {
   retries?: number;
   delay?: number;
+}
+
+export interface VerifiableCredential {
+  "@context": string[];
+  type: string[];
+  issuer: string;
+  validFrom: string;
+  validUntil?: string;
+  credentialSubject?: {
+    id: string;
+  };
+  credential?: Record<string, unknown> | null;
+  signature?: Signature;
 }
 
 export interface Credential {
@@ -30,6 +50,16 @@ export interface VerifyResponseResponse {
   responder: string;
   credentials?: Credential[];
 }
+
+export interface IssueCredentialsOptions {
+  schema?: string;
+  subject?: string;
+  registry?: string;
+  validFrom?: string;
+  validUntil?: string;
+  credential?: Record<string, unknown>;
+}
+
 export interface WalletSeed {
   mnemonic: string;
   hdkey: {
@@ -166,6 +196,52 @@ export class Keymaster {
       challenge: challenge,
       challengeUrl: `${spec.callback}?challenge=${challenge}`,
     };
+  }
+
+  async bindCredential(
+    schemaId: string,
+    subjectId: string,
+    options: {
+      validFrom?: string;
+      validUntil?: string;
+      credential?: Record<string, unknown>;
+    } = {}
+  ): Promise<VerifiableCredential> {
+    if (!this.serviceRunning()) {
+      throw new Error("Keymaster service not running");
+    }
+
+    return this.keymasterService.bindCredential(schemaId, subjectId, options);
+  }
+
+  async issueCredential(
+    credential: Partial<VerifiableCredential>,
+    options: IssueCredentialsOptions = {}
+  ): Promise<string> {
+    if (!this.serviceRunning()) {
+      throw new Error("Keymaster service not running");
+    }
+
+    return this.keymasterService.issueCredential(credential, options);
+  }
+
+  async publishCredential(
+    did: string,
+    options: { reveal?: boolean } = {}
+  ): Promise<VerifiableCredential> {
+    if (!this.serviceRunning()) {
+      throw new Error("Keymaster service not running");
+    }
+
+    return this.keymasterService.publishCredential(did, options);
+  }
+
+  async acceptCredential(did: string): Promise<boolean> {
+    if (!this.serviceRunning()) {
+      throw new Error("Keymaster service not running");
+    }
+
+    return this.keymasterService.acceptCredential(did);
   }
 
   async showMnemonic(): Promise<string> {

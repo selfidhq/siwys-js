@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# 0.10.0 (2025-04-30)
+
+
+### Features
+
+* **sapp-192:** added support for create/attest molecule ([#37](https://github.com/selfidhq/siwys-js/issues/37)) ([dd97058](https://github.com/selfidhq/siwys-js/commit/dd97058ae564e6a93c4af75bc25bd2585bb8f79f))
+
+
+
+
+
 # 0.9.0 (2025-04-28)
 
 

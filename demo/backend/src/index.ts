@@ -58,7 +58,7 @@ app.post("/login", async (req, res) => {
 app.listen(port, () => {
   startKeymaster({
     gatekeeperConfig: {
-      url: "http://localhost:4224",
+      url: "https://gatekeeper.selfid.com",
     },
     walletConfig: {
       id: "demo-wallet",

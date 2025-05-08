@@ -1,143 +1,220 @@
-// @ts-ignore
-// @ts-nocheck
 import GatekeeperClient from "@mdip/gatekeeper/client";
 import CipherNode from "@mdip/cipher/node";
-import KeymasterClient from "@mdip/keymaster/client";
-import { default as KeymasterLib } from "@mdip/keymaster";
-export interface CreateChallengeSpec {
-  callback: string;
-  credentials?: { schema: string; issuers: string[] }[];
-}
-export interface CreateChallengeOptions {
-  registry?: string;
-  validUntil?: string; // ISO string
-}
-
-export interface Signature {
-  signer?: string;
-  signed: string;
-  hash: string;
-  value: string;
-}
-export interface CreateChallengeResponse {
-  challenge: string; // DID
-  challengeUrl: string;
-}
-export interface VerifyResponseOptions {
-  retries?: number;
-  delay?: number;
-}
-
-export interface VerifiableCredential {
-  "@context": string[];
-  type: string[];
-  issuer: string;
-  validFrom: string;
-  validUntil?: string;
-  credentialSubject?: {
-    id: string;
-  };
-  credential?: Record<string, unknown> | null;
-  signature?: Signature;
-}
-
-export interface Credential {
-  vp: string;
-}
-export interface VerifyResponseResponse {
-  match: boolean;
-  challenge: string;
-  responder: string;
-  credentials?: Credential[];
-}
-
-export interface IssueCredentialsOptions {
-  schema?: string;
-  subject?: string;
-  registry?: string;
-  validFrom?: string;
-  validUntil?: string;
-  credential?: Record<string, unknown>;
-}
-
-export interface WalletSeed {
-  mnemonic: string;
-  hdkey: {
-    xpriv: string;
-    xpub: string;
-  };
-}
-export interface Wallet {
-  seed: WalletSeed;
-  counter: number;
-  ids: any;
-  current?: string;
-}
-// config for connecting to an external Gatekeeper or Keymaster
-export interface SdkConfig {
-  url: string;
-  waitUntilReady?: boolean;
-  intervalSeconds?: number;
-  chatty?: boolean;
-}
-export interface WalletConfig {
-  id: string;
-  mnemonic?: string;
-  registry?: string;
-}
-export interface WalletDb {
-  loadWallet: () => Promise<Wallet | null>;
-  saveWallet: (w: Wallet, overwrite?: boolean) => Promise<boolean>;
-}
+import KeymasterLib from "@mdip/keymaster";
+import {
+  CreateChallengeResponse,
+  CreateChallengeSpec,
+  SdkConfig,
+  WalletConfig,
+} from "./types/index.js";
+import {
+  ChallengeResponse,
+  CreateAssetOptions,
+  IssueCredentialsOptions,
+  StoredWallet,
+  VerifiableCredential,
+  WalletBase,
+} from "@mdip/keymaster/types";
 
 export interface KeymasterConfig {
-  /**
-   * Config for connecting to an external Keymaster service
-   * when the consuming applciation is connecting to an external Keymaster.
-   */
-  keymasterConfig?: SdkConfig;
-  /**
-   * Config for connecting to an external Keymaster service when
-   * the consuming applciation is acting as its own (integrated) Keymaster service.
-   */
   gatekeeperConfig?: SdkConfig;
-  /**
-   * Config for custom user-defined values of the underlying wallet.
-   *
-   * Required for an integrated Keymaster.
-   */
+  walletDb?: WalletBase;
   walletConfig?: WalletConfig;
-  /**
-   * Config that contains the callbacks for persisting a
-   * wallet to a backing Database.
-   */
-  walletDb?: WalletDb;
 }
 
 export class Keymaster {
+  private static instance: Keymaster | null = null;
+
   private config: KeymasterConfig;
-  /**
-   * Underlying Keymaster libray based on the use-case:
-   *
-   * Integrated Keymaster = keymaster_lib
-   *
-   * External Keymaster = keymaster_sdk
-   */
-  private keymasterService;
+  private keymasterService!: KeymasterLib;
   private serviceStarted = false;
 
-  constructor(config: KeymasterConfig) {
+  private constructor(config: KeymasterConfig) {
     this.validateConfig(config);
     this.config = config;
   }
 
-  public async start(): Promise<boolean> {
+  public static initialize(config: KeymasterConfig) {
+    if (!Keymaster.instance) {
+      Keymaster.instance = new Keymaster(config);
+      console.log("✅ Keymaster initialized");
+    } else {
+      console.warn(
+        "Keymaster already initialized, ignoring re-initialization."
+      );
+    }
+  }
+
+  private ensureInitialized() {
+    if (!Keymaster.instance) {
+      throw new Error(
+        "Keymaster not initialized. Call Keymaster.initialize() first."
+      );
+    }
+  }
+
+  // Delegated STATIC methods
+
+  public static async start() {
+    Keymaster.getInstance().ensureInitialized();
+    return Keymaster.getInstance().startInternal();
+  }
+
+  public static async createChallenge(
+    ...args: Parameters<Keymaster["createChallengeInternal"]>
+  ) {
+    Keymaster.getInstance().ensureInitialized();
+    return Keymaster.getInstance().createChallengeInternal(...args);
+  }
+
+  public static async bindCredential(
+    ...args: Parameters<Keymaster["bindCredentialInternal"]>
+  ) {
+    Keymaster.getInstance().ensureInitialized();
+    return Keymaster.getInstance().bindCredentialInternal(...args);
+  }
+
+  public static async issueCredential(
+    ...args: Parameters<Keymaster["issueCredentialInternal"]>
+  ) {
+    Keymaster.getInstance().ensureInitialized();
+    return Keymaster.getInstance().issueCredentialInternal(...args);
+  }
+
+  public static async publishCredential(
+    ...args: Parameters<Keymaster["publishCredentialInternal"]>
+  ) {
+    Keymaster.getInstance().ensureInitialized();
+    return Keymaster.getInstance().publishCredentialInternal(...args);
+  }
+
+  public static async acceptCredential(
+    ...args: Parameters<Keymaster["acceptCredentialInternal"]>
+  ) {
+    Keymaster.getInstance().ensureInitialized();
+    return Keymaster.getInstance().acceptCredentialInternal(...args);
+  }
+
+  public static async showMnemonic(
+    ...args: Parameters<Keymaster["showMnemonicInternal"]>
+  ) {
+    Keymaster.getInstance().ensureInitialized();
+    return Keymaster.getInstance().showMnemonicInternal(...args);
+  }
+
+  public static async verifyResponse(
+    ...args: Parameters<Keymaster["verifyResponseInternal"]>
+  ) {
+    Keymaster.getInstance().ensureInitialized();
+    return Keymaster.getInstance().verifyResponseInternal(...args);
+  }
+
+  public static async decryptMessage(
+    ...args: Parameters<Keymaster["decryptMessageInternal"]>
+  ) {
+    Keymaster.getInstance().ensureInitialized();
+    return Keymaster.getInstance().decryptMessageInternal(...args);
+  }
+
+  public static async decryptMnemonic(
+    ...args: Parameters<Keymaster["decryptMnemonicInternal"]>
+  ) {
+    Keymaster.getInstance().ensureInitialized();
+    return Keymaster.getInstance().decryptMnemonicInternal(...args);
+  }
+
+  public static async getCredential(
+    ...args: Parameters<Keymaster["getCredentialInternal"]>
+  ) {
+    Keymaster.getInstance().ensureInitialized();
+    return Keymaster.getInstance().getCredentialInternal(...args);
+  }
+
+  public static async removeCredential(
+    ...args: Parameters<Keymaster["removeCredentialInternal"]>
+  ) {
+    Keymaster.getInstance().ensureInitialized();
+    return Keymaster.getInstance().removeCredentialInternal(...args);
+  }
+
+  public static async updateCredential(
+    ...args: Parameters<Keymaster["updateCredentialInternal"]>
+  ) {
+    Keymaster.getInstance().ensureInitialized();
+    return Keymaster.getInstance().updateCredentialInternal(...args);
+  }
+
+  public static async createId(
+    ...args: Parameters<Keymaster["createIdInternal"]>
+  ) {
+    Keymaster.getInstance().ensureInitialized();
+    return Keymaster.getInstance().createIdInternal(...args);
+  }
+
+  public static async removeId(
+    ...args: Parameters<Keymaster["removeIdInternal"]>
+  ) {
+    Keymaster.getInstance().ensureInitialized();
+    return Keymaster.getInstance().removeIdInternal(...args);
+  }
+
+  public static async resolveDID(
+    ...args: Parameters<Keymaster["resolveDIDInternal"]>
+  ) {
+    Keymaster.getInstance().ensureInitialized();
+    return Keymaster.getInstance().resolveDIDInternal(...args);
+  }
+
+  public static async setCurrentId(
+    ...args: Parameters<Keymaster["setCurrentIdInternal"]>
+  ) {
+    Keymaster.getInstance().ensureInitialized();
+    return Keymaster.getInstance().setCurrentIdInternal(...args);
+  }
+
+  public static async createSchema(
+    ...args: Parameters<Keymaster["createSchemaInternal"]>
+  ) {
+    Keymaster.getInstance().ensureInitialized();
+    return Keymaster.getInstance().createSchemaInternal(...args);
+  }
+
+  public static async newWallet(
+    ...args: Parameters<Keymaster["newWalletInternal"]>
+  ) {
+    Keymaster.getInstance().ensureInitialized();
+    return Keymaster.getInstance().newWalletInternal(...args);
+  }
+
+  public static async recoverWallet(
+    ...args: Parameters<Keymaster["recoverWalletInternal"]>
+  ) {
+    Keymaster.getInstance().ensureInitialized();
+    return Keymaster.getInstance().recoverWalletInternal(...args);
+  }
+
+  private static getInstance(): Keymaster {
+    if (!Keymaster.instance) {
+      throw new Error(
+        "Keymaster not initialized. Call Keymaster.initialize() first."
+      );
+    }
+    return Keymaster.instance;
+  }
+
+  // -------- Internal instance methods (originals renamed with Internal) -------
+
+  private async ensureServiceIsRunning() {
+    if (!(await this.serviceRunning())) {
+      throw new Error("Keymaster service not running");
+    }
+  }
+
+  private async startInternal(): Promise<boolean> {
     if (this.config.gatekeeperConfig) {
       this.serviceStarted = await this.startIntegratedKeymaster();
-    } else if (this.config.keymasterConfig) {
-      this.serviceStarted = await this.startExternalKeymaster();
     } else {
-      throw "Missing Gatekeeper or Keymaster config";
+      throw "Missing Gatekeeper config";
     }
     return this.serviceStarted;
   }
@@ -146,18 +223,22 @@ export class Keymaster {
     console.log(`Starting integrated Keymaster service`);
 
     try {
-      const gatekeeper = new GatekeeperClient();
-      await gatekeeper.connect(this.config.gatekeeperConfig);
+      if (this.config.walletDb) {
+        const gatekeeper = new GatekeeperClient();
+        await gatekeeper.connect(this.config.gatekeeperConfig);
 
-      const cipher = new CipherNode();
+        const cipher = new CipherNode();
 
-      this.keymasterService = await new KeymasterLib({
-        gatekeeper,
-        wallet: this.config.walletDb,
-        cipher,
-      });
+        this.keymasterService = new KeymasterLib({
+          gatekeeper,
+          wallet: this.config.walletDb,
+          cipher,
+        });
 
-      await this.ensureWalletExists();
+        await this.ensureWalletExists();
+      } else {
+        return false;
+      }
     } catch (e) {
       console.error("Error starting Keymaster service:", e);
       return false;
@@ -167,27 +248,11 @@ export class Keymaster {
     return true;
   }
 
-  private async startExternalKeymaster(): Promise<boolean> {
-    console.log(`Starting external Keymaster service`);
-    try {
-      this.keymasterService = new KeymasterClient();
-      await this.keymasterService.connect(this.config.keymasterConfig);
-    } catch (e) {
-      console.error(`Error starting Keymaster service:`, e);
-      return false;
-    }
-
-    console.log(`Started external Keymaster service`);
-    return true;
-  }
-
-  async createChallenge(
+  private async createChallengeInternal(
     spec: CreateChallengeSpec,
-    options?: CreateChallengeOptions
+    options?: CreateAssetOptions
   ): Promise<CreateChallengeResponse> {
-    if (!this.serviceRunning()) {
-      throw new Error("Keymaster service not running");
-    }
+    await this.ensureServiceIsRunning();
     const challenge: string = await this.keymasterService.createChallenge(
       spec,
       options
@@ -198,7 +263,7 @@ export class Keymaster {
     };
   }
 
-  async bindCredential(
+  private async bindCredentialInternal(
     schemaId: string,
     subjectId: string,
     options: {
@@ -207,96 +272,159 @@ export class Keymaster {
       credential?: Record<string, unknown>;
     } = {}
   ): Promise<VerifiableCredential> {
-    if (!this.serviceRunning()) {
-      throw new Error("Keymaster service not running");
-    }
-
+    await this.ensureServiceIsRunning();
     return this.keymasterService.bindCredential(schemaId, subjectId, options);
   }
 
-  async issueCredential(
+  private async issueCredentialInternal(
     credential: Partial<VerifiableCredential>,
     options: IssueCredentialsOptions = {}
   ): Promise<string> {
-    if (!this.serviceRunning()) {
-      throw new Error("Keymaster service not running");
-    }
-
+    await this.ensureServiceIsRunning();
     return this.keymasterService.issueCredential(credential, options);
   }
 
-  async publishCredential(
+  private async publishCredentialInternal(
     did: string,
     options: { reveal?: boolean } = {}
   ): Promise<VerifiableCredential> {
-    if (!this.serviceRunning()) {
-      throw new Error("Keymaster service not running");
-    }
-
+    await this.ensureServiceIsRunning();
     return this.keymasterService.publishCredential(did, options);
   }
 
-  async acceptCredential(did: string): Promise<boolean> {
-    if (!this.serviceRunning()) {
-      throw new Error("Keymaster service not running");
-    }
-
+  private async acceptCredentialInternal(did: string): Promise<boolean> {
+    await this.ensureServiceIsRunning();
     return this.keymasterService.acceptCredential(did);
   }
 
-  async showMnemonic(): Promise<string> {
-    if (!this.serviceRunning()) {
-      throw new Error("Keymaster service not running");
-    }
+  private async showMnemonicInternal(): Promise<string> {
+    await this.ensureServiceIsRunning();
     return this.keymasterService.decryptMnemonic();
   }
 
-  async verifyResponse(
+  private async verifyResponseInternal(
     did: string,
-    options?: VerifyResponseOptions
-  ): Promise<VerifyResponseResponse> {
-    if (!this.serviceRunning()) {
-      throw new Error("Keymaster service not running");
-    }
-    const response: VerifyResponseResponse =
-      await this.keymasterService.verifyResponse(did, options);
-    return response;
+    options?: { retries?: number; delay?: number }
+  ): Promise<ChallengeResponse> {
+    await this.ensureServiceIsRunning();
+    return this.keymasterService.verifyResponse(did, options);
+  }
+
+  private async decryptMessageInternal(
+    ...args: Parameters<KeymasterLib["decryptMessage"]>
+  ) {
+    await this.ensureServiceIsRunning();
+    return this.keymasterService.decryptMessage(...args);
+  }
+
+  private async decryptMnemonicInternal(
+    ...args: Parameters<KeymasterLib["decryptMnemonic"]>
+  ) {
+    await this.ensureServiceIsRunning();
+    return this.keymasterService.decryptMnemonic(...args);
+  }
+
+  private async getCredentialInternal(
+    ...args: Parameters<KeymasterLib["getCredential"]>
+  ) {
+    await this.ensureServiceIsRunning();
+    return this.keymasterService.getCredential(...args);
+  }
+
+  private async removeCredentialInternal(
+    ...args: Parameters<KeymasterLib["removeCredential"]>
+  ) {
+    await this.ensureServiceIsRunning();
+    return this.keymasterService.removeCredential(...args);
+  }
+
+  private async updateCredentialInternal(
+    ...args: Parameters<KeymasterLib["updateCredential"]>
+  ) {
+    await this.ensureServiceIsRunning();
+    return this.keymasterService.updateCredential(...args);
+  }
+
+  private async createIdInternal(
+    ...args: Parameters<KeymasterLib["createId"]>
+  ) {
+    await this.ensureServiceIsRunning();
+    return this.keymasterService.createId(...args);
+  }
+
+  private async removeIdInternal(
+    ...args: Parameters<KeymasterLib["removeId"]>
+  ) {
+    await this.ensureServiceIsRunning();
+    return this.keymasterService.removeId(...args);
+  }
+
+  private async resolveDIDInternal(
+    ...args: Parameters<KeymasterLib["resolveDID"]>
+  ) {
+    await this.ensureServiceIsRunning();
+    return this.keymasterService.resolveDID(...args);
+  }
+
+  private async setCurrentIdInternal(
+    ...args: Parameters<KeymasterLib["setCurrentId"]>
+  ) {
+    await this.ensureServiceIsRunning();
+    return this.keymasterService.setCurrentId(...args);
+  }
+
+  private async createSchemaInternal(
+    ...args: Parameters<KeymasterLib["createSchema"]>
+  ) {
+    await this.ensureServiceIsRunning();
+    return this.keymasterService.createSchema(...args);
+  }
+
+  private async newWalletInternal(
+    ...args: Parameters<KeymasterLib["newWallet"]>
+  ) {
+    await this.ensureServiceIsRunning();
+    return this.keymasterService.newWallet(...args);
+  }
+
+  private async recoverWalletInternal(
+    ...args: Parameters<KeymasterLib["recoverWallet"]>
+  ) {
+    await this.ensureServiceIsRunning();
+    return this.keymasterService.recoverWallet(...args);
   }
 
   private async ensureWalletExists(): Promise<void> {
     console.log("Ensuring wallet exists");
-    const existing: Wallet | null =
+    const existing: StoredWallet | null =
       (await this.config?.walletDb?.loadWallet()) || null;
-    if (existing?.current) {
+    if (existing && "current" in existing) {
       console.log(`Using existing wallet with ID ${existing.current}`);
       return;
     }
 
     const walletConfig = this.config.walletConfig;
-    console.log(
-      `Creating  Creating Creating wallet with ID ${walletConfig?.id}`
-    );
-    // wallet was just created, recreate based on config
+    console.log(`Creating wallet with ID ${walletConfig?.id}`);
     if (walletConfig?.mnemonic) {
-      // create the wallet with a custom mnemonic first
       await this.keymasterService.newWallet(walletConfig.mnemonic, true);
     }
-    // create ID and set as current, createId() will save wallet
-    const did = await this.keymasterService.createId(
-      walletConfig?.id,
-      walletConfig?.registry
-    );
-    console.log("Did ", did);
-    console.log(`Created wallet with ID ${walletConfig?.id}`);
+
+    if (walletConfig?.id) {
+      const did = await this.keymasterService.createId(walletConfig.id, {
+        registry: walletConfig.registry,
+      });
+      console.log("Did ", did);
+      console.log(`Created wallet with ID ${walletConfig.id}`);
+    }
   }
 
   private async serviceRunning(): Promise<boolean> {
-    return this.serviceStarted || (await this.start());
+    return this.serviceStarted || (await this.startInternal());
   }
 
   private validateConfig(config: KeymasterConfig): void {
-    if (config.gatekeeperConfig && config.keymasterConfig) {
-      throw new Error("Cannot provide both a Gatekeeper and Keymaster config");
+    if (!config.gatekeeperConfig) {
+      throw new Error("Missing Gatekeeper config");
     }
 
     if (config.gatekeeperConfig) {

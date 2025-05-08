@@ -1,9 +1,8 @@
+export { Keymaster, KeymasterConfig } from "./keymaster.js";
+
+export { KeymasterExternalClient } from "./keymasterClient.js";
+
 export {
-  CreateChallengeOptions,
-  CreateChallengeResponse,
-  CreateChallengeSpec,
-  Keymaster,
-  KeymasterConfig,
   SdkConfig,
   VerifyResponseOptions,
   VerifyResponseResponse,
@@ -11,4 +10,7 @@ export {
   WalletConfig,
   WalletDb,
   WalletSeed,
-} from "./keymaster";
+  CreateChallengeOptions,
+  CreateChallengeResponse,
+  CreateChallengeSpec,
+} from "./types/index.js";

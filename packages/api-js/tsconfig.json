@@ -1,11 +1,11 @@
 {
   "compilerOptions": {
     "target": "ES5", // Support older browsers if needed
-    "module": "ESNext", // Use ESNext module system
+    "module": "NodeNext", // Use NodeNext module system
     "lib": ["DOM", "ESNext"],
     "declaration": true, // Generate declaration files
     "jsx": "react", // JSX transpilation for React
-    "moduleResolution": "Node",
+    "moduleResolution": "nodenext",
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "strict": true,

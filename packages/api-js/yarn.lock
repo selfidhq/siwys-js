@@ -2144,10 +2144,10 @@
     hdkey "^2.1.0"
     multiformats "^13.0.0"
 
-"@mdip/cipher@1.0.0":
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/@mdip/cipher/-/cipher-1.0.0.tgz#366f0357743b117a5ca3734b333a2664b7c97f25"
-  integrity sha512-Z2+C+/4RUvB19qQ4uf1qn027aKAND0v5ol+s3XQi0K3fRs840+3ew4yhUdMU0hns15QjNVEjenkuT4ZkxZH6YA==
+"@mdip/cipher@1.1.0":
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/@mdip/cipher/-/cipher-1.1.0.tgz#968f348f23363b095a98adf60a683a20675b8e9c"
+  integrity sha512-hKtJQ2bBEypKnPXIuZ5rIlkpChwtd7EIZHTDJKyKtsMEFoiOVdHUIy9Z92lLgy1sLOoMcvgMH/PLruI6Qxl5zQ==
   dependencies:
     "@mdip/browser-hdkey" "^0.1.8"
     "@noble/ciphers" "^0.4.1"
@@ -2164,10 +2164,10 @@
   resolved "https://registry.yarnpkg.com/@mdip/common/-/common-0.6.0.tgz#fbc2e6147834c77289b21ac4aad301e3bbbf9c38"
   integrity sha512-Z6r24Gnt3jG5zyG+igp9P/0McfwOoXwHFtmWoQh5mbcnV83GTUORo97L9G6rWot/LbC+Jr6nep/FyuBpUsS7mA==
 
-"@mdip/gatekeeper@1.0.0":
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/@mdip/gatekeeper/-/gatekeeper-1.0.0.tgz#2da980a02e9dd4952332b93b68c68d0f9d8edaa5"
-  integrity sha512-dbuHqUrcOEkj3xJI2QrSuYgL7GiI6enPpMNr6wOdGUZ4AAAhk0bGFrmRyoVieADWQ8DKe7+Gbx8ZrMiD4IqswQ==
+"@mdip/gatekeeper@1.1.0":
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/@mdip/gatekeeper/-/gatekeeper-1.1.0.tgz#5d2fca892a629bf2302b749d6b5f797a8cf6f540"
+  integrity sha512-9C2929qMcsRmOo/mwP4FIu+1Ak7Gpi/XwDakPZOOTcg51Uii1CWGaGRDmdLVGUa6n+ur80F3Yu5386VgBNbF7Q==
   dependencies:
     "@mdip/cipher" "*"
     "@mdip/common" "*"
@@ -2191,13 +2191,14 @@
     helia "^3.0.0"
     multiformats "^13.0.0"
 
-"@mdip/keymaster@1.0.0":
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/@mdip/keymaster/-/keymaster-1.0.0.tgz#6d48cbd3b8695afeafb7e7870f37f5a47011c3ea"
-  integrity sha512-KFk6CRCy1TjQNF2uBrwWEX20qcYuJ4m95ZDV/FGCrafAy4sT746ef4QPGf9bAZYAGVls7DO5M6ZXJf5E2xa6hg==
+"@mdip/keymaster@1.1.0":
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/@mdip/keymaster/-/keymaster-1.1.0.tgz#4a06a73f92b3dce08a4d486468e2b835b7e6521b"
+  integrity sha512-fc75HfwAJ+q3F7uVRtVlaNoPZprhezsI/EQATyshvCKBTyOtmCg2ogIXldIIwRDFmwsZfaLN+s+hvgV+RdSoZg==
   dependencies:
     "@mdip/common" "*"
     axios "^1.7.7"
+    image-size "^2.0.1"
     ioredis "^5.4.1"
     mongodb "^6.5.0"
     sqlite "^5.1.1"
@@ -3991,6 +3992,11 @@ ieee754@^1.1.13, ieee754@^1.2.1:
   version "1.2.1"
   resolved "https://registry.yarnpkg.com/ieee754/-/ieee754-1.2.1.tgz#8eb7a10a63fff25d15a57b001586d177d1b0d352"
   integrity sha512-dcyqhDvX1C46lXZcVqCpK+FtMRQVdIMN6/Df5js2zouUsqG7I6sFxitIC+7KYK29KdXOLHdu9zL4sFnoVQnqaA==
+
+image-size@^2.0.1:
+  version "2.0.2"
+  resolved "https://registry.yarnpkg.com/image-size/-/image-size-2.0.2.tgz#84a7b43704db5736f364bf0d1b029821299b4bdc"
+  integrity sha512-IRqXKlaXwgSMAMtpNzZa1ZAe8m+Sa1770Dhk8VkSsP9LS+iHD62Zd8FQKs8fbPiagBE7BzoFX23cxFnwshpV6w==
 
 import-local@^3.0.2:
   version "3.2.0"

@@ -4,13 +4,9 @@ export { KeymasterExternalClient } from "./keymasterClient.js";
 
 export {
   SdkConfig,
-  VerifyResponseOptions,
-  VerifyResponseResponse,
-  Wallet,
   WalletConfig,
-  WalletDb,
-  WalletSeed,
-  CreateChallengeOptions,
   CreateChallengeResponse,
   CreateChallengeSpec,
 } from "./types/index.js";
+
+export * from "@mdip/keymaster/types";

@@ -3,10 +3,16 @@
   "version": "0.10.0",
   "description": "A React component library",
   "repository": "https://github.com/selfidhq/siwys-js",
-  "main": "dist/index.js",
-  "module": "dist/index.js",
-  "types": "dist/index.d.ts",
   "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "types": "./dist/index.d.ts",
   "files": [
     "dist"
   ],

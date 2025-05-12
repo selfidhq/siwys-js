@@ -10,6 +10,11 @@
     ".": {
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
+    },
+    "./client": {
+      "import": "./node_modules/@mdip/gatekeeper/dist/gatekeeper-client.js", 
+      "require": "./node_modules/@mdip/gatekeeper/dist/gatekeeper-client.cjs",
+      "types": "./node_modules/@mdip/gatekeeper/dist/types/gatekeeper-client.d.ts"
     }
   },
   "types": "./dist/index.d.ts",

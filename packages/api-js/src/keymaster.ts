@@ -10,6 +10,7 @@ import {
 import {
   ChallengeResponse,
   CreateAssetOptions,
+  CreateResponseOptions,
   IssueCredentialsOptions,
   StoredWallet,
   VerifiableCredential,
@@ -72,6 +73,20 @@ export class Keymaster {
   ) {
     Keymaster.getInstance().ensureInitialized();
     return Keymaster.getInstance().bindCredentialInternal(...args);
+  }
+
+  public static async backupWallet(
+    ...args: Parameters<Keymaster["backupWalletInternal"]>
+  ) {
+    Keymaster.getInstance().ensureInitialized();
+    return Keymaster.getInstance().backupWalletInternal(...args);
+  }
+
+  public static async createResponse(
+    ...args: Parameters<Keymaster["createResponseInternal"]>
+  ) {
+    Keymaster.getInstance().ensureInitialized();
+    return Keymaster.getInstance().createResponseInternal(...args);
   }
 
   public static async issueCredential(
@@ -274,6 +289,19 @@ export class Keymaster {
   ): Promise<VerifiableCredential> {
     await this.ensureServiceIsRunning();
     return this.keymasterService.bindCredential(schemaId, subjectId, options);
+  }
+
+  private async createResponseInternal(
+    challengeDID: string,
+    options?: CreateResponseOptions
+  ): Promise<string> {
+    await this.ensureServiceIsRunning();
+    return this.keymasterService.createResponse(challengeDID, options);
+  }
+
+  private async backupWalletInternal(registry?: string): Promise<string> {
+    await this.ensureServiceIsRunning();
+    return this.keymasterService.backupWallet(registry);
   }
 
   private async issueCredentialInternal(

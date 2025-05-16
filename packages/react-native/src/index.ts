@@ -1,5 +1,8 @@
-export { Keymaster, KeymasterConfig } from "./keymaster.js";
-export { KeymasterExternalClient } from "./keymasterClient.js";
+export {
+  KeymasterReactNative,
+  KeymasterConfig as KeymasterReactNativeConfig,
+} from "./keymaster-react-native.js";
+export { GatekeeperReactNative } from "./gatekeeper-react-native.js";
 
 export {
   SdkConfig,

@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",                // O el objetivo que prefieras
+    "module": "NodeNext", // Use NodeNext module system
+    "lib": ["DOM", "ESNext"],
+    "declaration": true, // Generate declaration files
+    "jsx": "react", // JSX transpilation for React
+    "moduleResolution": "nodenext",
+    "rootDir": "src",                  // Carpeta de entrada del código fuente
+    "declarationDir": "dist/types",    // Carpeta para los archivos de tipos
+    "sourceMap": true,                 // Generar archivos .map para depuración
+    "noUnusedLocals": true,            // Eliminar variables no utilizadas
+    "noUnusedParameters": true,        // Eliminar parámetros no utilizados
+    "allowJs": true ,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,      
+    "skipLibCheck": true,
+    "outDir": "dist" // Output the compiled code and type definitions to dist 
+  },
+  "include": ["src/**/*"], // Include all .ts and .tsx files in src
+  "exclude": ["node_modules", "dist"] // Exclude node_modules and dist
+}

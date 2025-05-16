@@ -1,15 +1,15 @@
 import express from "express";
 import cors from "cors";
 
-import { startKeymaster } from "./services/keymaster";
+import { startKeymaster } from "./services/keymaster.js";
 import { Keymaster } from "@yourself_id/siwys-api-js";
-import { loadWallet, saveWallet } from "./services/wallet";
-import { writeToDb } from "./services/db";
+import { loadWallet, saveWallet } from "./services/wallet.js";
+import { writeToDb } from "./services/db.js";
 
 const app = express();
 const port = 3001;
 
-let LOGINS = [];
+let LOGINS: string[] = [];
 
 app.use(cors());
 app.use(express.json());

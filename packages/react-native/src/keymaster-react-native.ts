@@ -1,18 +1,17 @@
-import { default as GatekeeperClient } from "@mdip/gatekeeper/client";
-import { default as CipherNode } from "@mdip/cipher/node";
+const GatekeeperClient = require("@mdip/gatekeeper/client").default;
+const KeymasterMDIP = require("@mdip/keymaster").default;
 import { default as KeymasterLib } from "@mdip/keymaster";
+import { Cipher } from "@mdip/cipher/types";
 import {
   CreateChallengeResponse,
   CreateChallengeSpec,
   SdkConfig,
-  WalletConfig,
 } from "./types/index.js";
 import {
   ChallengeResponse,
   CreateAssetOptions,
   CreateResponseOptions,
   IssueCredentialsOptions,
-  StoredWallet,
   VerifiableCredential,
   WalletBase,
 } from "@mdip/keymaster/types";
@@ -20,15 +19,14 @@ import {
 export interface KeymasterConfig {
   gatekeeperConfig?: SdkConfig;
   walletDb?: WalletBase;
-  walletConfig?: WalletConfig;
+  cipher?: Cipher;
 }
 
-export class Keymaster {
-  private static instance: Keymaster | null = null;
+export class KeymasterReactNative {
+  private static instance: KeymasterReactNative | null = null;
 
   private config: KeymasterConfig;
   private keymasterService!: KeymasterLib;
-  private serviceStarted = false;
 
   private constructor(config: KeymasterConfig) {
     this.validateConfig(config);
@@ -36,20 +34,19 @@ export class Keymaster {
   }
 
   public static initialize(config: KeymasterConfig) {
-    if (!Keymaster.instance) {
-      Keymaster.instance = new Keymaster(config);
-      console.log("✅ Keymaster initialized");
+    if (!KeymasterReactNative.instance) {
+      KeymasterReactNative.instance = new KeymasterReactNative(config);
     } else {
       console.warn(
-        "Keymaster already initialized, ignoring re-initialization."
+        "KeymasterReactNative already initialized, ignoring re-initialization."
       );
     }
   }
 
   private ensureInitialized() {
-    if (!Keymaster.instance) {
+    if (!KeymasterReactNative.instance) {
       throw new Error(
-        "Keymaster not initialized. Call Keymaster.initialize() first."
+        "KeymasterReactNative not initialized. Call KeymasterReactNative.initialize() first."
       );
     }
   }
@@ -57,181 +54,176 @@ export class Keymaster {
   // Delegated STATIC methods
 
   public static async start() {
-    Keymaster.getInstance().ensureInitialized();
-    return Keymaster.getInstance().startInternal();
+    KeymasterReactNative.getInstance().ensureInitialized();
+    return KeymasterReactNative.getInstance().startInternal();
   }
 
   public static async createChallenge(
-    ...args: Parameters<Keymaster["createChallengeInternal"]>
+    ...args: Parameters<KeymasterReactNative["createChallengeInternal"]>
   ) {
-    Keymaster.getInstance().ensureInitialized();
-    return Keymaster.getInstance().createChallengeInternal(...args);
+    KeymasterReactNative.getInstance().ensureInitialized();
+    return KeymasterReactNative.getInstance().createChallengeInternal(...args);
   }
 
   public static async bindCredential(
-    ...args: Parameters<Keymaster["bindCredentialInternal"]>
+    ...args: Parameters<KeymasterReactNative["bindCredentialInternal"]>
   ) {
-    Keymaster.getInstance().ensureInitialized();
-    return Keymaster.getInstance().bindCredentialInternal(...args);
+    KeymasterReactNative.getInstance().ensureInitialized();
+    return KeymasterReactNative.getInstance().bindCredentialInternal(...args);
   }
 
   public static async backupWallet(
-    ...args: Parameters<Keymaster["backupWalletInternal"]>
+    ...args: Parameters<KeymasterReactNative["backupWalletInternal"]>
   ) {
-    Keymaster.getInstance().ensureInitialized();
-    return Keymaster.getInstance().backupWalletInternal(...args);
+    KeymasterReactNative.getInstance().ensureInitialized();
+    return KeymasterReactNative.getInstance().backupWalletInternal(...args);
   }
 
   public static async createResponse(
-    ...args: Parameters<Keymaster["createResponseInternal"]>
+    ...args: Parameters<KeymasterReactNative["createResponseInternal"]>
   ) {
-    Keymaster.getInstance().ensureInitialized();
-    return Keymaster.getInstance().createResponseInternal(...args);
+    KeymasterReactNative.getInstance().ensureInitialized();
+    return KeymasterReactNative.getInstance().createResponseInternal(...args);
   }
 
   public static async issueCredential(
-    ...args: Parameters<Keymaster["issueCredentialInternal"]>
+    ...args: Parameters<KeymasterReactNative["issueCredentialInternal"]>
   ) {
-    Keymaster.getInstance().ensureInitialized();
-    return Keymaster.getInstance().issueCredentialInternal(...args);
+    KeymasterReactNative.getInstance().ensureInitialized();
+    return KeymasterReactNative.getInstance().issueCredentialInternal(...args);
   }
 
   public static async publishCredential(
-    ...args: Parameters<Keymaster["publishCredentialInternal"]>
+    ...args: Parameters<KeymasterReactNative["publishCredentialInternal"]>
   ) {
-    Keymaster.getInstance().ensureInitialized();
-    return Keymaster.getInstance().publishCredentialInternal(...args);
+    KeymasterReactNative.getInstance().ensureInitialized();
+    return KeymasterReactNative.getInstance().publishCredentialInternal(
+      ...args
+    );
   }
 
   public static async acceptCredential(
-    ...args: Parameters<Keymaster["acceptCredentialInternal"]>
+    ...args: Parameters<KeymasterReactNative["acceptCredentialInternal"]>
   ) {
-    Keymaster.getInstance().ensureInitialized();
-    return Keymaster.getInstance().acceptCredentialInternal(...args);
+    KeymasterReactNative.getInstance().ensureInitialized();
+    return KeymasterReactNative.getInstance().acceptCredentialInternal(...args);
   }
 
   public static async showMnemonic(
-    ...args: Parameters<Keymaster["showMnemonicInternal"]>
+    ...args: Parameters<KeymasterReactNative["showMnemonicInternal"]>
   ) {
-    Keymaster.getInstance().ensureInitialized();
-    return Keymaster.getInstance().showMnemonicInternal(...args);
+    KeymasterReactNative.getInstance().ensureInitialized();
+    return KeymasterReactNative.getInstance().showMnemonicInternal(...args);
   }
 
   public static async verifyResponse(
-    ...args: Parameters<Keymaster["verifyResponseInternal"]>
+    ...args: Parameters<KeymasterReactNative["verifyResponseInternal"]>
   ) {
-    Keymaster.getInstance().ensureInitialized();
-    return Keymaster.getInstance().verifyResponseInternal(...args);
+    KeymasterReactNative.getInstance().ensureInitialized();
+    return KeymasterReactNative.getInstance().verifyResponseInternal(...args);
   }
 
   public static async decryptMessage(
-    ...args: Parameters<Keymaster["decryptMessageInternal"]>
+    ...args: Parameters<KeymasterReactNative["decryptMessageInternal"]>
   ) {
-    Keymaster.getInstance().ensureInitialized();
-    return Keymaster.getInstance().decryptMessageInternal(...args);
+    KeymasterReactNative.getInstance().ensureInitialized();
+    return KeymasterReactNative.getInstance().decryptMessageInternal(...args);
   }
 
   public static async decryptMnemonic(
-    ...args: Parameters<Keymaster["decryptMnemonicInternal"]>
+    ...args: Parameters<KeymasterReactNative["decryptMnemonicInternal"]>
   ) {
-    Keymaster.getInstance().ensureInitialized();
-    return Keymaster.getInstance().decryptMnemonicInternal(...args);
+    KeymasterReactNative.getInstance().ensureInitialized();
+    return KeymasterReactNative.getInstance().decryptMnemonicInternal(...args);
   }
 
   public static async getCredential(
-    ...args: Parameters<Keymaster["getCredentialInternal"]>
+    ...args: Parameters<KeymasterReactNative["getCredentialInternal"]>
   ) {
-    Keymaster.getInstance().ensureInitialized();
-    return Keymaster.getInstance().getCredentialInternal(...args);
+    KeymasterReactNative.getInstance().ensureInitialized();
+    return KeymasterReactNative.getInstance().getCredentialInternal(...args);
   }
 
   public static async removeCredential(
-    ...args: Parameters<Keymaster["removeCredentialInternal"]>
+    ...args: Parameters<KeymasterReactNative["removeCredentialInternal"]>
   ) {
-    Keymaster.getInstance().ensureInitialized();
-    return Keymaster.getInstance().removeCredentialInternal(...args);
+    KeymasterReactNative.getInstance().ensureInitialized();
+    return KeymasterReactNative.getInstance().removeCredentialInternal(...args);
   }
 
   public static async updateCredential(
-    ...args: Parameters<Keymaster["updateCredentialInternal"]>
+    ...args: Parameters<KeymasterReactNative["updateCredentialInternal"]>
   ) {
-    Keymaster.getInstance().ensureInitialized();
-    return Keymaster.getInstance().updateCredentialInternal(...args);
+    KeymasterReactNative.getInstance().ensureInitialized();
+    return KeymasterReactNative.getInstance().updateCredentialInternal(...args);
   }
 
   public static async createId(
-    ...args: Parameters<Keymaster["createIdInternal"]>
+    ...args: Parameters<KeymasterReactNative["createIdInternal"]>
   ) {
-    Keymaster.getInstance().ensureInitialized();
-    return Keymaster.getInstance().createIdInternal(...args);
+    KeymasterReactNative.getInstance().ensureInitialized();
+    return KeymasterReactNative.getInstance().createIdInternal(...args);
   }
 
   public static async removeId(
-    ...args: Parameters<Keymaster["removeIdInternal"]>
+    ...args: Parameters<KeymasterReactNative["removeIdInternal"]>
   ) {
-    Keymaster.getInstance().ensureInitialized();
-    return Keymaster.getInstance().removeIdInternal(...args);
+    KeymasterReactNative.getInstance().ensureInitialized();
+    return KeymasterReactNative.getInstance().removeIdInternal(...args);
   }
 
   public static async resolveDID(
-    ...args: Parameters<Keymaster["resolveDIDInternal"]>
+    ...args: Parameters<KeymasterReactNative["resolveDIDInternal"]>
   ) {
-    Keymaster.getInstance().ensureInitialized();
-    return Keymaster.getInstance().resolveDIDInternal(...args);
+    KeymasterReactNative.getInstance().ensureInitialized();
+    return KeymasterReactNative.getInstance().resolveDIDInternal(...args);
   }
 
   public static async setCurrentId(
-    ...args: Parameters<Keymaster["setCurrentIdInternal"]>
+    ...args: Parameters<KeymasterReactNative["setCurrentIdInternal"]>
   ) {
-    Keymaster.getInstance().ensureInitialized();
-    return Keymaster.getInstance().setCurrentIdInternal(...args);
+    KeymasterReactNative.getInstance().ensureInitialized();
+    return KeymasterReactNative.getInstance().setCurrentIdInternal(...args);
   }
 
   public static async createSchema(
-    ...args: Parameters<Keymaster["createSchemaInternal"]>
+    ...args: Parameters<KeymasterReactNative["createSchemaInternal"]>
   ) {
-    Keymaster.getInstance().ensureInitialized();
-    return Keymaster.getInstance().createSchemaInternal(...args);
+    KeymasterReactNative.getInstance().ensureInitialized();
+    return KeymasterReactNative.getInstance().createSchemaInternal(...args);
   }
 
   public static async newWallet(
-    ...args: Parameters<Keymaster["newWalletInternal"]>
+    ...args: Parameters<KeymasterReactNative["newWalletInternal"]>
   ) {
-    Keymaster.getInstance().ensureInitialized();
-    return Keymaster.getInstance().newWalletInternal(...args);
+    KeymasterReactNative.getInstance().ensureInitialized();
+    return KeymasterReactNative.getInstance().newWalletInternal(...args);
   }
 
   public static async recoverWallet(
-    ...args: Parameters<Keymaster["recoverWalletInternal"]>
+    ...args: Parameters<KeymasterReactNative["recoverWalletInternal"]>
   ) {
-    Keymaster.getInstance().ensureInitialized();
-    return Keymaster.getInstance().recoverWalletInternal(...args);
+    KeymasterReactNative.getInstance().ensureInitialized();
+    return KeymasterReactNative.getInstance().recoverWalletInternal(...args);
   }
 
-  private static getInstance(): Keymaster {
-    if (!Keymaster.instance) {
+  private static getInstance(): KeymasterReactNative {
+    if (!KeymasterReactNative.instance) {
       throw new Error(
-        "Keymaster not initialized. Call Keymaster.initialize() first."
+        "KeymasterReactNative not initialized. Call KeymasterReactNative.initialize() first."
       );
     }
-    return Keymaster.instance;
+    return KeymasterReactNative.instance;
   }
 
   // -------- Internal instance methods (originals renamed with Internal) -------
 
-  private async ensureServiceIsRunning() {
-    if (!(await this.serviceRunning())) {
-      throw new Error("Keymaster service not running");
-    }
-  }
-
   private async startInternal(): Promise<boolean> {
     if (this.config.gatekeeperConfig) {
-      this.serviceStarted = await this.startIntegratedKeymaster();
+      return await this.startIntegratedKeymaster();
     } else {
       throw "Missing Gatekeeper config";
     }
-    return this.serviceStarted;
   }
 
   private async startIntegratedKeymaster(): Promise<boolean> {
@@ -243,23 +235,19 @@ export class Keymaster {
           intervalSeconds: this.config.gatekeeperConfig?.intervalSeconds,
           chatty: this.config.gatekeeperConfig?.chatty,
         });
-
-        const cipher = new CipherNode();
-        this.keymasterService = new KeymasterLib({
+        this.keymasterService = new KeymasterMDIP({
           gatekeeper,
           wallet: this.config.walletDb,
-          cipher,
+          cipher: this.config.cipher,
         });
-        await this.ensureWalletExists();
       } else {
         return false;
       }
     } catch (e) {
-      console.error("Error starting Keymaster service:", e);
+      console.error("Error starting KeymasterReactNative service:", e);
       return false;
     }
 
-    console.log("✅ Keymaster Started");
     return true;
   }
 
@@ -267,7 +255,6 @@ export class Keymaster {
     spec: CreateChallengeSpec,
     options?: CreateAssetOptions
   ): Promise<CreateChallengeResponse> {
-    await this.ensureServiceIsRunning();
     const challenge: string = await this.keymasterService.createChallenge(
       spec,
       options
@@ -287,7 +274,6 @@ export class Keymaster {
       credential?: Record<string, unknown>;
     } = {}
   ): Promise<VerifiableCredential> {
-    await this.ensureServiceIsRunning();
     return this.keymasterService.bindCredential(schemaId, subjectId, options);
   }
 
@@ -295,12 +281,10 @@ export class Keymaster {
     challengeDID: string,
     options?: CreateResponseOptions
   ): Promise<string> {
-    await this.ensureServiceIsRunning();
     return this.keymasterService.createResponse(challengeDID, options);
   }
 
   private async backupWalletInternal(registry?: string): Promise<string> {
-    await this.ensureServiceIsRunning();
     return this.keymasterService.backupWallet(registry);
   }
 
@@ -308,7 +292,6 @@ export class Keymaster {
     credential: Partial<VerifiableCredential>,
     options: IssueCredentialsOptions = {}
   ): Promise<string> {
-    await this.ensureServiceIsRunning();
     return this.keymasterService.issueCredential(credential, options);
   }
 
@@ -316,17 +299,14 @@ export class Keymaster {
     did: string,
     options: { reveal?: boolean } = {}
   ): Promise<VerifiableCredential> {
-    await this.ensureServiceIsRunning();
     return this.keymasterService.publishCredential(did, options);
   }
 
   private async acceptCredentialInternal(did: string): Promise<boolean> {
-    await this.ensureServiceIsRunning();
     return this.keymasterService.acceptCredential(did);
   }
 
   private async showMnemonicInternal(): Promise<string> {
-    await this.ensureServiceIsRunning();
     return this.keymasterService.decryptMnemonic();
   }
 
@@ -334,116 +314,79 @@ export class Keymaster {
     did: string,
     options?: { retries?: number; delay?: number }
   ): Promise<ChallengeResponse> {
-    await this.ensureServiceIsRunning();
     return this.keymasterService.verifyResponse(did, options);
   }
 
   private async decryptMessageInternal(
     ...args: Parameters<KeymasterLib["decryptMessage"]>
   ) {
-    await this.ensureServiceIsRunning();
     return this.keymasterService.decryptMessage(...args);
   }
 
   private async decryptMnemonicInternal(
     ...args: Parameters<KeymasterLib["decryptMnemonic"]>
   ) {
-    await this.ensureServiceIsRunning();
     return this.keymasterService.decryptMnemonic(...args);
   }
 
   private async getCredentialInternal(
     ...args: Parameters<KeymasterLib["getCredential"]>
   ) {
-    await this.ensureServiceIsRunning();
     return this.keymasterService.getCredential(...args);
   }
 
   private async removeCredentialInternal(
     ...args: Parameters<KeymasterLib["removeCredential"]>
   ) {
-    await this.ensureServiceIsRunning();
     return this.keymasterService.removeCredential(...args);
   }
 
   private async updateCredentialInternal(
     ...args: Parameters<KeymasterLib["updateCredential"]>
   ) {
-    await this.ensureServiceIsRunning();
     return this.keymasterService.updateCredential(...args);
   }
 
   private async createIdInternal(
     ...args: Parameters<KeymasterLib["createId"]>
   ) {
-    await this.ensureServiceIsRunning();
     return this.keymasterService.createId(...args);
   }
 
   private async removeIdInternal(
     ...args: Parameters<KeymasterLib["removeId"]>
   ) {
-    await this.ensureServiceIsRunning();
     return this.keymasterService.removeId(...args);
   }
 
   private async resolveDIDInternal(
     ...args: Parameters<KeymasterLib["resolveDID"]>
   ) {
-    await this.ensureServiceIsRunning();
     return this.keymasterService.resolveDID(...args);
   }
 
   private async setCurrentIdInternal(
     ...args: Parameters<KeymasterLib["setCurrentId"]>
   ) {
-    await this.ensureServiceIsRunning();
     return this.keymasterService.setCurrentId(...args);
   }
 
   private async createSchemaInternal(
     ...args: Parameters<KeymasterLib["createSchema"]>
   ) {
-    await this.ensureServiceIsRunning();
     return this.keymasterService.createSchema(...args);
   }
 
   private async newWalletInternal(
     ...args: Parameters<KeymasterLib["newWallet"]>
   ) {
-    await this.ensureServiceIsRunning();
     return this.keymasterService.newWallet(...args);
   }
 
   private async recoverWalletInternal(
     ...args: Parameters<KeymasterLib["recoverWallet"]>
   ) {
-    await this.ensureServiceIsRunning();
     return this.keymasterService.recoverWallet(...args);
-  }
-
-  private async ensureWalletExists(): Promise<void> {
-    const existing: StoredWallet | null =
-      (await this.config?.walletDb?.loadWallet()) || null;
-    if (existing && "current" in existing) {
-      console.log(`Using existing wallet with ID ${existing.current}`);
-      return;
-    }
-
-    const walletConfig = this.config.walletConfig;
-    if (walletConfig?.mnemonic) {
-      await this.keymasterService.newWallet(walletConfig.mnemonic, true);
-    }
-
-    if (walletConfig?.id) {
-      await this.keymasterService.createId(walletConfig.id, {
-        registry: walletConfig.registry,
-      });
-    }
-  }
-
-  private async serviceRunning(): Promise<boolean> {
-    return this.serviceStarted || (await this.startInternal());
   }
 
   private validateConfig(config: KeymasterConfig): void {
@@ -452,9 +395,6 @@ export class Keymaster {
     }
 
     if (config.gatekeeperConfig) {
-      if (!config.walletConfig) {
-        throw new Error("Missing wallet config");
-      }
       if (!config.walletDb?.loadWallet) {
         throw new Error("Missing load wallet callback");
       }

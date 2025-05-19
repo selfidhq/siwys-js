@@ -11,7 +11,7 @@ export {
   CreateChallengeSpec,
 } from "./types/index.js";
 
-import * as KeymasterTypes from "@mdip/keymaster/types";
+export * from "@mdip/keymaster/types";
 import * as GatekeeperTypes from "@mdip/gatekeeper/types";
 
-export { KeymasterTypes, GatekeeperTypes };
+export { GatekeeperTypes };

@@ -1,3 +1,4 @@
+// Imports
 import { default as GatekeeperClient } from "@mdip/gatekeeper/client";
 import { default as CipherNode } from "@mdip/cipher/node";
 import { default as KeymasterLib } from "@mdip/keymaster";
@@ -15,8 +16,11 @@ import {
   StoredWallet,
   VerifiableCredential,
   WalletBase,
+  WalletFile,
 } from "@mdip/keymaster/types";
+import { MdipDocument, ResolveDIDOptions } from "@mdip/gatekeeper/types";
 
+// Keymaster configuration interface
 export interface KeymasterConfig {
   gatekeeperConfig?: SdkConfig;
   walletDb?: WalletBase;
@@ -35,6 +39,11 @@ export class Keymaster {
     this.config = config;
   }
 
+  // Initializes the instance if not already initialized
+  /**
+   * Initializes the Keymaster instance.
+   * @param config The configuration object for the Keymaster service.
+   */
   public static initialize(config: KeymasterConfig) {
     if (!Keymaster.instance) {
       Keymaster.instance = new Keymaster(config);
@@ -46,6 +55,7 @@ export class Keymaster {
     }
   }
 
+  // Ensures the instance is initialized
   private ensureInitialized() {
     if (!Keymaster.instance) {
       throw new Error(
@@ -54,160 +64,308 @@ export class Keymaster {
     }
   }
 
-  // Delegated STATIC methods
-
+  /**
+   * Starts the Keymaster service.
+   * @returns A boolean indicating whether the service was started successfully.
+   */
   public static async start() {
     Keymaster.getInstance().ensureInitialized();
     return Keymaster.getInstance().startInternal();
   }
 
+  // Method to create a challenge
+  /**
+   * Creates a challenge for the user to solve.
+   * @param spec The challenge specifications.
+   * @param options Additional options for creating the challenge (optional).
+   * @returns A promise with the challenge response, including the challenge and its callback URL.
+   */
   public static async createChallenge(
-    ...args: Parameters<Keymaster["createChallengeInternal"]>
-  ) {
+    spec: CreateChallengeSpec,
+    options?: CreateAssetOptions
+  ): Promise<CreateChallengeResponse> {
     Keymaster.getInstance().ensureInitialized();
-    return Keymaster.getInstance().createChallengeInternal(...args);
+    return Keymaster.getInstance().createChallengeInternal(spec, options);
   }
 
+  // Method to bind a credential to a user
+  /**
+   * Binds a credential to a subject.
+   * @param schemaId The schema ID for the credential.
+   * @param subjectId The subject's DID (Decentralized Identifier).
+   * @param options Optional options, such as validity period and credential data.
+   * @returns A promise with the verifiable credential that was bound.
+   */
   public static async bindCredential(
-    ...args: Parameters<Keymaster["bindCredentialInternal"]>
-  ) {
+    schemaId: string,
+    subjectId: string,
+    options?: {
+      validFrom?: string;
+      validUntil?: string;
+      credential?: Record<string, unknown>;
+    }
+  ): Promise<VerifiableCredential> {
     Keymaster.getInstance().ensureInitialized();
-    return Keymaster.getInstance().bindCredentialInternal(...args);
+    return Keymaster.getInstance().bindCredentialInternal(
+      schemaId,
+      subjectId,
+      options
+    );
   }
 
-  public static async backupWallet(
-    ...args: Parameters<Keymaster["backupWalletInternal"]>
-  ) {
-    Keymaster.getInstance().ensureInitialized();
-    return Keymaster.getInstance().backupWalletInternal(...args);
-  }
-
+  // Method to create a response
+  /**
+   * Creates a response for the challenge.
+   * @param challengeDID The DID of the challenge to respond to.
+   * @param options Optional options for creating the response (optional).
+   * @returns A promise with the response string.
+   */
   public static async createResponse(
-    ...args: Parameters<Keymaster["createResponseInternal"]>
-  ) {
+    challengeDID: string,
+    options?: CreateResponseOptions
+  ): Promise<string> {
     Keymaster.getInstance().ensureInitialized();
-    return Keymaster.getInstance().createResponseInternal(...args);
+    return Keymaster.getInstance().createResponseInternal(
+      challengeDID,
+      options
+    );
   }
 
+  // Backup wallet
+  /**
+   * Backups the wallet data.
+   * @param registry Optional registry URL for the wallet backup.
+   * @returns A promise with a backup string (e.g., backup URL).
+   */
+  public static async backupWallet(registry?: string): Promise<string> {
+    Keymaster.getInstance().ensureInitialized();
+    return Keymaster.getInstance().backupWalletInternal(registry);
+  }
+
+  // Issue credential to a user
+  /**
+   * Issues a credential to the subject.
+   * @param credential The credential to be issued.
+   * @param options Optional parameters for issuing the credential.
+   * @returns A promise with the credential ID or issuance result.
+   */
   public static async issueCredential(
-    ...args: Parameters<Keymaster["issueCredentialInternal"]>
-  ) {
+    credential: Partial<VerifiableCredential>,
+    options?: IssueCredentialsOptions
+  ): Promise<string> {
     Keymaster.getInstance().ensureInitialized();
-    return Keymaster.getInstance().issueCredentialInternal(...args);
+    return Keymaster.getInstance().issueCredentialInternal(credential, options);
   }
 
+  // Publish a credential
+  /**
+   * Publishes a verifiable credential.
+   * @param did The DID of the credential.
+   * @param options Optional parameters, such as whether to reveal the credential.
+   * @returns A promise with the published credential.
+   */
   public static async publishCredential(
-    ...args: Parameters<Keymaster["publishCredentialInternal"]>
-  ) {
+    did: string,
+    options?: {
+      reveal?: boolean;
+    }
+  ): Promise<VerifiableCredential> {
     Keymaster.getInstance().ensureInitialized();
-    return Keymaster.getInstance().publishCredentialInternal(...args);
+    return Keymaster.getInstance().publishCredentialInternal(did, options);
   }
 
-  public static async acceptCredential(
-    ...args: Parameters<Keymaster["acceptCredentialInternal"]>
-  ) {
+  // Accept a credential
+  /**
+   * Accepts a credential.
+   * @param did The DID of the credential to accept.
+   * @returns A promise indicating whether the credential was successfully accepted.
+   */
+  public static async acceptCredential(did: string): Promise<boolean> {
     Keymaster.getInstance().ensureInitialized();
-    return Keymaster.getInstance().acceptCredentialInternal(...args);
+    return Keymaster.getInstance().acceptCredentialInternal(did);
   }
 
-  public static async showMnemonic(
-    ...args: Parameters<Keymaster["showMnemonicInternal"]>
-  ) {
+  // Show mnemonic
+  /**
+   * Shows the mnemonic for the wallet.
+   * @returns A promise with the mnemonic string.
+   */
+  public static async showMnemonic(): Promise<string> {
     Keymaster.getInstance().ensureInitialized();
-    return Keymaster.getInstance().showMnemonicInternal(...args);
+    return Keymaster.getInstance().showMnemonicInternal();
   }
 
+  // Verify a challenge response
+  /**
+   * Verifies a response to a challenge.
+   * @param did The DID to verify the response for.
+   * @param options Optional options, such as retry behavior.
+   * @returns A promise with the response verification result.
+   */
   public static async verifyResponse(
-    ...args: Parameters<Keymaster["verifyResponseInternal"]>
-  ) {
+    did: string,
+    options?: { retries?: number; delay?: number }
+  ): Promise<ChallengeResponse> {
     Keymaster.getInstance().ensureInitialized();
-    return Keymaster.getInstance().verifyResponseInternal(...args);
+    return Keymaster.getInstance().verifyResponseInternal(did, options);
   }
 
-  public static async decryptMessage(
-    ...args: Parameters<Keymaster["decryptMessageInternal"]>
-  ) {
+  // Decrypt a message
+  /**
+   * Decrypts a message using the current key.
+   * @param did The DID of the message to decrypt.
+   * @returns A promise with the decrypted message.
+   */
+  public static async decryptMessage(did: string): Promise<string> {
     Keymaster.getInstance().ensureInitialized();
-    return Keymaster.getInstance().decryptMessageInternal(...args);
+    return Keymaster.getInstance().decryptMessageInternal(did);
   }
 
-  public static async decryptMnemonic(
-    ...args: Parameters<Keymaster["decryptMnemonicInternal"]>
-  ) {
+  // Decrypt mnemonic
+  /**
+   * Decrypts the mnemonic for the wallet.
+   * @returns A promise with the decrypted mnemonic.
+   */
+  public static async decryptMnemonic(): Promise<string> {
     Keymaster.getInstance().ensureInitialized();
-    return Keymaster.getInstance().decryptMnemonicInternal(...args);
+    return Keymaster.getInstance().decryptMnemonicInternal();
   }
 
+  // Get a credential
+  /**
+   * Retrieves a verifiable credential.
+   * @param id The credential ID to retrieve.
+   * @returns A promise with the credential data or null if not found.
+   */
   public static async getCredential(
-    ...args: Parameters<Keymaster["getCredentialInternal"]>
-  ) {
+    id: string
+  ): Promise<VerifiableCredential | null> {
     Keymaster.getInstance().ensureInitialized();
-    return Keymaster.getInstance().getCredentialInternal(...args);
+    return Keymaster.getInstance().getCredentialInternal(id);
   }
 
-  public static async removeCredential(
-    ...args: Parameters<Keymaster["removeCredentialInternal"]>
-  ) {
+  // Remove a credential
+  /**
+   * Removes a verifiable credential.
+   * @param id The credential ID to remove.
+   * @returns A promise indicating success or failure of the operation.
+   */
+  public static async removeCredential(id: string): Promise<boolean> {
     Keymaster.getInstance().ensureInitialized();
-    return Keymaster.getInstance().removeCredentialInternal(...args);
+    return Keymaster.getInstance().removeCredentialInternal(id);
   }
 
+  // Update a credential
+  /**
+   * Updates a verifiable credential.
+   * @param did The DID of the credential to update.
+   * @param credential The new credential data.
+   * @returns A promise indicating success or failure of the update operation.
+   */
   public static async updateCredential(
-    ...args: Parameters<Keymaster["updateCredentialInternal"]>
-  ) {
+    did: string,
+    credential: VerifiableCredential
+  ): Promise<boolean> {
     Keymaster.getInstance().ensureInitialized();
-    return Keymaster.getInstance().updateCredentialInternal(...args);
+    return Keymaster.getInstance().updateCredentialInternal(did, credential);
   }
 
+  // Method to create an ID
+  /**
+   * Creates a new DID (Decentralized Identifier).
+   * @param name The name for the DID.
+   * @param options Optional options, such as registry URL.
+   * @returns A promise with the newly created DID.
+   */
   public static async createId(
-    ...args: Parameters<Keymaster["createIdInternal"]>
-  ) {
+    name: string,
+    options?: {
+      registry?: string;
+    }
+  ): Promise<string> {
     Keymaster.getInstance().ensureInitialized();
-    return Keymaster.getInstance().createIdInternal(...args);
+    return Keymaster.getInstance().createIdInternal(name, options);
   }
 
-  public static async removeId(
-    ...args: Parameters<Keymaster["removeIdInternal"]>
-  ) {
+  // Remove an ID
+  /**
+   * Removes an existing DID.
+   * @param name The name of the DID to remove.
+   * @returns A promise indicating success or failure of the operation.
+   */
+  public static async removeId(name: string): Promise<boolean> {
     Keymaster.getInstance().ensureInitialized();
-    return Keymaster.getInstance().removeIdInternal(...args);
+    return Keymaster.getInstance().removeIdInternal(name);
   }
 
+  // Resolve a DID
+  /**
+   * Resolves a DID to fetch associated data.
+   * @param did The DID to resolve.
+   * @param options Optional parameters for resolving the DID.
+   * @returns A promise with the resolved DID data.
+   */
   public static async resolveDID(
-    ...args: Parameters<Keymaster["resolveDIDInternal"]>
-  ) {
+    did: string,
+    options?: ResolveDIDOptions
+  ): Promise<MdipDocument> {
     Keymaster.getInstance().ensureInitialized();
-    return Keymaster.getInstance().resolveDIDInternal(...args);
+    return Keymaster.getInstance().resolveDIDInternal(did, options);
   }
 
-  public static async setCurrentId(
-    ...args: Parameters<Keymaster["setCurrentIdInternal"]>
-  ) {
+  // Set the current DID
+  /**
+   * Sets the current DID in use.
+   * @param name The DID name to set as the current one.
+   * @returns A promise indicating success or failure of the operation.
+   */
+  public static async setCurrentId(name: string): Promise<boolean> {
     Keymaster.getInstance().ensureInitialized();
-    return Keymaster.getInstance().setCurrentIdInternal(...args);
+    return Keymaster.getInstance().setCurrentIdInternal(name);
   }
 
+  // Create a schema
+  /**
+   * Creates a new schema for credentials.
+   * @param schema The schema data to create.
+   * @param options Optional options for creating the schema.
+   * @returns A promise with the created schema data.
+   */
   public static async createSchema(
-    ...args: Parameters<Keymaster["createSchemaInternal"]>
-  ) {
+    schema?: unknown,
+    options?: CreateAssetOptions
+  ): Promise<string> {
     Keymaster.getInstance().ensureInitialized();
-    return Keymaster.getInstance().createSchemaInternal(...args);
+    return Keymaster.getInstance().createSchemaInternal(schema, options);
   }
 
+  // Create a new wallet
+  /**
+   * Creates a new wallet.
+   * @param mnemonic Optional mnemonic to initialize the wallet.
+   * @param overwrite Optional flag to overwrite the existing wallet.
+   * @returns A promise with the wallet creation result.
+   */
   public static async newWallet(
-    ...args: Parameters<Keymaster["newWalletInternal"]>
-  ) {
+    mnemonic?: string,
+    overwrite?: boolean
+  ): Promise<WalletFile> {
     Keymaster.getInstance().ensureInitialized();
-    return Keymaster.getInstance().newWalletInternal(...args);
+    return Keymaster.getInstance().newWalletInternal(mnemonic, overwrite);
   }
 
-  public static async recoverWallet(
-    ...args: Parameters<Keymaster["recoverWalletInternal"]>
-  ) {
+  // Recover an existing wallet
+  /**
+   * Recovers a wallet from a backup.
+   * @param did The DID to use for recovery (optional).
+   * @returns A promise with the wallet recovery result.
+   */
+  public static async recoverWallet(did?: string): Promise<WalletFile> {
     Keymaster.getInstance().ensureInitialized();
-    return Keymaster.getInstance().recoverWalletInternal(...args);
+    return Keymaster.getInstance().recoverWalletInternal(did);
   }
 
+  // Helper method to retrieve the instance
   private static getInstance(): Keymaster {
     if (!Keymaster.instance) {
       throw new Error(

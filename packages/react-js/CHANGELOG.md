@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# 0.11.0 (2025-05-20)
+
+
+### Features
+
+* **SAPP-221:** updating Keymaster class to support mobile integration ([#38](https://github.com/selfidhq/siwys-js/issues/38)) ([dc565c1](https://github.com/selfidhq/siwys-js/commit/dc565c12ac8fd0754c9168406a4e59a2dad35993))
+
+
+
+
+
 # 0.10.0 (2025-04-30)
 
 

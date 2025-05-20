@@ -1,6 +1,6 @@
 {
   "name": "@yourself_id/siwys-api-js",
-  "version": "0.10.0",
+  "version": "0.11.0",
   "description": "A React component library",
   "repository": "https://github.com/selfidhq/siwys-js",
   "type": "module",

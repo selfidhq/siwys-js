@@ -1,7 +1,7 @@
 {
-  "name": "@yourself_id/siwys-api-js",
+  "name": "@yourself_id/siwys-react-native",
   "version": "0.10.0",
-  "description": "A React component library",
+  "description": "A React Native component library",
   "repository": "https://github.com/selfidhq/siwys-js",
   "type": "module",
   "main": "./dist/index.cjs",

@@ -2144,10 +2144,10 @@
     hdkey "^2.1.0"
     multiformats "^13.0.0"
 
-"@mdip/cipher@1.1.2":
-  version "1.1.2"
-  resolved "https://registry.yarnpkg.com/@mdip/cipher/-/cipher-1.1.2.tgz#fd02817bf3b783192d9db912417ce989879ad4c0"
-  integrity sha512-2GDOhXeBIs1SuGe19Nh06Dgk9m4RciT/ZK2xLF6Pdu+FJMwtsXW0K2kxzyXAep3Yh8iqwwGc463LxO9jiQKF9w==
+"@mdip/cipher@1.1.3":
+  version "1.1.3"
+  resolved "https://registry.yarnpkg.com/@mdip/cipher/-/cipher-1.1.3.tgz#e222b3c9add68a821c17a2598e48841f4faa95a8"
+  integrity sha512-iiylRnjczMpHGat3mWZGQh8I8SgXl9u+j0p3iqdyP2Tib6h6Z3G6dJsfLz8mYj5zk8/TASU3SvokJ4G4koRQzw==
   dependencies:
     "@mdip/browser-hdkey" "^0.1.8"
     "@noble/ciphers" "^0.4.1"
@@ -2164,10 +2164,10 @@
   resolved "https://registry.yarnpkg.com/@mdip/common/-/common-0.6.0.tgz#fbc2e6147834c77289b21ac4aad301e3bbbf9c38"
   integrity sha512-Z6r24Gnt3jG5zyG+igp9P/0McfwOoXwHFtmWoQh5mbcnV83GTUORo97L9G6rWot/LbC+Jr6nep/FyuBpUsS7mA==
 
-"@mdip/gatekeeper@1.1.2":
-  version "1.1.2"
-  resolved "https://registry.yarnpkg.com/@mdip/gatekeeper/-/gatekeeper-1.1.2.tgz#5f82ea92c1010b49e3ea52a98e3ea2be53e03ad6"
-  integrity sha512-XizgJZioLBSnfhPveSDoCeNzRxVrAVpo9k53TVTmz4YhEqoalAYakm3qAm/sbK6iVl+fyY7PjnC57kC/pXBUBQ==
+"@mdip/gatekeeper@1.1.3":
+  version "1.1.3"
+  resolved "https://registry.yarnpkg.com/@mdip/gatekeeper/-/gatekeeper-1.1.3.tgz#b57b6fc22db9c295abdfcdda8c352161b5ccf900"
+  integrity sha512-TnBRgWQvMDhWoLAFd29HDOVxAWmJBMYjl41pgmKsQlXL09TRrPKOTgv06B+SL1+1YrAN77X+qqD7zny6XQDjOQ==
   dependencies:
     "@mdip/cipher" "*"
     "@mdip/common" "*"
@@ -2191,10 +2191,10 @@
     helia "^3.0.0"
     multiformats "^13.0.0"
 
-"@mdip/keymaster@1.1.2":
-  version "1.1.2"
-  resolved "https://registry.yarnpkg.com/@mdip/keymaster/-/keymaster-1.1.2.tgz#208948a1674723da4d9c33456ab38f2964b83f11"
-  integrity sha512-47UZ1V1XjL3bpU85OrjLVnNBhTSP/SznZpkQE7QlJu9T6tgVOvV2WknrR/+XmB1znjR45fw95FQ6JcU4t69jEg==
+"@mdip/keymaster@1.1.3":
+  version "1.1.3"
+  resolved "https://registry.yarnpkg.com/@mdip/keymaster/-/keymaster-1.1.3.tgz#68485231d735bec9760cab437787df9744f06d2a"
+  integrity sha512-vgz2XwL6lbnz3CHixEb4WP7D8PKXyZXicPW9991y0+Kc1b/ofQVtbY2BYbd52Hpj517x0tksWM+u/wieu4nNOA==
   dependencies:
     "@mdip/common" "*"
     axios "^1.7.7"

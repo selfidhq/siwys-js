@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# 0.12.0 (2025-05-27)
+
+
+### Features
+
+* **SAPP-310:** updated mdip v1.1.3 ([#39](https://github.com/selfidhq/siwys-js/issues/39)) ([970ef8d](https://github.com/selfidhq/siwys-js/commit/970ef8d79ed435310de62e39b49db8f644865304))
+
+
+
+
+
 # 0.11.0 (2025-05-20)
 
 

@@ -70,10 +70,6 @@ export class GatekeeperReactNative {
   private async startIntegratedGatekeeper(): Promise<boolean> {
     try {
       this.gatekeeperClient = new GatekeeperClient();
-      console.log(
-        "Starting GatekeeperReactNative service...",
-        this.gatekeeperClient
-      );
       await this.gatekeeperClient.connect({
         url: this.config?.url,
         waitUntilReady: this.config?.waitUntilReady,

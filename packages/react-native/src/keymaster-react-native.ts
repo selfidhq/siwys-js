@@ -417,13 +417,11 @@ export class KeymasterReactNative {
           intervalSeconds: this.config.gatekeeperConfig?.intervalSeconds,
           chatty: this.config.gatekeeperConfig?.chatty,
         });
-        console.log("Gatekeeper client created:", gatekeeper);
         this.keymasterService = new Keymaster({
           gatekeeper,
           wallet: this.config.walletDb,
           cipher: this.config.cipher,
         });
-        console.log("Kyemaster client created:", this.keymasterService);
       } else {
         return false;
       }

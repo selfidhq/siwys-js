@@ -1,13 +1,5 @@
 // Imports
-const GatekeeperClient = require("@mdip/gatekeeper/client").default;
-const KeymasterMDIP = require("@mdip/keymaster").default;
-import { default as KeymasterLib } from "@mdip/keymaster";
-import { Cipher } from "@mdip/cipher/types";
-import {
-  CreateChallengeResponse,
-  CreateChallengeSpec,
-  SdkConfig,
-} from "./types/index.js";
+import CipherNode from "@mdip/cipher";
 import {
   ChallengeResponse,
   CreateAssetOptions,
@@ -16,20 +8,33 @@ import {
   VerifiableCredential,
   WalletBase,
   WalletFile,
-} from "@mdip/keymaster/types";
-import { MdipDocument, ResolveDIDOptions } from "@mdip/gatekeeper/types";
+} from "@mdip/keymaster";
+
+import {
+  GatekeeperClient,
+  MdipDocument,
+  ResolveDIDOptions,
+} from "@mdip/gatekeeper";
+import {
+  CreateChallengeResponse,
+  CreateChallengeSpec,
+  SdkConfig,
+} from "./types/index.js";
+import KeymasterModule from "@mdip/keymaster";
+
+// @ts-ignore
+const Keymaster = KeymasterModule?.default || KeymasterModule;
 
 // Keymaster configuration interface
 export interface KeymasterConfig {
   gatekeeperConfig?: SdkConfig;
   walletDb?: WalletBase;
-  cipher?: Cipher;
+  cipher?: CipherNode;
 }
-
 export class KeymasterReactNative {
   private static instance: KeymasterReactNative | null = null;
   private config: KeymasterConfig;
-  private keymasterService!: KeymasterLib;
+  private keymasterService!: typeof Keymaster;
 
   private constructor(config: KeymasterConfig) {
     this.validateConfig(config);
@@ -404,14 +409,15 @@ export class KeymasterReactNative {
 
   private async startIntegratedKeymaster(): Promise<boolean> {
     try {
-      if (this.config.walletDb) {
-        const gatekeeper = await GatekeeperClient.create({
+      if (this.config.walletDb && this.config.cipher) {
+        const gatekeeper = new GatekeeperClient();
+        await gatekeeper.connect({
           url: this.config.gatekeeperConfig?.url,
           waitUntilReady: this.config.gatekeeperConfig?.waitUntilReady,
           intervalSeconds: this.config.gatekeeperConfig?.intervalSeconds,
           chatty: this.config.gatekeeperConfig?.chatty,
         });
-        this.keymasterService = new KeymasterMDIP({
+        this.keymasterService = new Keymaster({
           gatekeeper,
           wallet: this.config.walletDb,
           cipher: this.config.cipher,
@@ -442,13 +448,13 @@ export class KeymasterReactNative {
   }
 
   private async bindCredentialInternal(
-    ...args: Parameters<KeymasterLib["bindCredential"]>
+    ...args: Parameters<(typeof Keymaster)["bindCredential"]>
   ) {
     return this.keymasterService.bindCredential(...args);
   }
 
   private async createResponseInternal(
-    ...args: Parameters<KeymasterLib["createResponse"]>
+    ...args: Parameters<(typeof Keymaster)["createResponse"]>
   ) {
     return this.keymasterService.createResponse(...args);
   }
@@ -458,19 +464,19 @@ export class KeymasterReactNative {
   }
 
   private async issueCredentialInternal(
-    ...args: Parameters<KeymasterLib["issueCredential"]>
+    ...args: Parameters<(typeof Keymaster)["issueCredential"]>
   ) {
     return this.keymasterService.issueCredential(...args);
   }
 
   private async publishCredentialInternal(
-    ...args: Parameters<KeymasterLib["publishCredential"]>
+    ...args: Parameters<(typeof Keymaster)["publishCredential"]>
   ) {
     return this.keymasterService.publishCredential(...args);
   }
 
   private async acceptCredentialInternal(
-    ...args: Parameters<KeymasterLib["acceptCredential"]>
+    ...args: Parameters<(typeof Keymaster)["acceptCredential"]>
   ) {
     return this.keymasterService.acceptCredential(...args);
   }
@@ -480,13 +486,13 @@ export class KeymasterReactNative {
   }
 
   private async verifyResponseInternal(
-    ...args: Parameters<KeymasterLib["verifyResponse"]>
+    ...args: Parameters<(typeof Keymaster)["verifyResponse"]>
   ) {
     return this.keymasterService.verifyResponse(...args);
   }
 
   private async decryptMessageInternal(
-    ...args: Parameters<KeymasterLib["decryptMessage"]>
+    ...args: Parameters<(typeof Keymaster)["decryptMessage"]>
   ) {
     return this.keymasterService.decryptMessage(...args);
   }
@@ -496,61 +502,61 @@ export class KeymasterReactNative {
   }
 
   private async getCredentialInternal(
-    ...args: Parameters<KeymasterLib["getCredential"]>
+    ...args: Parameters<(typeof Keymaster)["getCredential"]>
   ) {
     return this.keymasterService.getCredential(...args);
   }
 
   private async removeCredentialInternal(
-    ...args: Parameters<KeymasterLib["removeCredential"]>
+    ...args: Parameters<(typeof Keymaster)["removeCredential"]>
   ) {
     return this.keymasterService.removeCredential(...args);
   }
 
   private async updateCredentialInternal(
-    ...args: Parameters<KeymasterLib["updateCredential"]>
+    ...args: Parameters<(typeof Keymaster)["updateCredential"]>
   ) {
     return this.keymasterService.updateCredential(...args);
   }
 
   private async createIdInternal(
-    ...args: Parameters<KeymasterLib["createId"]>
+    ...args: Parameters<(typeof Keymaster)["createId"]>
   ) {
     return this.keymasterService.createId(...args);
   }
 
   private async removeIdInternal(
-    ...args: Parameters<KeymasterLib["removeId"]>
+    ...args: Parameters<(typeof Keymaster)["removeId"]>
   ) {
     return this.keymasterService.removeId(...args);
   }
 
   private async resolveDIDInternal(
-    ...args: Parameters<KeymasterLib["resolveDID"]>
+    ...args: Parameters<(typeof Keymaster)["resolveDID"]>
   ) {
     return this.keymasterService.resolveDID(...args);
   }
 
   private async setCurrentIdInternal(
-    ...args: Parameters<KeymasterLib["setCurrentId"]>
+    ...args: Parameters<(typeof Keymaster)["setCurrentId"]>
   ) {
     return this.keymasterService.setCurrentId(...args);
   }
 
   private async createSchemaInternal(
-    ...args: Parameters<KeymasterLib["createSchema"]>
+    ...args: Parameters<(typeof Keymaster)["createSchema"]>
   ) {
     return this.keymasterService.createSchema(...args);
   }
 
   private async newWalletInternal(
-    ...args: Parameters<KeymasterLib["newWallet"]>
+    ...args: Parameters<(typeof Keymaster)["newWallet"]>
   ) {
     return this.keymasterService.newWallet(...args);
   }
 
   private async recoverWalletInternal(
-    ...args: Parameters<KeymasterLib["recoverWallet"]>
+    ...args: Parameters<(typeof Keymaster)["recoverWallet"]>
   ) {
     return this.keymasterService.recoverWallet(...args);
   }

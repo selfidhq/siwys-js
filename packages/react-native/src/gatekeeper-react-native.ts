@@ -1,12 +1,15 @@
 import { SdkConfig } from "./types/index.js";
-const GatekeeperClient = require("@mdip/gatekeeper/client").default;
-import { GetDIDOptions, MdipDocument } from "@mdip/gatekeeper/types";
+import {
+  GatekeeperClient,
+  MdipDocument,
+  GetDIDOptions,
+} from "@mdip/gatekeeper";
 
 export class GatekeeperReactNative {
   private static instance: GatekeeperReactNative | null = null;
 
   private config: SdkConfig;
-  private gatekeeperClient!: typeof GatekeeperClient;
+  private gatekeeperClient!: GatekeeperClient;
 
   private constructor(config: SdkConfig) {
     this.validateConfig(config);
@@ -66,7 +69,8 @@ export class GatekeeperReactNative {
 
   private async startIntegratedGatekeeper(): Promise<boolean> {
     try {
-      this.gatekeeperClient = await GatekeeperClient.create({
+      this.gatekeeperClient = new GatekeeperClient();
+      await this.gatekeeperClient.connect({
         url: this.config?.url,
         waitUntilReady: this.config?.waitUntilReady,
         intervalSeconds: this.config?.intervalSeconds,
@@ -84,7 +88,7 @@ export class GatekeeperReactNative {
     resolve,
   }: GetDIDOptions): Promise<string[] | MdipDocument[]> {
     const response = await this.gatekeeperClient.getDIDs({ dids, resolve });
-    return response.data;
+    return response;
   }
 
   private validateConfig(config: SdkConfig): void {

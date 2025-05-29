@@ -339,6 +339,21 @@ export class Keymaster {
     return Keymaster.getInstance().createSchemaInternal(schema, options);
   }
 
+  // Update a schema
+  /**
+   * Updates an schema for credentials given a schemaDID.
+   * @param id The ID of the schema to update.
+   * @param schema The schema data to update.
+   * @returns A promise with a boolean.
+   */
+  public static async updateSchema(
+    id: string,
+    schema?: unknown
+  ): Promise<boolean> {
+    Keymaster.getInstance().ensureInitialized();
+    return Keymaster.getInstance().setSchemaInternal(id, schema);
+  }
+
   // Create a new wallet
   /**
    * Creates a new wallet.
@@ -564,6 +579,13 @@ export class Keymaster {
   ) {
     await this.ensureServiceIsRunning();
     return this.keymasterService.createSchema(...args);
+  }
+
+  private async setSchemaInternal(
+    ...args: Parameters<KeymasterLib["setSchema"]>
+  ) {
+    await this.ensureServiceIsRunning();
+    return this.keymasterService.setSchema(...args);
   }
 
   private async newWalletInternal(

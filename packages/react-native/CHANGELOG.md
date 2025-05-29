@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# 0.13.0 (2025-05-29)
+
+
+### Features
+
+* **SAPP-219:** added update schema fn ([#40](https://github.com/selfidhq/siwys-js/issues/40)) ([51dd7c9](https://github.com/selfidhq/siwys-js/commit/51dd7c9e358f786b7835b6e63f9778a37ceeb830))
+
+
+
+
+
 # 0.12.0 (2025-05-27)
 
 

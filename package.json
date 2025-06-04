@@ -8,11 +8,17 @@
   "scripts": {
     "bootstrap": "lerna bootstrap",
     "bootstrap-ci": "for D in packages/*; do yarn --frozen-lockfile --cwd \"${D}\"; done",
-    "build": "lerna run build",
+    "build:siwys-react-js": "lerna run build --scope @yourself_id/siwys-react-js",
+    "build:siwys-react-native": "lerna run build --scope @yourself_id/siwys-react-native",
+    "build:siwys-api-js": "lerna run build --scope @yourself_id/siwys-api-js",
+    "build": "yarn build:siwys-react-js && yarn build:siwys-react-native && yarn build:siwys-api-js",
     "commit-lint": "commitlint -E HUSKY_GIT_PARAMS",
     "prepare": "husky install && chmod ug+x .husky/*",
     "release": "lerna publish",
-    "test": "lerna run test"
+    "test:siwys-react-js": "lerna run test --scope @yourself_id/siwys-react-js",
+    "test:siwys-react-native": "lerna run test --scope @yourself_id/siwys-react-native",
+    "test:siwys-api-js": "lerna run test --scope @yourself_id/siwys-api-js",
+    "test": "yarn test:siwys-react-js && yarn test:siwys-react-native && yarn test:siwys-api-js"
   },
   "devDependencies": {
     "@commitlint/cli": "^19.5.0",

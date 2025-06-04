@@ -47,19 +47,16 @@ jobs:
         run: yarn test
       - name: Run builds
         run: yarn build
-      - name: Publish canary releases for each package
+      - name: Publish canary release
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_ACCESS_TOKEN }}
         run: |
           git config user.name "${{ github.actor }}"
           git config user.email "${{ github.actor}}@users.noreply.github.com"
-          for pkg in @yourself_id/siwys-react-js @yourself_id/siwys-react-native @yourself_id/siwys-api-js; do
-            echo "Publishing $pkg..."
-            yarn lerna publish \
-              --canary \
-              --exact \
-              --scope $pkg \
-              --dist-tag ${{ steps.use_branch_name.outputs.sanitized-branch-name }} \
-              --preid ${{ steps.use_branch_name.outputs.sanitized-branch-name }} \
-              --yes
-          done
+          yarn lerna publish \
+            --force-publish=@yourself_id/siwys-react-js,@yourself_id/siwys-api-js  \
+            --canary \
+            --exact \
+            --dist-tag ${{ steps.use_branch_name.outputs.sanitized-branch-name }}  \
+            --preid ${{ steps.use_branch_name.outputs.sanitized-branch-name }}  \
+            --yes

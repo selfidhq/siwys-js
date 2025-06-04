@@ -6,7 +6,10 @@
     "registry": "https://registry.npmjs.org/"
   },
   "scripts": {
-    "bootstrap": "lerna bootstrap",
+    "bootstrap:siwys-react-js": "lerna bootstrap --scope @yourself_id/siwys-react-js",
+    "bootstrap:siwys-react-native": "lerna bootstrap --scope @yourself_id/siwys-react-native",
+    "bootstrap:siwys-api-js": "lerna bootstrap --scope @yourself_id/siwys-api-js",
+    "bootstrap": "yarn bootstrap:siwys-react-js && yarn bootstrap:siwys-react-native && yarn bootstrap:siwys-api-js",
     "bootstrap-ci": "for D in packages/*; do yarn --frozen-lockfile --cwd \"${D}\"; done",
     "build:siwys-react-js": "lerna run build --scope @yourself_id/siwys-react-js",
     "build:siwys-react-native": "lerna run build --scope @yourself_id/siwys-react-native",

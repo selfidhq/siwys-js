@@ -54,7 +54,7 @@ jobs:
           git config user.name "${{ github.actor }}"
           git config user.email "${{ github.actor}}@users.noreply.github.com"
           yarn lerna publish \
-            --force-publish=@yourself_id/siwys-react-js,@yourself_id/siwys-api-js  \
+            --force-publish=@yourself_id/siwys-react-js,@yourself_id/siwys-api-js,@yourself_id/siwys-react-native  \
             --canary \
             --exact \
             --dist-tag ${{ steps.use_branch_name.outputs.sanitized-branch-name }}  \

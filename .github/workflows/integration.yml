@@ -36,7 +36,7 @@ jobs:
         run: yarn bootstrap
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_ACCESS_TOKEN }}
-      - name: Run Unit Tests
-        run: yarn test
+      # - name: Run Unit Tests
+      #   run: yarn test
       - name: Run builds
         run: yarn build

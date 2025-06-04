@@ -12,7 +12,7 @@
     "commit-lint": "commitlint -E HUSKY_GIT_PARAMS",
     "prepare": "husky install && chmod ug+x .husky/*",
     "release": "lerna publish",
-    "test": "lerna run test --stream --no-prefix"
+    "test": "lerna run test"
   },
   "devDependencies": {
     "@commitlint/cli": "^19.5.0",

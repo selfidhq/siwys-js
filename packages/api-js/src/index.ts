@@ -9,6 +9,6 @@ export {
 } from "./types/index.js";
 
 export * from "@mdip/keymaster/types";
-import * as GatekeeperTypes from "@mdip/gatekeeper";
+import type * as GatekeeperTypes from "@mdip/gatekeeper";
 
 export { GatekeeperTypes };

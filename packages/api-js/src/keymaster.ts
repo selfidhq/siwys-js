@@ -18,7 +18,7 @@ import {
   WalletBase,
   WalletFile,
 } from "@mdip/keymaster/types";
-import { MdipDocument, ResolveDIDOptions } from "@mdip/gatekeeper";
+import type { MdipDocument, ResolveDIDOptions } from "@mdip/gatekeeper";
 
 // Keymaster configuration interface
 export interface KeymasterConfig {

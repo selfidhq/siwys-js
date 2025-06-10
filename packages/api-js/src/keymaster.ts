@@ -17,7 +17,7 @@ import {
   VerifiableCredential,
   WalletBase,
   WalletFile,
-} from "@mdip/keymaster/types";
+} from "@mdip/keymaster";
 import type { MdipDocument, ResolveDIDOptions } from "@mdip/gatekeeper";
 
 // Keymaster configuration interface

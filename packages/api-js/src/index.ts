@@ -8,7 +8,7 @@ export {
   CreateChallengeSpec,
 } from "./types/index.js";
 
-export * from "@mdip/keymaster/types";
+export * from "@mdip/keymaster";
 import type * as GatekeeperTypes from "@mdip/gatekeeper";
 
 export { GatekeeperTypes };

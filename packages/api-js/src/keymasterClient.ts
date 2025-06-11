@@ -4,7 +4,7 @@ import {
   CreateAssetOptions,
   IssueCredentialsOptions,
   VerifiableCredential,
-} from "@mdip/keymaster/types";
+} from "@mdip/keymaster";
 import {
   CreateChallengeResponse,
   CreateChallengeSpec,

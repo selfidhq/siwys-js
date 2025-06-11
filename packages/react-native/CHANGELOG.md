@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# 0.15.0 (2025-06-11)
+
+
+### Features
+
+* **SAPP-281:** update to node 22 ([#42](https://github.com/selfidhq/siwys-js/issues/42)) ([c2e7e80](https://github.com/selfidhq/siwys-js/commit/c2e7e80101083ab41e6e25c202b27760760d7e01))
+
+
+
+
+
 # 0.14.0 (2025-06-05)
 
 

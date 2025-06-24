@@ -17,8 +17,9 @@ import {
 type ThemeProp = "light" | "dark";
 
 interface SignInProps {
-  challengeUrl: string;
+  challengeDID: string;
   onSiwysPress: () => void;
+  challengeBaseUrl?: string;
   isCYS?: boolean;
   createChallengeUrl?: string;
   pollForAuthUrl?: string;
@@ -202,15 +203,20 @@ const AppIconsContainer = styled.div`
 `;
 
 const SignInWithYourSelf: React.FC<SignInProps> = ({
-  challengeUrl: challengeUrlParam,
+  challengeDID,
   onSiwysPress,
   isCYS = false,
   createChallengeUrl = undefined,
   pollForAuthUrl = undefined,
   successComponent,
   theme = "light",
+  challengeBaseUrl = "",
 }) => {
-  const [challengeUrl, setChallengeUrl] = useState<string>(challengeUrlParam);
+  const [challengeUrl, setChallengeUrl] = useState<string>(
+    challengeBaseUrl
+      ? `${challengeBaseUrl}/challenge?challenge=${challengeDID || ""}`
+      : `https://www.selfid.link/challenge?challenge=${challengeDID || ""}`
+  );
   const [challengeDid, setChallengeDid] = useState<string>("");
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
 

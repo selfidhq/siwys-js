@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# 0.16.0 (2025-06-25)
+
+
+### Features
+
+* **sapp-339:** making challenge base url configurable ([#43](https://github.com/selfidhq/siwys-js/issues/43)) ([3892cb8](https://github.com/selfidhq/siwys-js/commit/3892cb8b2fa1c29d283f4fe3f725070a66d6e39a))
+
+
+
+
+
 # 0.15.0 (2025-06-11)
 
 

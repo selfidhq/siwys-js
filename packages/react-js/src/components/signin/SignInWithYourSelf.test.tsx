@@ -65,7 +65,7 @@ describe("SignInWithYourSelf Component", () => {
       <SignInWithYourSelf
         createChallengeUrl={createChallengeUrl}
         pollForAuthUrl={checkAuthUrl}
-        challengeUrl={challengeUrl}
+        challengeDID={challengeDid}
         onSiwysPress={onSiwysPress}
         successComponent={<div>Success</div>}
       />
@@ -80,7 +80,7 @@ describe("SignInWithYourSelf Component", () => {
   it("renders the QR code with the provided challenge URL", () => {
     render(
       <SignInWithYourSelf
-        challengeUrl={challengeUrl}
+        challengeDID={challengeDid}
         onSiwysPress={onSiwysPress}
       />
     );
@@ -90,7 +90,7 @@ describe("SignInWithYourSelf Component", () => {
   it("calls onSiwysPress when the sign-in button is clicked", async () => {
     render(
       <SignInWithYourSelf
-        challengeUrl={challengeUrl}
+        challengeDID={challengeDid}
         onSiwysPress={onSiwysPress}
       />
     );
@@ -104,7 +104,7 @@ describe("SignInWithYourSelf Component", () => {
   it("renders CysButton instead of SiwysButton when isCYS is true", () => {
     render(
       <SignInWithYourSelf
-        challengeUrl={challengeUrl}
+        challengeDID={challengeDid}
         onSiwysPress={onSiwysPress}
         isCYS
       />
@@ -118,7 +118,7 @@ describe("SignInWithYourSelf Component", () => {
     global.window.open = jest.fn();
     render(
       <SignInWithYourSelf
-        challengeUrl={challengeUrl}
+        challengeDID={challengeDid}
         onSiwysPress={onSiwysPress}
       />
     );
@@ -135,7 +135,7 @@ describe("SignInWithYourSelf Component", () => {
     global.window.open = jest.fn();
     render(
       <SignInWithYourSelf
-        challengeUrl={challengeUrl}
+        challengeDID={challengeDid}
         onSiwysPress={onSiwysPress}
       />
     );
@@ -154,7 +154,7 @@ describe("SignInWithYourSelf Component", () => {
       <SignInWithYourSelf
         createChallengeUrl={createChallengeUrl}
         pollForAuthUrl={checkAuthUrl}
-        challengeUrl={challengeUrl}
+        challengeDID={challengeDid}
         onSiwysPress={onSiwysPress}
         successComponent={<div>Success</div>}
       />
@@ -175,7 +175,7 @@ describe("SignInWithYourSelf Component", () => {
       <SignInWithYourSelf
         createChallengeUrl={createChallengeUrl}
         pollForAuthUrl={checkAuthUrl}
-        challengeUrl={challengeUrl}
+        challengeDID={challengeDid}
         onSiwysPress={onSiwysPress}
         successComponent={<div data-testid="success">Success</div>}
       />
@@ -204,7 +204,7 @@ describe("SignInWithYourSelf Component", () => {
     jest.useFakeTimers();
     render(
       <SignInWithYourSelf
-        challengeUrl={challengeUrl}
+        challengeDID={challengeDid}
         onSiwysPress={onSiwysPress}
         createChallengeUrl={createChallengeUrl}
       />

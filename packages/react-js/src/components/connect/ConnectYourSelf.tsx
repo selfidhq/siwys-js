@@ -2,17 +2,20 @@ import React from "react";
 import SignInWithYourSelf from "../signin/SignInWithYourSelf";
 
 interface ConnectYourSelfProps {
-  challengeUrl: string;
+  challengeDID: string;
+  challengeBaseUrl?: string;
   onConnectPress: () => void;
 }
 
 const ConnectYourSelf: React.FC<ConnectYourSelfProps> = ({
-  challengeUrl,
+  challengeBaseUrl,
+  challengeDID,
   onConnectPress,
 }) => {
   return (
     <SignInWithYourSelf
-      challengeUrl={challengeUrl}
+      challengeBaseUrl={challengeBaseUrl}
+      challengeDID={challengeDID}
       onSiwysPress={onConnectPress}
       isCYS
     />

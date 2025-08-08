@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import styled from "styled-components";
 import QRCode from "./QrCode";
 import { CysButton, SiwysButton } from "../button/SignInButton";
@@ -18,10 +18,10 @@ type ThemeProp = "light" | "dark";
 
 interface SignInProps {
   challengeDID: string;
-  onSiwysPress: () => void;
   challengeBaseUrl?: string;
   isCYS?: boolean;
   createChallengeUrl?: string;
+  onSiwysPress?: () => void;
   pollForAuthUrl?: string;
   successComponent?: React.ReactNode;
   theme?: ThemeProp;
@@ -268,6 +268,15 @@ const SignInWithYourSelf: React.FC<SignInProps> = ({
     window.open(appStoreURL, "_blank");
   };
 
+  const defaultSiwysClick = useCallback(() => {
+    if (onSiwysPress) {
+      onSiwysPress();
+      return;
+    }
+
+    window.open(challengeUrl, "_blank");
+  }, [challengeUrl, onSiwysPress]);
+
   if (isAuthenticated) {
     return <Wrapper>{successComponent}</Wrapper>;
   }
@@ -295,9 +304,9 @@ const SignInWithYourSelf: React.FC<SignInProps> = ({
           <QRCode challengeUrl={challengeUrl} size={200} level="H" />
         </QRContainer>
         {isCYS ? (
-          <CysButton colorTheme={theme} onClick={onSiwysPress} glow />
+          <CysButton colorTheme={theme} onClick={defaultSiwysClick} glow />
         ) : (
-          <SiwysButton colorTheme={theme} onClick={onSiwysPress} glow />
+          <SiwysButton colorTheme={theme} onClick={defaultSiwysClick} glow />
         )}
       </SignInContainer>
       <InstructionsContainer>

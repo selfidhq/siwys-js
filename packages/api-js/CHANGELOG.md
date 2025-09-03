@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# 0.17.0 (2025-09-03)
+
+
+### Features
+
+* updating mdip packages to 1.2.1 ([#45](https://github.com/selfidhq/siwys-js/issues/45)) ([c1d9305](https://github.com/selfidhq/siwys-js/commit/c1d93056d54c11fda5b56ba1d220a7df6b54c123))
+
+
+
+
+
 ## 0.16.1 (2025-08-08)
 
 **Note:** Version bump only for package @yourself_id/siwys-api-js

@@ -25,9 +25,9 @@
     "test": "echo 'no tests yet'"
   },
   "dependencies": {
-    "@mdip/cipher": "1.1.4",
-    "@mdip/gatekeeper": "1.1.4",
-    "@mdip/keymaster": "1.1.4"
+    "@mdip/cipher": "^1.2.1",
+    "@mdip/gatekeeper": "^1.2.1",
+    "@mdip/keymaster": "^1.2.1"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.25.8",

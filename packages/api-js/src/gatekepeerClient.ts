@@ -266,10 +266,7 @@ export class GatekeeperClient {
     try {
       this.gatekeeperClient = new GatekeeperClientMdip();
       await this.gatekeeperClient.connect({
-        url: this.config?.url,
-        waitUntilReady: this.config?.waitUntilReady,
-        intervalSeconds: this.config?.intervalSeconds,
-        chatty: this.config?.chatty,
+        ...this.config,
       });
     } catch (e) {
       console.error("Error starting GatekeeperClient service:", e);

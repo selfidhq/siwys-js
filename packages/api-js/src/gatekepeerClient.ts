@@ -1,4 +1,3 @@
-import { SdkConfig } from "./types/index.js";
 import {
   GatekeeperClient as GatekeeperClientMdip,
   MdipDocument,
@@ -12,20 +11,21 @@ import {
   ProcessEventsResult,
   BlockId,
   BlockInfo,
+  GatekeeperClientOptions,
 } from "@mdip/gatekeeper";
 
 export class GatekeeperClient {
   private static instance: GatekeeperClient | null = null;
 
-  private config: SdkConfig;
+  private config: GatekeeperClientOptions;
   private gatekeeperClient!: GatekeeperClientMdip;
 
-  private constructor(config: SdkConfig) {
+  private constructor(config: GatekeeperClientOptions) {
     this.validateConfig(config);
     this.config = config;
   }
 
-  public static initialize(config: SdkConfig) {
+  public static initialize(config: GatekeeperClientOptions) {
     if (!GatekeeperClient.instance) {
       GatekeeperClient.instance = new GatekeeperClient(config);
     } else {
@@ -420,7 +420,7 @@ export class GatekeeperClient {
     return this.gatekeeperClient.addBlock(registry, block);
   }
 
-  private validateConfig(config: SdkConfig): void {
+  private validateConfig(config: GatekeeperClientOptions): void {
     if (!config) {
       throw new Error("Missing Gatekeeper config");
     }

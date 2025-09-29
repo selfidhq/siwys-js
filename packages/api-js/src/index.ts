@@ -1,5 +1,6 @@
 export { Keymaster, KeymasterConfig } from "./keymaster.js";
 export { KeymasterExternalClient } from "./keymasterClient.js";
+export { GatekeeperClient } from "./gatekepeerClient.js";
 
 export {
   SdkConfig,

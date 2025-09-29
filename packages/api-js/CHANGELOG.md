@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# 0.18.0 (2025-09-29)
+
+
+### Features
+
+* adding gatekepeer client for js sdk ([#46](https://github.com/selfidhq/siwys-js/issues/46)) ([0ad432a](https://github.com/selfidhq/siwys-js/commit/0ad432a702dc19991675351fed891cb90c48d697))
+
+
+
+
+
 # 0.17.0 (2025-09-03)
 
 

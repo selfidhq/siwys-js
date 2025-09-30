@@ -970,10 +970,10 @@
     hdkey "^2.1.0"
     multiformats "^13.0.0"
 
-"@mdip/cipher@1.1.4":
-  version "1.1.4"
-  resolved "https://registry.yarnpkg.com/@mdip/cipher/-/cipher-1.1.4.tgz#b595f6ba2221fefa80e99b6a69d50f87cc1b6fd5"
-  integrity sha512-kRSg2kerNYbRmJTl5rKwba/raHjSFXx/kBFoOiYXQuewSmkKNbiR5RzUBB4LTe+SOe/8dFL+CugrKXgdVPtUcg==
+"@mdip/cipher@^1.3.0":
+  version "1.3.0"
+  resolved "https://registry.yarnpkg.com/@mdip/cipher/-/cipher-1.3.0.tgz#83fb3d9e8a8b97b17910523a5e470d9163de71ec"
+  integrity sha512-TqgfJQ80LJUkllBujG+G2JWjqj10K3Bf+59wHn6/1albxhCZnpkodzxXYpWhtSxE3zElBNqrcOAuXfNbk8pvow==
   dependencies:
     "@mdip/browser-hdkey" "^0.1.8"
     "@noble/ciphers" "^0.4.1"
@@ -992,10 +992,10 @@
   dependencies:
     "@mdip/ipfs" "*"
 
-"@mdip/gatekeeper@1.1.4":
-  version "1.1.4"
-  resolved "https://registry.yarnpkg.com/@mdip/gatekeeper/-/gatekeeper-1.1.4.tgz#c84068c77e9f266450d1ce9fe0358346dbaf4a15"
-  integrity sha512-pDGV3Gc/RzPcRallzX8tN6MhkeTEwKI5srY2NXBGM8unZvUqFsfhFD144TLnOpNyspUgI2Wv01RL43MZxRZjhw==
+"@mdip/gatekeeper@^1.3.0":
+  version "1.3.0"
+  resolved "https://registry.yarnpkg.com/@mdip/gatekeeper/-/gatekeeper-1.3.0.tgz#37f9bb1b9f12e889801022dacc7e7ffb73e8b632"
+  integrity sha512-69d9AIiFDdg79j6t7O0RUBsen6I/TzAwR5ZDl5KUVav3aq5mKWYUk9QryO8aLEqEkMelOPfaMfabDZNYhf0yBA==
   dependencies:
     "@mdip/cipher" "*"
     "@mdip/common" "*"
@@ -1022,10 +1022,10 @@
     kubo-rpc-client "^5.1.0"
     multiformats "^13.3.3"
 
-"@mdip/keymaster@1.1.4":
-  version "1.1.4"
-  resolved "https://registry.yarnpkg.com/@mdip/keymaster/-/keymaster-1.1.4.tgz#9b5c3b59626c2240e21c0bbead22541e7bafd1f6"
-  integrity sha512-3V85OvwOlUozx4UOz4qqBXhcjSUR9zFOq6qvNgldxLTD8GiOV34mcWpocDbvcbv/P/gE4KJ6J6vVIpYLavKrMQ==
+"@mdip/keymaster@^1.3.0":
+  version "1.3.0"
+  resolved "https://registry.yarnpkg.com/@mdip/keymaster/-/keymaster-1.3.0.tgz#20b43c1fc50df816d91327a0b13ee34d581856a6"
+  integrity sha512-2FQEr9AmbGxl1t8Ds0FhEBkpLwwH74+C8COrTMDDFeL6Xvv4kKFfLRmFXNCmdrkDoGg/deO2Ad1R0hRDJCjC+A==
   dependencies:
     "@mdip/common" "*"
     axios "^1.7.7"
@@ -1494,11 +1494,11 @@
     "@types/node" "*"
 
 "@yourself_id/siwys-api-js@file:../../packages/api-js":
-  version "0.14.0"
+  version "0.18.0"
   dependencies:
-    "@mdip/cipher" "1.1.4"
-    "@mdip/gatekeeper" "1.1.4"
-    "@mdip/keymaster" "1.1.4"
+    "@mdip/cipher" "^1.3.0"
+    "@mdip/gatekeeper" "^1.3.0"
+    "@mdip/keymaster" "^1.3.0"
 
 abbrev@1:
   version "1.1.1"

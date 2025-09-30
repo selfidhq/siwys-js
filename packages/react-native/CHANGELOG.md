@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# 0.19.0 (2025-09-30)
+
+
+### Features
+
+* update to latest mdip ([#47](https://github.com/selfidhq/siwys-js/issues/47)) ([e71dc05](https://github.com/selfidhq/siwys-js/commit/e71dc05f1b055a2a53831aa0efc40f16c6124253))
+
+
+
+
+
 # 0.18.0 (2025-09-29)
 
 

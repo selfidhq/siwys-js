@@ -2328,10 +2328,10 @@
     kubo-rpc-client "^5.1.0"
     multiformats "^13.3.3"
 
-"@mdip/keymaster@^1.3.0":
-  version "1.3.0"
-  resolved "https://registry.yarnpkg.com/@mdip/keymaster/-/keymaster-1.3.0.tgz#20b43c1fc50df816d91327a0b13ee34d581856a6"
-  integrity sha512-2FQEr9AmbGxl1t8Ds0FhEBkpLwwH74+C8COrTMDDFeL6Xvv4kKFfLRmFXNCmdrkDoGg/deO2Ad1R0hRDJCjC+A==
+"@mdip/keymaster@^1.3.1":
+  version "1.3.1"
+  resolved "https://registry.yarnpkg.com/@mdip/keymaster/-/keymaster-1.3.1.tgz#464eac3b70965f3fc91e12c39c3a042a35acb8a6"
+  integrity sha512-sq0IDx7Y5UEG5lWCIDdKQdI06Oap2H5EBZE4xEzLzJwzsh0ptfeyH9JhFnrVcG0iP+3O/rh1TlTodZI45Ja3fA==
   dependencies:
     "@mdip/common" "*"
     axios "^1.7.7"

@@ -9,8 +9,8 @@ export {
   CreateChallengeSpec,
 } from "./types/index.js";
 
-export { default as CipherNode } from "@mdip/cipher/node";
 export * from "@mdip/keymaster";
+export { AbstractBase } from "@mdip/keymaster";
 import type * as GatekeeperTypes from "@mdip/gatekeeper";
 
 export { GatekeeperTypes };

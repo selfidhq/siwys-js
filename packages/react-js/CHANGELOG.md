@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# 0.21.0 (2025-10-02)
+
+
+### Features
+
+* update gatekeeper client ([#50](https://github.com/selfidhq/siwys-js/issues/50)) ([d9282ef](https://github.com/selfidhq/siwys-js/commit/d9282efc31dcb2949dd8ae82be75d99accaeb1cf))
+
+
+
+
+
 # 0.20.0 (2025-10-01)
 
 

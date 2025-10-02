@@ -50,25 +50,22 @@ export class GatekeeperClient {
     return GatekeeperClient.getInstance().startInternal();
   }
 
-  public static addCustomHeader(
-    ...args: Parameters<GatekeeperClient["addCustomHeaderInternal"]>
-  ): void {
+  public static addCustomHeader(header: string, value: string): void {
     GatekeeperClient.getInstance().ensureInitialized();
-    return GatekeeperClient.getInstance().addCustomHeaderInternal(...args);
+    return GatekeeperClient.getInstance().addCustomHeaderInternal(
+      header,
+      value
+    );
   }
 
-  public static removeCustomHeader(
-    ...args: Parameters<GatekeeperClient["removeCustomHeaderInternal"]>
-  ): void {
+  public static removeCustomHeader(header: string): void {
     GatekeeperClient.getInstance().ensureInitialized();
-    return GatekeeperClient.getInstance().removeCustomHeaderInternal(...args);
+    return GatekeeperClient.getInstance().removeCustomHeaderInternal(header);
   }
 
-  public static async listRegistries(
-    ...args: Parameters<GatekeeperClient["listRegistriesInternal"]>
-  ) {
+  public static async listRegistries(): Promise<string[]> {
     GatekeeperClient.getInstance().ensureInitialized();
-    return GatekeeperClient.getInstance().listRegistriesInternal(...args);
+    return GatekeeperClient.getInstance().listRegistriesInternal();
   }
 
   public static async resetDb(): Promise<boolean> {
@@ -96,130 +93,109 @@ export class GatekeeperClient {
     return GatekeeperClient.getInstance().getStatusInternal();
   }
 
-  public static async createDID(
-    ...args: Parameters<GatekeeperClient["createDIDInternal"]>
-  ): Promise<string> {
+  public static async createDID(operation: Operation): Promise<string> {
     GatekeeperClient.getInstance().ensureInitialized();
-    return GatekeeperClient.getInstance().createDIDInternal(...args);
+    return GatekeeperClient.getInstance().createDIDInternal(operation);
   }
 
   public static async resolveDID(
-    ...args: Parameters<GatekeeperClient["resolveDIDInternal"]>
+    did: string,
+    options?: ResolveDIDOptions
   ): Promise<MdipDocument> {
     GatekeeperClient.getInstance().ensureInitialized();
-    return GatekeeperClient.getInstance().resolveDIDInternal(...args);
+    return GatekeeperClient.getInstance().resolveDIDInternal(did, options);
   }
 
-  public static async updateDID(
-    ...args: Parameters<GatekeeperClient["updateDIDInternal"]>
-  ): Promise<boolean> {
+  public static async updateDID(operation: Operation): Promise<boolean> {
     GatekeeperClient.getInstance().ensureInitialized();
-    return GatekeeperClient.getInstance().updateDIDInternal(...args);
+    return GatekeeperClient.getInstance().updateDIDInternal(operation);
   }
 
-  public static async deleteDID(
-    ...args: Parameters<GatekeeperClient["deleteDIDInternal"]>
-  ): Promise<boolean> {
+  public static async deleteDID(operation: Operation): Promise<boolean> {
     GatekeeperClient.getInstance().ensureInitialized();
-    return GatekeeperClient.getInstance().deleteDIDInternal(...args);
+    return GatekeeperClient.getInstance().deleteDIDInternal(operation);
   }
 
-  public static async getDIDs(
-    ...args: Parameters<GatekeeperClient["getDIDsInternal"]>
-  ): Promise<string[] | MdipDocument[]> {
+  public static async getDIDs({
+    dids,
+    resolve,
+  }: GetDIDOptions): Promise<string[] | MdipDocument[]> {
     GatekeeperClient.getInstance().ensureInitialized();
-    return GatekeeperClient.getInstance().getDIDsInternal(...args);
+    return GatekeeperClient.getInstance().getDIDsInternal({ dids, resolve });
   }
 
   public static async exportDIDs(
-    ...args: Parameters<GatekeeperClient["exportDIDsInternal"]>
+    dids?: string[]
   ): Promise<GatekeeperEvent[][]> {
     GatekeeperClient.getInstance().ensureInitialized();
-    return GatekeeperClient.getInstance().exportDIDsInternal(...args);
+    return GatekeeperClient.getInstance().exportDIDsInternal(dids);
   }
 
   public static async importDIDs(
-    ...args: Parameters<GatekeeperClient["importDIDsInternal"]>
+    dids: GatekeeperEvent[][]
   ): Promise<ImportBatchResult> {
     GatekeeperClient.getInstance().ensureInitialized();
-    return GatekeeperClient.getInstance().importDIDsInternal(...args);
+    return GatekeeperClient.getInstance().importDIDsInternal(dids);
   }
 
-  public static async exportBatch(
-    ...args: Parameters<GatekeeperClient["exportBatchInternal"]>
-  ): Promise<GatekeeperEvent[]> {
+  public static async exportBatch(dids?: string[]): Promise<GatekeeperEvent[]> {
     GatekeeperClient.getInstance().ensureInitialized();
-    return GatekeeperClient.getInstance().exportBatchInternal(...args);
+    return GatekeeperClient.getInstance().exportBatchInternal(dids);
   }
 
   public static async importBatch(
-    ...args: Parameters<GatekeeperClient["importBatchInternal"]>
+    batch: GatekeeperEvent[]
   ): Promise<ImportBatchResult> {
     GatekeeperClient.getInstance().ensureInitialized();
-    return GatekeeperClient.getInstance().importBatchInternal(...args);
+    return GatekeeperClient.getInstance().importBatchInternal(batch);
   }
 
-  public static async removeDIDs(
-    ...args: Parameters<GatekeeperClient["removeDIDsInternal"]>
-  ): Promise<boolean> {
+  public static async removeDIDs(dids: string[]): Promise<boolean> {
     GatekeeperClient.getInstance().ensureInitialized();
-    return GatekeeperClient.getInstance().removeDIDsInternal(...args);
+    return GatekeeperClient.getInstance().removeDIDsInternal(dids);
   }
 
-  public static async getQueue(
-    ...args: Parameters<GatekeeperClient["getQueueInternal"]>
-  ): Promise<Operation[]> {
+  public static async getQueue(registry: string): Promise<Operation[]> {
     GatekeeperClient.getInstance().ensureInitialized();
-    return GatekeeperClient.getInstance().getQueueInternal(...args);
+    return GatekeeperClient.getInstance().getQueueInternal(registry);
   }
 
   public static async clearQueue(
-    ...args: Parameters<GatekeeperClient["clearQueueInternal"]>
+    registry: string,
+    events: Operation[]
   ): Promise<boolean> {
     GatekeeperClient.getInstance().ensureInitialized();
-    return GatekeeperClient.getInstance().clearQueueInternal(...args);
+    return GatekeeperClient.getInstance().clearQueueInternal(registry, events);
   }
 
-  public static async processEvents(
-    ...args: Parameters<GatekeeperClient["processEventsInternal"]>
-  ): Promise<ProcessEventsResult> {
+  public static async processEvents(): Promise<ProcessEventsResult> {
     GatekeeperClient.getInstance().ensureInitialized();
-    return GatekeeperClient.getInstance().processEventsInternal(...args);
+    return GatekeeperClient.getInstance().processEventsInternal();
   }
 
-  public static async addJSON(
-    ...args: Parameters<GatekeeperClient["addJSONInternal"]>
-  ): Promise<string> {
+  public static async addJSON(data: object): Promise<string> {
     GatekeeperClient.getInstance().ensureInitialized();
-    return GatekeeperClient.getInstance().addJSONInternal(...args);
+    return GatekeeperClient.getInstance().addJSONInternal(data);
   }
 
-  public static async getJSON(
-    ...args: Parameters<GatekeeperClient["getJSONInternal"]>
-  ): Promise<object> {
+  public static async getJSON(cid: string): Promise<object> {
     GatekeeperClient.getInstance().ensureInitialized();
-    return GatekeeperClient.getInstance().getJSONInternal(...args);
+    return GatekeeperClient.getInstance().getJSONInternal(cid);
   }
 
-  public static async addText(
-    ...args: Parameters<GatekeeperClient["addTextInternal"]>
-  ): Promise<string> {
+  public static async addText(data: string): Promise<string> {
     GatekeeperClient.getInstance().ensureInitialized();
-    return GatekeeperClient.getInstance().addTextInternal(...args);
+    return GatekeeperClient.getInstance().addTextInternal(data);
   }
 
-  public static async getText(
-    ...args: Parameters<GatekeeperClient["getTextInternal"]>
-  ): Promise<string> {
+  public static async getText(cid: string): Promise<string> {
     GatekeeperClient.getInstance().ensureInitialized();
-    return GatekeeperClient.getInstance().getTextInternal(...args);
+    return GatekeeperClient.getInstance().getTextInternal(cid);
   }
 
-  public static async addData(
-    ...args: Parameters<GatekeeperClient["addDataInternal"]>
-  ): Promise<string> {
+  public static async addData(data: Buffer): Promise<string> {
     GatekeeperClient.getInstance().ensureInitialized();
-    return GatekeeperClient.getInstance().addDataInternal(...args);
+    return GatekeeperClient.getInstance().addDataInternal(data);
   }
 
   public static async getData(
@@ -229,18 +205,17 @@ export class GatekeeperClient {
     return GatekeeperClient.getInstance().getDataInternal(...args);
   }
 
-  public static async getBlock(
-    ...args: Parameters<GatekeeperClient["getBlockInternal"]>
-  ): Promise<BlockInfo | null> {
+  public static async getBlock(cid: string): Promise<BlockInfo | null> {
     GatekeeperClient.getInstance().ensureInitialized();
-    return GatekeeperClient.getInstance().getBlockInternal(...args);
+    return GatekeeperClient.getInstance().getBlockInternal(cid);
   }
 
   public static async addBlock(
-    ...args: Parameters<GatekeeperClient["addBlockInternal"]>
+    registry: string,
+    block: BlockInfo
   ): Promise<boolean> {
     GatekeeperClient.getInstance().ensureInitialized();
-    return GatekeeperClient.getInstance().addBlockInternal(...args);
+    return GatekeeperClient.getInstance().addBlockInternal(registry, block);
   }
 
   private static getInstance(): GatekeeperClient {
@@ -284,137 +259,134 @@ export class GatekeeperClient {
   }
 
   private async listRegistriesInternal(): Promise<string[]> {
-    const response = await this.gatekeeperClient.listRegistries();
-    return response;
+    return await this.gatekeeperClient.listRegistries();
   }
 
   private async resetDbInternal(): Promise<boolean> {
-    return this.gatekeeperClient.resetDb();
+    return await this.gatekeeperClient.resetDb();
   }
 
   private async verifyDbInternal(): Promise<VerifyDbResult> {
-    return this.gatekeeperClient.verifyDb();
+    return await this.gatekeeperClient.verifyDb();
   }
 
   private async isReadyInternal(): Promise<boolean> {
-    return this.gatekeeperClient.isReady();
+    return await this.gatekeeperClient.isReady();
   }
 
   private async getVersionInternal(): Promise<number> {
-    return this.gatekeeperClient.getVersion();
+    return await this.gatekeeperClient.getVersion();
   }
 
   private async getStatusInternal(): Promise<GetStatusResult> {
-    return this.gatekeeperClient.getStatus();
+    return await this.gatekeeperClient.getStatus();
   }
 
   private async createDIDInternal(operation: Operation): Promise<string> {
-    return this.gatekeeperClient.createDID(operation);
+    return await this.gatekeeperClient.createDID(operation);
   }
 
   private async resolveDIDInternal(
     did: string,
     options?: ResolveDIDOptions
   ): Promise<MdipDocument> {
-    const response = await this.gatekeeperClient.resolveDID(did, options);
-    return response;
+    return await this.gatekeeperClient.resolveDID(did, options);
   }
 
   private async updateDIDInternal(operation: Operation): Promise<boolean> {
-    return this.gatekeeperClient.updateDID(operation);
+    return await this.gatekeeperClient.updateDID(operation);
   }
 
   private async deleteDIDInternal(operation: Operation): Promise<boolean> {
-    return this.gatekeeperClient.deleteDID(operation);
+    return await this.gatekeeperClient.deleteDID(operation);
   }
 
   private async getDIDsInternal({
     dids,
     resolve,
   }: GetDIDOptions): Promise<string[] | MdipDocument[]> {
-    const response = await this.gatekeeperClient.getDIDs({ dids, resolve });
-    return response;
+    return await this.gatekeeperClient.getDIDs({ dids, resolve });
   }
 
   private async exportDIDsInternal(
     dids?: string[]
   ): Promise<GatekeeperEvent[][]> {
-    return this.gatekeeperClient.exportDIDs(dids);
+    return await this.gatekeeperClient.exportDIDs(dids);
   }
 
   private async importDIDsInternal(
     dids: GatekeeperEvent[][]
   ): Promise<ImportBatchResult> {
-    return this.gatekeeperClient.importDIDs(dids);
+    return await this.gatekeeperClient.importDIDs(dids);
   }
 
   private async exportBatchInternal(
     dids?: string[]
   ): Promise<GatekeeperEvent[]> {
-    return this.gatekeeperClient.exportBatch(dids);
+    return await this.gatekeeperClient.exportBatch(dids);
   }
 
   private async importBatchInternal(
     batch: GatekeeperEvent[]
   ): Promise<ImportBatchResult> {
-    return this.gatekeeperClient.importBatch(batch);
+    return await this.gatekeeperClient.importBatch(batch);
   }
 
   private async removeDIDsInternal(dids: string[]): Promise<boolean> {
-    return this.gatekeeperClient.removeDIDs(dids);
+    return await this.gatekeeperClient.removeDIDs(dids);
   }
 
   private async getQueueInternal(registry: string): Promise<Operation[]> {
-    return this.gatekeeperClient.getQueue(registry);
+    return await this.gatekeeperClient.getQueue(registry);
   }
 
   private async clearQueueInternal(
     registry: string,
     events: Operation[]
   ): Promise<boolean> {
-    return this.gatekeeperClient.clearQueue(registry, events);
+    return await this.gatekeeperClient.clearQueue(registry, events);
   }
 
   private async processEventsInternal(): Promise<ProcessEventsResult> {
-    return this.gatekeeperClient.processEvents();
+    return await this.gatekeeperClient.processEvents();
   }
 
   private async addJSONInternal(data: object): Promise<string> {
-    return this.gatekeeperClient.addJSON(data);
+    return await this.gatekeeperClient.addJSON(data);
   }
 
   private async getJSONInternal(cid: string): Promise<object> {
-    return this.gatekeeperClient.getJSON(cid);
+    return await this.gatekeeperClient.getJSON(cid);
   }
 
   private async addTextInternal(data: string): Promise<string> {
-    return this.gatekeeperClient.addText(data);
+    return await this.gatekeeperClient.addText(data);
   }
 
   private async getTextInternal(cid: string): Promise<string> {
-    return this.gatekeeperClient.getText(cid);
+    return await this.gatekeeperClient.getText(cid);
   }
 
   private async addDataInternal(data: Buffer): Promise<string> {
-    return this.gatekeeperClient.addData(data);
+    return await this.gatekeeperClient.addData(data);
   }
 
   private async getDataInternal(cid: string): Promise<Buffer> {
-    return this.gatekeeperClient.getData(cid);
+    return await this.gatekeeperClient.getData(cid);
   }
 
   private async getBlockInternal(
     registry: string,
     block?: BlockId
   ): Promise<BlockInfo | null> {
-    return this.gatekeeperClient.getBlock(registry, block);
+    return await this.gatekeeperClient.getBlock(registry, block);
   }
 
   private async addBlockInternal(
     registry: string,
     block: BlockInfo
   ): Promise<boolean> {
-    return this.gatekeeperClient.addBlock(registry, block);
+    return await this.gatekeeperClient.addBlock(registry, block);
   }
 
   private validateConfig(config: GatekeeperClientOptions): void {

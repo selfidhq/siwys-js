@@ -10,7 +10,6 @@ export {
 } from "./types/index.js";
 
 export * from "@mdip/keymaster";
-export { AbstractBase } from "@mdip/keymaster";
 import type * as GatekeeperTypes from "@mdip/gatekeeper";
 
 export { GatekeeperTypes };

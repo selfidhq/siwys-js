@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# 0.22.0 (2025-10-03)
+
+
+### Features
+
+* update mdip keymaster 1.3.2 ([#51](https://github.com/selfidhq/siwys-js/issues/51)) ([3837503](https://github.com/selfidhq/siwys-js/commit/3837503ce8f7e3b39a90d0cd3f6b8c5734c2ea55))
+
+
+
+
+
 # 0.21.0 (2025-10-02)
 
 

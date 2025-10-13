@@ -416,7 +416,12 @@ export class Keymaster {
           intervalSeconds: this.config.gatekeeperConfig?.intervalSeconds,
           chatty: this.config.gatekeeperConfig?.chatty,
         });
-
+        if (this.config.gatekeeperConfig?.token) {
+          gatekeeper.addCustomHeader(
+            "authorization",
+            `Bearer ${this.config.gatekeeperConfig.token}`
+          );
+        }
         const cipher = new CipherNode();
         this.keymasterService = new KeymasterLib({
           gatekeeper,

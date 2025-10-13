@@ -48,6 +48,27 @@ export class GatekeeperReactNative {
     return GatekeeperReactNative.getInstance().getDIDsInternal(...args);
   }
 
+  public static async addCustomHeader({
+    header,
+    value,
+  }: {
+    header: string;
+    value: string;
+  }) {
+    GatekeeperReactNative.getInstance().ensureInitialized();
+    return GatekeeperReactNative.getInstance().addCustomHeaderInternal({
+      header,
+      value,
+    });
+  }
+
+  public static async removeCustomHeader({ header }: { header: string }) {
+    GatekeeperReactNative.getInstance().ensureInitialized();
+    return GatekeeperReactNative.getInstance().removeCustomHeaderInternal({
+      header,
+    });
+  }
+
   private static getInstance(): GatekeeperReactNative {
     if (!GatekeeperReactNative.instance) {
       throw new Error(
@@ -89,6 +110,24 @@ export class GatekeeperReactNative {
   }: GetDIDOptions): Promise<string[] | MdipDocument[]> {
     const response = await this.gatekeeperClient.getDIDs({ dids, resolve });
     return response;
+  }
+
+  private async addCustomHeaderInternal({
+    header,
+    value,
+  }: {
+    header: string;
+    value: string;
+  }): Promise<void> {
+    await this.gatekeeperClient.addCustomHeader(header, value);
+  }
+
+  private async removeCustomHeaderInternal({
+    header,
+  }: {
+    header: string;
+  }): Promise<void> {
+    await this.gatekeeperClient.removeCustomHeader(header);
   }
 
   private validateConfig(config: SdkConfig): void {

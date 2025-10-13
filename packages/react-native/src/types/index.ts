@@ -15,6 +15,7 @@ export interface SdkConfig {
   waitUntilReady?: boolean;
   intervalSeconds?: number;
   chatty?: boolean;
+  token?: string;
 }
 export interface WalletConfig {
   id: string;

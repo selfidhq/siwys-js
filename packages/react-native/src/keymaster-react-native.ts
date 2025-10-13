@@ -417,6 +417,12 @@ export class KeymasterReactNative {
           intervalSeconds: this.config.gatekeeperConfig?.intervalSeconds,
           chatty: this.config.gatekeeperConfig?.chatty,
         });
+        if (this.config.gatekeeperConfig?.token) {
+          gatekeeper.addCustomHeader(
+            "authorization",
+            `Bearer ${this.config.gatekeeperConfig.token}`
+          );
+        }
         this.keymasterService = new Keymaster({
           gatekeeper,
           wallet: this.config.walletDb,

@@ -35,6 +35,7 @@ export class KeymasterReactNative {
   private static instance: KeymasterReactNative | null = null;
   private config: KeymasterConfig;
   private keymasterService!: typeof Keymaster;
+  private gatekeeperClient?: GatekeeperClient;
 
   private constructor(config: KeymasterConfig) {
     this.validateConfig(config);
@@ -72,6 +73,29 @@ export class KeymasterReactNative {
   public static async start(): Promise<boolean> {
     KeymasterReactNative.getInstance().ensureInitialized();
     return KeymasterReactNative.getInstance().startInternal();
+  }
+
+  /**
+   * Adds a custom header to the GatekeeperClient instance.
+   * @param header Header name
+   * @param value Header value
+   */
+  public addCustomHeader(header: string, value: string): void {
+    if (!this.gatekeeperClient) {
+      throw new Error("GatekeeperClient not initialized");
+    }
+    this.gatekeeperClient.addCustomHeader(header, value);
+  }
+
+  /**
+   * Removes a custom header from the GatekeeperClient instance.
+   * @param header Header name
+   */
+  public removeCustomHeader(header: string): void {
+    if (!this.gatekeeperClient) {
+      throw new Error("GatekeeperClient not initialized");
+    }
+    this.gatekeeperClient.removeCustomHeader(header);
   }
 
   // Method to create a challenge
@@ -410,21 +434,23 @@ export class KeymasterReactNative {
   private async startIntegratedKeymaster(): Promise<boolean> {
     try {
       if (this.config.walletDb && this.config.cipher) {
-        const gatekeeper = new GatekeeperClient();
-        await gatekeeper.connect({
+        if (!this.gatekeeperClient) {
+          this.gatekeeperClient = new GatekeeperClient();
+        }
+        await this.gatekeeperClient.connect({
           url: this.config.gatekeeperConfig?.url,
           waitUntilReady: this.config.gatekeeperConfig?.waitUntilReady,
           intervalSeconds: this.config.gatekeeperConfig?.intervalSeconds,
           chatty: this.config.gatekeeperConfig?.chatty,
         });
         if (this.config.gatekeeperConfig?.token) {
-          gatekeeper.addCustomHeader(
+          this.gatekeeperClient.addCustomHeader(
             "authorization",
             `Bearer ${this.config.gatekeeperConfig.token}`
           );
         }
         this.keymasterService = new Keymaster({
-          gatekeeper,
+          gatekeeper: this.gatekeeperClient,
           wallet: this.config.walletDb,
           cipher: this.config.cipher,
         });

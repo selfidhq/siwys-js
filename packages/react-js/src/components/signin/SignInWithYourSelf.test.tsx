@@ -228,8 +228,8 @@ describe("SignInWithYourSelf Component", () => {
           onSiwysPress={onSiwysPress}
         />
       );
-      
-      expect(screen.getByText("Sign in with your")).toBeInTheDocument();
+
+      expect(screen.getByTestId("sign-in-title")).toBeInTheDocument();
     });
 
     it("should show logo when showLogo is explicitly true", () => {
@@ -240,8 +240,7 @@ describe("SignInWithYourSelf Component", () => {
           showLogo={true}
         />
       );
-      
-      expect(screen.getByText("Sign in with your")).toBeInTheDocument();
+      expect(screen.getByTestId("sign-in-title")).toBeInTheDocument();
     });
 
     it("should hide logo when showLogo is false", () => {
@@ -252,8 +251,8 @@ describe("SignInWithYourSelf Component", () => {
           showLogo={false}
         />
       );
-      
-      expect(screen.queryByText("Sign in with your")).not.toBeInTheDocument();
+
+      expect(screen.queryByTestId("sign-in-title")).not.toBeInTheDocument();
     });
   });
 

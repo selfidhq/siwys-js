@@ -296,7 +296,7 @@ const SignInWithYourSelf: React.FC<SignInProps> = ({
               <CircleLogoWhite width="48" height="48" />
             )}
             <TitleContainer>
-              <Title $theme={theme}>
+              <Title $theme={theme} data-testid="sign-in-title">
                 {isCYS ? "Connect your" : "Sign in with your"}
               </Title>
               {theme === "dark" ? (

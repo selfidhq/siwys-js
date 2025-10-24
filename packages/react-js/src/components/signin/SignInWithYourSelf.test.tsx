@@ -219,4 +219,77 @@ describe("SignInWithYourSelf Component", () => {
       { timeout: 6000 }
     );
   });
+
+  describe("showLogo prop", () => {
+    it("should show logo when showLogo is true (default)", () => {
+      render(
+        <SignInWithYourSelf
+          challengeDID={challengeDid}
+          onSiwysPress={onSiwysPress}
+        />
+      );
+
+      expect(screen.getByTestId("sign-in-title")).toBeInTheDocument();
+    });
+
+    it("should show logo when showLogo is explicitly true", () => {
+      render(
+        <SignInWithYourSelf
+          challengeDID={challengeDid}
+          onSiwysPress={onSiwysPress}
+          showLogo={true}
+        />
+      );
+      expect(screen.getByTestId("sign-in-title")).toBeInTheDocument();
+    });
+
+    it("should hide logo when showLogo is false", () => {
+      render(
+        <SignInWithYourSelf
+          challengeDID={challengeDid}
+          onSiwysPress={onSiwysPress}
+          showLogo={false}
+        />
+      );
+
+      expect(screen.queryByTestId("sign-in-title")).not.toBeInTheDocument();
+    });
+  });
+
+  describe("showInstructions prop", () => {
+    it("should show instructions when showInstructions is true (default)", () => {
+      render(
+        <SignInWithYourSelf
+          challengeDID={challengeDid}
+          onSiwysPress={onSiwysPress}
+        />
+      );
+      
+      expect(screen.getByText("Sign in with your SELF™ Guide:")).toBeInTheDocument();
+    });
+
+    it("should show instructions when showInstructions is explicitly true", () => {
+      render(
+        <SignInWithYourSelf
+          challengeDID={challengeDid}
+          onSiwysPress={onSiwysPress}
+          showInstructions={true}
+        />
+      );
+      
+      expect(screen.getByText("Sign in with your SELF™ Guide:")).toBeInTheDocument();
+    });
+
+    it("should hide instructions when showInstructions is false", () => {
+      render(
+        <SignInWithYourSelf
+          challengeDID={challengeDid}
+          onSiwysPress={onSiwysPress}
+          showInstructions={false}
+        />
+      );
+
+      expect(screen.queryByText("Sign in with your SELF™ Guide:")).not.toBeInTheDocument();
+    });
+  });
 });

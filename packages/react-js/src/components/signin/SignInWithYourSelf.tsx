@@ -25,6 +25,8 @@ interface SignInProps {
   pollForAuthUrl?: string;
   successComponent?: React.ReactNode;
   theme?: ThemeProp;
+  showLogo?: boolean;
+  showInstructions?: boolean;
 }
 
 const Wrapper = styled.div`
@@ -211,6 +213,8 @@ const SignInWithYourSelf: React.FC<SignInProps> = ({
   successComponent,
   theme = "light",
   challengeBaseUrl = "",
+  showLogo = true,
+  showInstructions = true,
 }) => {
   const [challengeUrl, setChallengeUrl] = useState<string>(
     challengeBaseUrl
@@ -284,22 +288,25 @@ const SignInWithYourSelf: React.FC<SignInProps> = ({
   return (
     <Wrapper>
       <SignInContainer>
-        {theme === "dark" ? (
-          <CircleLogoBlack width="48" height="48" />
-        ) : (
-          <CircleLogoWhite width="48" height="48" />
+        {showLogo && (
+          <>
+            {theme === "dark" ? (
+              <CircleLogoBlack width="48" height="48" />
+            ) : (
+              <CircleLogoWhite width="48" height="48" />
+            )}
+            <TitleContainer>
+              <Title $theme={theme} data-testid="sign-in-title">
+                {isCYS ? "Connect your" : "Sign in with your"}
+              </Title>
+              {theme === "dark" ? (
+                <SelfTextLogoBlack width="102" height="22" />
+              ) : (
+                <SelfTextLogoWhite width="102" height="22" />
+              )}
+            </TitleContainer>
+          </>
         )}
-        <TitleContainer>
-          <Title $theme={theme}>
-            {isCYS ? "Connect your" : "Sign in with your"}
-          </Title>
-          {theme === "dark" ? (
-            <SelfTextLogoBlack width="102" height="22" />
-          ) : (
-            <SelfTextLogoWhite width="102" height="22" />
-          )}
-        </TitleContainer>
-        {}
         <QRContainer $theme={theme}>
           <QRCode challengeUrl={challengeUrl} size={200} level="H" />
         </QRContainer>
@@ -309,86 +316,89 @@ const SignInWithYourSelf: React.FC<SignInProps> = ({
           <SiwysButton colorTheme={theme} onClick={defaultSiwysClick} glow />
         )}
       </SignInContainer>
-      <InstructionsContainer>
-        <InstructionsTitle $theme={theme}>
-          {isCYS
-            ? "Connect your SELF™ Guide:"
-            : "Sign in with your SELF™ Guide:"}
-        </InstructionsTitle>
-        <div>
-          <InstructionsSubtitle $theme={theme}>
+
+      {showInstructions && (
+        <InstructionsContainer>
+          <InstructionsTitle $theme={theme}>
             {isCYS
-              ? "If you have the SELF® mobile app:"
-              : "If you are signing in on a device that has the SELF® app installed:"}
-          </InstructionsSubtitle>
-          <InstructionsDescription $theme={theme}>
-            <InstructionsDescriptionItem>
+              ? "Connect your SELF™ Guide:"
+              : "Sign in with your SELF™ Guide:"}
+          </InstructionsTitle>
+          <div>
+            <InstructionsSubtitle $theme={theme}>
               {isCYS
-                ? "Use scanning feature in the SELF® app to scan the QR code."
-                : 'Tap the "Sign in with your SELF™" button.'}
-            </InstructionsDescriptionItem>
-            <InstructionsDescriptionItem>
-              Approve the connection request within the SELF® app.
-            </InstructionsDescriptionItem>
-          </InstructionsDescription>
-        </div>
-        <div>
-          <InstructionsSubtitle $theme={theme}>
-            {isCYS
-              ? "If you do not have the SELF® mobile app:"
-              : "If you are not signing in on a device that has the SELF® app installed:"}
-          </InstructionsSubtitle>
-          <InstructionsDescription $theme={theme}>
-            <InstructionsDescriptionItem>
+                ? "If you have the SELF® mobile app:"
+                : "If you are signing in on a device that has the SELF® app installed:"}
+            </InstructionsSubtitle>
+            <InstructionsDescription $theme={theme}>
+              <InstructionsDescriptionItem>
+                {isCYS
+                  ? "Use scanning feature in the SELF® app to scan the QR code."
+                  : 'Tap the "Sign in with your SELF™" button.'}
+              </InstructionsDescriptionItem>
+              <InstructionsDescriptionItem>
+                Approve the connection request within the SELF® app.
+              </InstructionsDescriptionItem>
+            </InstructionsDescription>
+          </div>
+          <div>
+            <InstructionsSubtitle $theme={theme}>
               {isCYS
-                ? "Download and open the SELF® ID app from the App Store."
-                : "Open the SELF® app on the device with the app installed."}
-            </InstructionsDescriptionItem>
-            <InstructionsDescriptionItem>
-              Use the scanning feature in the SELF® app to scan the QR code.
-            </InstructionsDescriptionItem>
-            <InstructionsDescriptionItem>
-              Approve the connection request within the SELF® app.
-            </InstructionsDescriptionItem>
-          </InstructionsDescription>
-        </div>
-        <ParentDownloadContainer>
-          <DownloadTitleContainer>
-            <InstructionsTitle $theme={theme}>
-              {"Don’t have the"}
-            </InstructionsTitle>
-            {theme === "dark" ? (
-              <SelfTextLogoBlack width="58" height="12" />
-            ) : (
-              <SelfTextLogoWhite width="58" height="12" />
-            )}
-            <InstructionsTitle $theme={theme}>{" app?"}</InstructionsTitle>
-          </DownloadTitleContainer>
-          <DownloadContainer>
-            <DownloadContainerFlex>
-              <DownloadAppTitle>Available to download now:</DownloadAppTitle>
-              <AppIconsContainer>
-                <AppIconDark width="56" height="56" />
-                <AppIconLight width="56" height="56" />
-              </AppIconsContainer>
-            </DownloadContainerFlex>
-            <DownloadContainerFlex>
-              <AppleAppStore
-                width="8rem"
-                height="2.5rem"
-                onClick={redirectToAppStore}
-                style={{ cursor: "pointer" }}
-              />
-              <GooglePlayStore
-                width="8rem"
-                height="2.5rem"
-                onClick={redirectToPlayStore}
-                style={{ cursor: "pointer" }}
-              />
-            </DownloadContainerFlex>
-          </DownloadContainer>
-        </ParentDownloadContainer>
-      </InstructionsContainer>
+                ? "If you do not have the SELF® mobile app:"
+                : "If you are not signing in on a device that has the SELF® app installed:"}
+            </InstructionsSubtitle>
+            <InstructionsDescription $theme={theme}>
+              <InstructionsDescriptionItem>
+                {isCYS
+                  ? "Download and open the SELF® ID app from the App Store."
+                  : "Open the SELF® app on the device with the app installed."}
+              </InstructionsDescriptionItem>
+              <InstructionsDescriptionItem>
+                Use the scanning feature in the SELF® app to scan the QR code.
+              </InstructionsDescriptionItem>
+              <InstructionsDescriptionItem>
+                Approve the connection request within the SELF® app.
+              </InstructionsDescriptionItem>
+            </InstructionsDescription>
+          </div>
+          <ParentDownloadContainer>
+            <DownloadTitleContainer>
+              <InstructionsTitle $theme={theme}>
+                {"Don’t have the"}
+              </InstructionsTitle>
+              {theme === "dark" ? (
+                <SelfTextLogoBlack width="58" height="12" />
+              ) : (
+                <SelfTextLogoWhite width="58" height="12" />
+              )}
+              <InstructionsTitle $theme={theme}>{" app?"}</InstructionsTitle>
+            </DownloadTitleContainer>
+            <DownloadContainer>
+              <DownloadContainerFlex>
+                <DownloadAppTitle>Available to download now:</DownloadAppTitle>
+                <AppIconsContainer>
+                  <AppIconDark width="56" height="56" />
+                  <AppIconLight width="56" height="56" />
+                </AppIconsContainer>
+              </DownloadContainerFlex>
+              <DownloadContainerFlex>
+                <AppleAppStore
+                  width="8rem"
+                  height="2.5rem"
+                  onClick={redirectToAppStore}
+                  style={{ cursor: "pointer" }}
+                />
+                <GooglePlayStore
+                  width="8rem"
+                  height="2.5rem"
+                  onClick={redirectToPlayStore}
+                  style={{ cursor: "pointer" }}
+                />
+              </DownloadContainerFlex>
+            </DownloadContainer>
+          </ParentDownloadContainer>
+        </InstructionsContainer>
+      )}
     </Wrapper>
   );
 };

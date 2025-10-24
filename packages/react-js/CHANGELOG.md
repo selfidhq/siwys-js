@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# 0.24.0 (2025-10-24)
+
+
+### Features
+
+* add showLogo and showInstructions props to SignInWithYourSelf ([#54](https://github.com/selfidhq/siwys-js/issues/54)) ([de5251f](https://github.com/selfidhq/siwys-js/commit/de5251f4c05a1c1cb4ad7039fd78a8f49830a831))
+
+
+
+
+
 # 0.23.0 (2025-10-13)
 
 

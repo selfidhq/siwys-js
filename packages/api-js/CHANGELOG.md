@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# 0.25.0 (2025-11-04)
+
+
+### Features
+
+* added add and remove custom header ([#55](https://github.com/selfidhq/siwys-js/issues/55)) ([9201d1c](https://github.com/selfidhq/siwys-js/commit/9201d1cda426b5afefe53381e4d554f98fa9ac92))
+
+
+
+
+
 # 0.24.0 (2025-10-24)
 
 

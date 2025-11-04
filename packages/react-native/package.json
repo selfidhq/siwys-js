@@ -1,6 +1,6 @@
 {
   "name": "@yourself_id/siwys-react-native",
-  "version": "0.24.0",
+  "version": "0.25.0",
   "description": "A React Native component library",
   "repository": "https://github.com/selfidhq/siwys-js",
   "type": "module",

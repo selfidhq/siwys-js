@@ -35,6 +35,7 @@ export class KeymasterReactNative {
   private static instance: KeymasterReactNative | null = null;
   private config: KeymasterConfig;
   private keymasterService!: typeof Keymaster;
+  private gatekeeper: GatekeeperClient | null = null;
 
   private constructor(config: KeymasterConfig) {
     this.validateConfig(config);
@@ -376,6 +377,30 @@ export class KeymasterReactNative {
     );
   }
 
+  /**
+   * Adds a custom header to the GatekeeperClient instance.
+   */
+  public async addCustomHeader({
+    header,
+    value,
+  }: {
+    header: string;
+    value: string;
+  }) {
+    KeymasterReactNative.getInstance().ensureInitialized();
+    const gatekeeper = this.getGatekeeper();
+    return gatekeeper.addCustomHeader(header, value);
+  }
+
+  /**
+   * Removes a custom header from the GatekeeperClient instance.
+   */
+  public async removeCustomHeader({ header }: { header: string }) {
+    KeymasterReactNative.getInstance().ensureInitialized();
+    const gatekeeper = this.getGatekeeper();
+    return gatekeeper.removeCustomHeader(header);
+  }
+
   // Recover an existing wallet
   /**
    * Recovers a wallet from a backup.
@@ -395,6 +420,13 @@ export class KeymasterReactNative {
       );
     }
     return KeymasterReactNative.instance;
+  }
+
+  private getGatekeeper(): GatekeeperClient {
+    if (!this.gatekeeper) {
+      throw new Error("GatekeeperClient not initialized");
+    }
+    return this.gatekeeper;
   }
 
   // -------- Internal instance methods (originals renamed with Internal) -------
@@ -423,6 +455,7 @@ export class KeymasterReactNative {
             `Bearer ${this.config.gatekeeperConfig.token}`
           );
         }
+        this.gatekeeper = gatekeeper;
         this.keymasterService = new Keymaster({
           gatekeeper,
           wallet: this.config.walletDb,
@@ -435,7 +468,6 @@ export class KeymasterReactNative {
       console.error("Error starting KeymasterReactNative service:", e);
       return false;
     }
-
     return true;
   }
 

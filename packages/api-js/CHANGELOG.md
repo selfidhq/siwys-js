@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# 0.26.0 (2025-11-05)
+
+
+### Features
+
+* save gatekeeper instance for future use cases ([#56](https://github.com/selfidhq/siwys-js/issues/56)) ([fc26092](https://github.com/selfidhq/siwys-js/commit/fc260928f76493d8d7efa996e1b35488ca5d8385))
+
+
+
+
+
 # 0.25.0 (2025-11-04)
 
 

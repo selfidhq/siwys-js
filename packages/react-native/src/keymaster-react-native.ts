@@ -379,14 +379,10 @@ export class KeymasterReactNative {
 
   /**
    * Adds a custom header to the GatekeeperClient instance.
+   * @param header Header name
+   * @param value Header value
    */
-  public async addCustomHeader({
-    header,
-    value,
-  }: {
-    header: string;
-    value: string;
-  }) {
+  public addCustomHeader(header: string, value: string): void {
     KeymasterReactNative.getInstance().ensureInitialized();
     const gatekeeper = this.getGatekeeper();
     return gatekeeper.addCustomHeader(header, value);
@@ -394,8 +390,9 @@ export class KeymasterReactNative {
 
   /**
    * Removes a custom header from the GatekeeperClient instance.
+   * @param header Header name
    */
-  public async removeCustomHeader({ header }: { header: string }) {
+  public removeCustomHeader(header: string): void {
     KeymasterReactNative.getInstance().ensureInitialized();
     const gatekeeper = this.getGatekeeper();
     return gatekeeper.removeCustomHeader(header);
@@ -442,22 +439,23 @@ export class KeymasterReactNative {
   private async startIntegratedKeymaster(): Promise<boolean> {
     try {
       if (this.config.walletDb && this.config.cipher) {
-        const gatekeeper = new GatekeeperClient();
-        await gatekeeper.connect({
+        if (!this.gatekeeper) {
+          this.gatekeeper = new GatekeeperClient();
+        }
+        await this.gatekeeper.connect({
           url: this.config.gatekeeperConfig?.url,
           waitUntilReady: this.config.gatekeeperConfig?.waitUntilReady,
           intervalSeconds: this.config.gatekeeperConfig?.intervalSeconds,
           chatty: this.config.gatekeeperConfig?.chatty,
         });
         if (this.config.gatekeeperConfig?.token) {
-          gatekeeper.addCustomHeader(
+          this.gatekeeper.addCustomHeader(
             "authorization",
             `Bearer ${this.config.gatekeeperConfig.token}`
           );
         }
-        this.gatekeeper = gatekeeper;
         this.keymasterService = new Keymaster({
-          gatekeeper,
+          gatekeeper: this.gatekeeper,
           wallet: this.config.walletDb,
           cipher: this.config.cipher,
         });

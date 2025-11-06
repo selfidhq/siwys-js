@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# 0.27.0 (2025-11-06)
+
+
+### Features
+
+* make addCustomHeader and removeCustomHeader static methods ([#57](https://github.com/selfidhq/siwys-js/issues/57)) ([4654995](https://github.com/selfidhq/siwys-js/commit/4654995e735f3353866d94e3cd353fcaee20f1e4))
+
+
+
+
+
 # 0.26.0 (2025-11-05)
 
 

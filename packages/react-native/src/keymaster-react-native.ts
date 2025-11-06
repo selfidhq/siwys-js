@@ -382,9 +382,9 @@ export class KeymasterReactNative {
    * @param header Header name
    * @param value Header value
    */
-  public addCustomHeader(header: string, value: string): void {
+  public static addCustomHeader(header: string, value: string): void {
     KeymasterReactNative.getInstance().ensureInitialized();
-    const gatekeeper = this.getGatekeeper();
+    const gatekeeper = KeymasterReactNative.getInstance().getGatekeeper();
     return gatekeeper.addCustomHeader(header, value);
   }
 
@@ -392,9 +392,9 @@ export class KeymasterReactNative {
    * Removes a custom header from the GatekeeperClient instance.
    * @param header Header name
    */
-  public removeCustomHeader(header: string): void {
+  public static removeCustomHeader(header: string): void {
     KeymasterReactNative.getInstance().ensureInitialized();
-    const gatekeeper = this.getGatekeeper();
+    const gatekeeper = KeymasterReactNative.getInstance().getGatekeeper();
     return gatekeeper.removeCustomHeader(header);
   }
 

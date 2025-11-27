@@ -33,6 +33,7 @@ export class Keymaster {
   private config: KeymasterConfig;
   private keymasterService!: KeymasterLib;
   private serviceStarted = false;
+  private gatekeeper: GatekeeperClient | null = null;
 
   private constructor(config: KeymasterConfig) {
     this.validateConfig(config);
@@ -111,6 +112,27 @@ export class Keymaster {
       subjectId,
       options
     );
+  }
+
+  /**
+   * Adds a custom header to the GatekeeperClient instance.
+   * @param header Header name
+   * @param value Header value
+   */
+  public static addCustomHeader(header: string, value: string): void {
+    Keymaster.getInstance().ensureInitialized();
+    const gatekeeper = Keymaster.getInstance().getGatekeeper();
+    return gatekeeper.addCustomHeader(header, value);
+  }
+
+  /**
+   * Removes a custom header from the GatekeeperClient instance.
+   * @param header Header name
+   */
+  public static removeCustomHeader(header: string): void {
+    Keymaster.getInstance().ensureInitialized();
+    const gatekeeper = Keymaster.getInstance().getGatekeeper();
+    return gatekeeper.removeCustomHeader(header);
   }
 
   // Method to create a response
@@ -398,6 +420,13 @@ export class Keymaster {
     }
   }
 
+  private getGatekeeper(): GatekeeperClient {
+    if (!this.gatekeeper) {
+      throw new Error("GatekeeperClient not initialized");
+    }
+    return this.gatekeeper;
+  }
+
   private async startInternal(): Promise<boolean> {
     if (this.config.gatekeeperConfig) {
       this.serviceStarted = await this.startIntegratedKeymaster();
@@ -410,21 +439,25 @@ export class Keymaster {
   private async startIntegratedKeymaster(): Promise<boolean> {
     try {
       if (this.config.walletDb) {
-        const gatekeeper = await GatekeeperClient.create({
+        if (!this.gatekeeper) {
+          this.gatekeeper = new GatekeeperClient();
+        }
+        await this.gatekeeper.connect({
           url: this.config.gatekeeperConfig?.url,
           waitUntilReady: this.config.gatekeeperConfig?.waitUntilReady,
           intervalSeconds: this.config.gatekeeperConfig?.intervalSeconds,
           chatty: this.config.gatekeeperConfig?.chatty,
         });
+
         if (this.config.gatekeeperConfig?.token) {
-          gatekeeper.addCustomHeader(
+          this.gatekeeper.addCustomHeader(
             "authorization",
             `Bearer ${this.config.gatekeeperConfig.token}`
           );
         }
         const cipher = new CipherNode();
         this.keymasterService = new KeymasterLib({
-          gatekeeper,
+          gatekeeper: this.gatekeeper,
           wallet: this.config.walletDb,
           cipher,
         });

@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# 0.28.0 (2025-11-27)
+
+
+### Features
+
+* added private gatekepeer instance to siwys-js api ([#58](https://github.com/selfidhq/siwys-js/issues/58)) ([73b0475](https://github.com/selfidhq/siwys-js/commit/73b047506d39b7b5ce97f0af818006c440c96337))
+
+
+
+
+
 # 0.27.0 (2025-11-06)
 
 

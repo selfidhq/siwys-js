@@ -22,12 +22,14 @@
   },
   "scripts": {
     "build": "tsup",
-    "test": "echo 'no tests yet'"
+    "test": "echo 'no tests yet'",
+    "postinstall": "patch-package"
   },
   "dependencies": {
     "@mdip/cipher": "^1.3.0",
     "@mdip/gatekeeper": "^1.3.0",
-    "@mdip/keymaster": "^1.3.2"
+    "@mdip/keymaster": "1.3.3",
+    "patch-package": "^8.0.1"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.25.8",

@@ -1,0 +1,100 @@
+diff --git a/node_modules/@mdip/keymaster/dist/cjs/keymaster.cjs b/node_modules/@mdip/keymaster/dist/cjs/keymaster.cjs
+index 7a7b96f..52be38d 100644
+--- a/node_modules/@mdip/keymaster/dist/cjs/keymaster.cjs
++++ b/node_modules/@mdip/keymaster/dist/cjs/keymaster.cjs
+@@ -2037,6 +2037,38 @@ class Keymaster {
+         });
+         return createdDid;
+     }
++    async createIdOperation(name, options = {}) {
++        const { registry = this.defaultRegistry } = options;
++        const wallet = await this.loadWallet();
++        name = this.validateName(name, wallet);
++        const account = wallet.counter;
++        const index = 0;
++        const hdkey = await this.getHDKeyFromCacheOrMnemonic(wallet);
++        const path = `m/44'/0'/${account}'/0/${index}`;
++        const didkey = hdkey.derive(path);
++        const keypair = this.cipher.generateJwk(didkey.privateKey);
++        const operation = {
++            type: 'create',
++            created: new Date().toISOString(),
++            mdip: {
++                version: 1,
++                type: 'agent',
++                registry
++            },
++            publicJwk: keypair.publicJwk,
++        };
++        const msgHash = this.cipher.hashJSON(operation);
++        const signature = this.cipher.signHash(msgHash, keypair.privateJwk);
++        const signed = {
++            ...operation,
++            signature: {
++                signed: new Date().toISOString(),
++                hash: msgHash,
++                value: signature
++            },
++        };
++        return signed;
++    }
+     async removeId(name) {
+         await this.mutateWallet((wallet) => {
+             if (!(name in wallet.ids)) {
+diff --git a/node_modules/@mdip/keymaster/dist/esm/keymaster.js b/node_modules/@mdip/keymaster/dist/esm/keymaster.js
+index d21f179..894da1c 100644
+--- a/node_modules/@mdip/keymaster/dist/esm/keymaster.js
++++ b/node_modules/@mdip/keymaster/dist/esm/keymaster.js
+@@ -990,6 +990,38 @@ export default class Keymaster {
+         });
+         return createdDid;
+     }
++    async createIdOperation(name, options = {}) {
++        const { registry = this.defaultRegistry } = options;
++        const wallet = await this.loadWallet();
++        name = this.validateName(name, wallet);
++        const account = wallet.counter;
++        const index = 0;
++        const hdkey = await this.getHDKeyFromCacheOrMnemonic(wallet);
++        const path = `m/44'/0'/${account}'/0/${index}`;
++        const didkey = hdkey.derive(path);
++        const keypair = this.cipher.generateJwk(didkey.privateKey);
++        const operation = {
++            type: 'create',
++            created: new Date().toISOString(),
++            mdip: {
++                version: 1,
++                type: 'agent',
++                registry
++            },
++            publicJwk: keypair.publicJwk,
++        };
++        const msgHash = this.cipher.hashJSON(operation);
++        const signature = this.cipher.signHash(msgHash, keypair.privateJwk);
++        const signed = {
++            ...operation,
++            signature: {
++                signed: new Date().toISOString(),
++                hash: msgHash,
++                value: signature
++            },
++        };
++        return signed;
++    }
+     async removeId(name) {
+         await this.mutateWallet((wallet) => {
+             if (!(name in wallet.ids)) {
+diff --git a/node_modules/@mdip/keymaster/dist/types/keymaster.d.ts b/node_modules/@mdip/keymaster/dist/types/keymaster.d.ts
+index 520122d..78dbec6 100644
+--- a/node_modules/@mdip/keymaster/dist/types/keymaster.d.ts
++++ b/node_modules/@mdip/keymaster/dist/types/keymaster.d.ts
+@@ -83,6 +83,9 @@ export default class Keymaster implements KeymasterInterface {
+     createId(name: string, options?: {
+         registry?: string;
+     }): Promise<string>;
++    createIdOperation(name: string, options?: {
++        registry?: string;
++    }): Promise<any>;
+     removeId(name: string): Promise<boolean>;
+     renameId(id: string, name: string): Promise<boolean>;
+     backupId(id?: string): Promise<boolean>;

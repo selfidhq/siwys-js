@@ -30,6 +30,7 @@ export interface KeymasterConfig {
   gatekeeperConfig?: SdkConfig;
   walletDb?: WalletBase;
   cipher?: CipherNode;
+  passphrase: string;
 }
 export class KeymasterReactNative {
   private static instance: KeymasterReactNative | null = null;
@@ -458,6 +459,7 @@ export class KeymasterReactNative {
           gatekeeper: this.gatekeeper,
           wallet: this.config.walletDb,
           cipher: this.config.cipher,
+          passphrase: this.config.passphrase,
         });
       } else {
         return false;
@@ -608,6 +610,9 @@ export class KeymasterReactNative {
       }
       if (!config.walletDb?.saveWallet) {
         throw new Error("Missing save wallet callback");
+      }
+      if (!config.passphrase) {
+        throw new Error("Missing passphrase");
       }
     }
   }

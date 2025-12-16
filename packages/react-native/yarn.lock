@@ -2328,10 +2328,10 @@
     kubo-rpc-client "^5.1.0"
     multiformats "^13.3.3"
 
-"@mdip/keymaster@1.4.0-beta.1":
-  version "1.4.0-beta.1"
-  resolved "https://registry.yarnpkg.com/@mdip/keymaster/-/keymaster-1.4.0-beta.1.tgz#1e91aff14d19f7b9ae9e94628efca8b2160d609f"
-  integrity sha512-tvv/IWO06g/B/qndOxeEjOey4RufeVSWoZID96JfS8OW8WbjiyFVYHefnBaZcECeo0TIHGcu+i7q88nL0iOj2A==
+"@mdip/keymaster@1.4.0-beta.2":
+  version "1.4.0-beta.2"
+  resolved "https://registry.yarnpkg.com/@mdip/keymaster/-/keymaster-1.4.0-beta.2.tgz#40f824f290af31ba6223dc0e47eda0ed3565b090"
+  integrity sha512-En2/ZIMUCtaigke5YzcV2WZJ6XW8yNIIvAuU1WZ/zTd/FW77FqUJaY9njUBtVkB99ABxjs6YrePdk4BSQn9kIQ==
   dependencies:
     "@mdip/common" "*"
     axios "^1.7.7"
@@ -2339,7 +2339,6 @@
     image-size "^2.0.1"
     ioredis "^5.4.1"
     mongodb "^6.5.0"
-    node-forge "^1.3.1"
     sqlite "^5.1.1"
     sqlite3 "^5.1.7"
 

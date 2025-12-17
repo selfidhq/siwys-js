@@ -30,6 +30,7 @@ export interface KeymasterConfig {
   gatekeeperConfig?: SdkConfig;
   walletDb?: WalletBase;
   cipher?: CipherNode;
+  passphrase: string;
 }
 export class KeymasterReactNative {
   private static instance: KeymasterReactNative | null = null;
@@ -304,6 +305,24 @@ export class KeymasterReactNative {
     return KeymasterReactNative.getInstance().createIdInternal(name, options);
   }
 
+  // Method to create an ID
+  /**
+   * Creates a new DID (Decentralized Identifier).
+   * @param name The name for the DID.
+   * @param options Optional options, such as registry URL.
+   * @returns A promise with the newly created DID.
+   */
+  public static async createIdOperation(
+    name: string,
+    account: number,
+    options?: {
+      registry?: string;
+    }
+  ): Promise<string> {
+    KeymasterReactNative.getInstance().ensureInitialized();
+    return KeymasterReactNative.getInstance().createIdOperationInternal(name, account, options);
+  }
+
   // Remove an ID
   /**
    * Removes an existing DID.
@@ -458,6 +477,7 @@ export class KeymasterReactNative {
           gatekeeper: this.gatekeeper,
           wallet: this.config.walletDb,
           cipher: this.config.cipher,
+          passphrase: this.config.passphrase,
         });
       } else {
         return false;
@@ -561,6 +581,12 @@ export class KeymasterReactNative {
     return this.keymasterService.createId(...args);
   }
 
+  private async createIdOperationInternal(
+    ...args: Parameters<(typeof Keymaster)["createIdOperation"]>
+  ) {
+    return this.keymasterService.createIdOperation(...args);
+  }
+
   private async removeIdInternal(
     ...args: Parameters<(typeof Keymaster)["removeId"]>
   ) {
@@ -608,6 +634,9 @@ export class KeymasterReactNative {
       }
       if (!config.walletDb?.saveWallet) {
         throw new Error("Missing save wallet callback");
+      }
+      if (!config.passphrase) {
+        throw new Error("Missing passphrase");
       }
     }
   }

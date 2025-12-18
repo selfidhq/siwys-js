@@ -1,6 +1,6 @@
 {
   "name": "@yourself_id/siwys-api-js",
-  "version": "0.28.2",
+  "version": "0.28.3",
   "description": "A React component library",
   "repository": "https://github.com/selfidhq/siwys-js",
   "type": "module",
@@ -25,9 +25,9 @@
     "test": "echo 'no tests yet'"
   },
   "dependencies": {
-    "@mdip/cipher": "^1.3.0",
+    "@mdip/cipher": "^1.4.0-beta.3",
     "@mdip/gatekeeper": "^1.4.0-beta.3",
-    "@mdip/keymaster": "^1.3.2"
+    "@mdip/keymaster": "^1.4.0-beta.3"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.25.8",

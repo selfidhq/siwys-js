@@ -75,6 +75,11 @@ export class GatekeeperReactNative {
     });
   }
 
+  public static async generateDID(operation: Operation): Promise<string> {
+    GatekeeperReactNative.getInstance().ensureInitialized();
+    return GatekeeperReactNative.getInstance().generateDIDInternal(operation);
+  }
+
   private static getInstance(): GatekeeperReactNative {
     if (!GatekeeperReactNative.instance) {
       throw new Error(
@@ -138,6 +143,10 @@ export class GatekeeperReactNative {
     header: string;
   }): Promise<void> {
     await this.gatekeeperClient.removeCustomHeader(header);
+  }
+
+  private async generateDIDInternal(operation: Operation): Promise<string> {
+    return await this.gatekeeperClient.generateDID(operation);
   }
 
   private validateConfig(config: SdkConfig): void {

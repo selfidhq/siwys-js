@@ -3,6 +3,7 @@ import {
   GatekeeperClient,
   MdipDocument,
   GetDIDOptions,
+  Operation,
 } from "@mdip/gatekeeper";
 
 export class GatekeeperReactNative {
@@ -46,6 +47,11 @@ export class GatekeeperReactNative {
   ) {
     GatekeeperReactNative.getInstance().ensureInitialized();
     return GatekeeperReactNative.getInstance().getDIDsInternal(...args);
+  }
+
+  public static async generateDID(operation: Operation): Promise<string> {
+    GatekeeperReactNative.getInstance().ensureInitialized();
+    return GatekeeperReactNative.getInstance().generateDIDInternal(operation);
   }
 
   public static async addCustomHeader({
@@ -110,6 +116,10 @@ export class GatekeeperReactNative {
   }: GetDIDOptions): Promise<string[] | MdipDocument[]> {
     const response = await this.gatekeeperClient.getDIDs({ dids, resolve });
     return response;
+  }
+
+  private async generateDIDInternal(operation: Operation): Promise<string> {
+    return await this.gatekeeperClient.generateDID(operation);
   }
 
   private async addCustomHeaderInternal({

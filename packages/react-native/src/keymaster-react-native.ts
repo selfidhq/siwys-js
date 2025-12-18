@@ -14,6 +14,7 @@ import {
   GatekeeperClient,
   MdipDocument,
   ResolveDIDOptions,
+  Operation,
 } from "@mdip/gatekeeper";
 import {
   CreateChallengeResponse,
@@ -349,6 +350,17 @@ export class KeymasterReactNative {
     return KeymasterReactNative.getInstance().resolveDIDInternal(did, options);
   }
 
+  // Generate a DID
+  /**
+   * Generates a DID from an operation without creating it on the blockchain.
+   * @param operation The operation to generate a DID from.
+   * @returns A promise with the generated DID string.
+   */
+  public static async generateDID(operation: Operation): Promise<string> {
+    KeymasterReactNative.getInstance().ensureInitialized();
+    return KeymasterReactNative.getInstance().generateDIDInternal(operation);
+  }
+
   // Set the current DID
   /**
    * Sets the current DID in use.
@@ -597,6 +609,11 @@ export class KeymasterReactNative {
     ...args: Parameters<(typeof Keymaster)["resolveDID"]>
   ) {
     return this.keymasterService.resolveDID(...args);
+  }
+
+  private async generateDIDInternal(operation: Operation): Promise<string> {
+    const gatekeeper = this.getGatekeeper();
+    return await gatekeeper.generateDID(operation);
   }
 
   private async setCurrentIdInternal(

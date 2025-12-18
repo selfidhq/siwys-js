@@ -25,6 +25,7 @@ export interface KeymasterConfig {
   gatekeeperConfig?: SdkConfig;
   walletDb?: WalletBase;
   walletConfig?: WalletConfig;
+  passphrase: string;
 }
 
 export class Keymaster {
@@ -460,6 +461,7 @@ export class Keymaster {
           gatekeeper: this.gatekeeper,
           wallet: this.config.walletDb,
           cipher,
+          passphrase: this.config.passphrase,
         });
         await this.ensureWalletExists();
       } else {

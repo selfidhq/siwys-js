@@ -98,6 +98,11 @@ export class GatekeeperClient {
     return GatekeeperClient.getInstance().createDIDInternal(operation);
   }
 
+  public static async generateDID(operation: Operation): Promise<string> {
+    GatekeeperClient.getInstance().ensureInitialized();
+    return GatekeeperClient.getInstance().generateDIDInternal(operation);
+  }
+
   public static async resolveDID(
     did: string,
     options?: ResolveDIDOptions
@@ -284,6 +289,10 @@ export class GatekeeperClient {
 
   private async createDIDInternal(operation: Operation): Promise<string> {
     return await this.gatekeeperClient.createDID(operation);
+  }
+
+  private async generateDIDInternal(operation: Operation): Promise<string> {
+    return await this.gatekeeperClient.generateDID(operation);
   }
 
   private async resolveDIDInternal(

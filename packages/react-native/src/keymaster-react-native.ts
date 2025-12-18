@@ -13,6 +13,7 @@ import {
 import {
   GatekeeperClient,
   MdipDocument,
+  Operation,
   ResolveDIDOptions,
 } from "@mdip/gatekeeper";
 import {
@@ -318,7 +319,7 @@ export class KeymasterReactNative {
     options?: {
       registry?: string;
     }
-  ): Promise<string> {
+  ): Promise<{signed: Operation, pendingDID: string}> {
     KeymasterReactNative.getInstance().ensureInitialized();
     return KeymasterReactNative.getInstance().createIdOperationInternal(name, account, options);
   }

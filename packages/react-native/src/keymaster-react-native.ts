@@ -319,7 +319,7 @@ export class KeymasterReactNative {
     options?: {
       registry?: string;
     }
-  ): Promise<{signed: Operation, pendingDID: string}> {
+  ): Promise<Operation> {
     KeymasterReactNative.getInstance().ensureInitialized();
     return KeymasterReactNative.getInstance().createIdOperationInternal(name, account, options);
   }

@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# 0.29.0 (2025-12-21)
+
+
+### Features
+
+* **sapp858:** add the loadWallet and saveWallet functions from Keymaster ([#69](https://github.com/selfidhq/siwys-js/issues/69)) ([737c4ec](https://github.com/selfidhq/siwys-js/commit/737c4ecc7030560d56e87374f47a8e5576a0a52c))
+
+
+
+
+
 ## 0.28.6 (2025-12-19)
 
 **Note:** Version bump only for package @yourself_id/siwys-react-native

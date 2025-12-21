@@ -5,6 +5,7 @@ import {
   CreateAssetOptions,
   CreateResponseOptions,
   IssueCredentialsOptions,
+  StoredWallet,
   VerifiableCredential,
   WalletBase,
   WalletFile,
@@ -379,6 +380,34 @@ export class KeymasterReactNative {
     );
   }
 
+  // Load wallet
+  /**
+   * Loads the current wallet.
+   * @returns A promise with the loaded wallet file.
+   */
+  public static async loadWallet(): Promise<WalletFile> {
+    KeymasterReactNative.getInstance().ensureInitialized();
+    return KeymasterReactNative.getInstance().loadWalletInternal();
+  }
+
+  // Save wallet
+  /**
+   * Saves the wallet.
+   * @param wallet The wallet to save.
+   * @param overwrite Optional flag to overwrite the existing wallet (default: true).
+   * @returns A promise with a boolean indicating success.
+   */
+  public static async saveWallet(
+    wallet: StoredWallet,
+    overwrite = true
+  ): Promise<boolean> {
+    KeymasterReactNative.getInstance().ensureInitialized();
+    return KeymasterReactNative.getInstance().saveWalletInternal(
+      wallet,
+      overwrite
+    );
+  }
+
   // Create a new wallet
   /**
    * Creates a new wallet.
@@ -610,6 +639,17 @@ export class KeymasterReactNative {
     ...args: Parameters<(typeof Keymaster)["createSchema"]>
   ) {
     return this.keymasterService.createSchema(...args);
+  }
+
+  private async loadWalletInternal(): Promise<WalletFile> {
+    return this.keymasterService.loadWallet();
+  }
+
+  private async saveWalletInternal(
+    wallet: StoredWallet,
+    overwrite = true
+  ): Promise<boolean> {
+    return this.keymasterService.saveWallet(wallet, overwrite);
   }
 
   private async newWalletInternal(

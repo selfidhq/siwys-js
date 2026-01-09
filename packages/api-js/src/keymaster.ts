@@ -403,6 +403,21 @@ export class Keymaster {
     return Keymaster.getInstance().recoverWalletInternal(did);
   }
 
+  // Load the stored wallet
+  /**
+   * Loads the stored wallet from the database.
+   * @returns A promise with the stored wallet or null if not found.
+   */
+  public static async getWallet(): Promise<StoredWallet | null> {
+    Keymaster.getInstance().ensureInitialized();
+    const walletDb = Keymaster.getInstance().config.walletDb;
+    if (!walletDb) {
+      throw new Error("Wallet database not configured");
+    }
+    const wallet = await walletDb.loadWallet();
+    return wallet;
+  }
+
   // Helper method to retrieve the instance
   private static getInstance(): Keymaster {
     if (!Keymaster.instance) {

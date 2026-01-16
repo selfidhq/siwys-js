@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# 0.30.0 (2026-01-16)
+
+
+### Features
+
+* account for encrypted wallet ([#71](https://github.com/selfidhq/siwys-js/issues/71)) ([5a930f6](https://github.com/selfidhq/siwys-js/commit/5a930f6c58723ee1296ff99dd1325e7a956e12fc))
+
+
+
+
+
 # 0.29.0 (2025-12-21)
 
 

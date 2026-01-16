@@ -13,7 +13,6 @@ import {
   CreateAssetOptions,
   CreateResponseOptions,
   IssueCredentialsOptions,
-  StoredWallet,
   VerifiableCredential,
   WalletBase,
   WalletFile,

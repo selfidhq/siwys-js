@@ -658,22 +658,24 @@ export class Keymaster {
   }
 
   private async ensureWalletExists(): Promise<void> {
-    const existing: StoredWallet | null =
-      (await this.config?.walletDb?.loadWallet()) || null;
-    if (existing && "current" in existing) {
-      console.log(`Using existing wallet with ID ${existing.current}`);
+    const existing = (await this.config?.walletDb?.loadWallet()) || null;
+    const walletConfig = this.config?.walletConfig;
+
+    if (existing) {
+      if (!walletConfig) {
+        throw new Error("Missing wallet config");
+      }
+      const decryptedWallet = await this.keymasterService.loadWallet();
+      if (!decryptedWallet.ids[walletConfig.id]) {
+        await this.keymasterService.createId(walletConfig.id, {
+          registry: walletConfig.registry,
+        });
+      }
+      console.log(`Using existing wallet with ID`, decryptedWallet);
       return;
     }
-
-    const walletConfig = this.config.walletConfig;
     if (walletConfig?.mnemonic) {
       await this.keymasterService.newWallet(walletConfig.mnemonic, true);
-    }
-
-    if (walletConfig?.id) {
-      await this.keymasterService.createId(walletConfig.id, {
-        registry: walletConfig.registry,
-      });
     }
   }
 

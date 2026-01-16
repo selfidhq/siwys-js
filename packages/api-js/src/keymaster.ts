@@ -655,7 +655,7 @@ export class Keymaster {
           registry: walletConfig.registry,
         });
       }
-      console.log(`Using existing wallet with ID`, decryptedWallet);
+      console.log(`Using existing wallet with ID`, walletConfig.id);
       return;
     }
     if (walletConfig?.mnemonic) {

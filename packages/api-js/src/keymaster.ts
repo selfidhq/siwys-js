@@ -645,10 +645,10 @@ export class Keymaster {
     const existing = (await this.config?.walletDb?.loadWallet()) || null;
     const walletConfig = this.config?.walletConfig;
 
+    if (!walletConfig) {
+      throw new Error("Missing wallet config");
+    }
     if (existing) {
-      if (!walletConfig) {
-        throw new Error("Missing wallet config");
-      }
       const decryptedWallet = await this.keymasterService.loadWallet();
       if (!decryptedWallet.ids[walletConfig.id]) {
         await this.keymasterService.createId(walletConfig.id, {
@@ -658,9 +658,12 @@ export class Keymaster {
       console.log(`Using existing wallet with ID`, walletConfig.id);
       return;
     }
-    if (walletConfig?.mnemonic) {
-      await this.keymasterService.newWallet(walletConfig.mnemonic, true);
-    }
+
+    console.log("** calling newWallet from ensureWalletExists **");
+    await this.keymasterService.newWallet(walletConfig?.mnemonic ?? "", true);
+    await this.keymasterService.createId(walletConfig.id, {
+      registry: walletConfig.registry,
+    });
   }
 
   private async serviceRunning(): Promise<boolean> {

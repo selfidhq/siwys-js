@@ -659,7 +659,8 @@ export class Keymaster {
       return;
     }
 
-    console.log("** calling newWallet from ensureWalletExists **");
+    console.log("Creating a new wallet with ID", walletConfig.id);
+
     await this.keymasterService.newWallet(walletConfig?.mnemonic ?? "", true);
     await this.keymasterService.createId(walletConfig.id, {
       registry: walletConfig.registry,

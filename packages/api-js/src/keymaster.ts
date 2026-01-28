@@ -51,7 +51,7 @@ export class Keymaster {
       console.log("✅ Keymaster initialized");
     } else {
       console.warn(
-        "Keymaster already initialized, ignoring re-initialization."
+        "Keymaster already initialized, ignoring re-initialization.",
       );
     }
   }
@@ -60,7 +60,7 @@ export class Keymaster {
   private ensureInitialized() {
     if (!Keymaster.instance) {
       throw new Error(
-        "Keymaster not initialized. Call Keymaster.initialize() first."
+        "Keymaster not initialized. Call Keymaster.initialize() first.",
       );
     }
   }
@@ -83,7 +83,7 @@ export class Keymaster {
    */
   public static async createChallenge(
     spec: CreateChallengeSpec,
-    options?: CreateAssetOptions
+    options?: CreateAssetOptions,
   ): Promise<CreateChallengeResponse> {
     Keymaster.getInstance().ensureInitialized();
     return Keymaster.getInstance().createChallengeInternal(spec, options);
@@ -104,13 +104,13 @@ export class Keymaster {
       validFrom?: string;
       validUntil?: string;
       credential?: Record<string, unknown>;
-    }
+    },
   ): Promise<VerifiableCredential> {
     Keymaster.getInstance().ensureInitialized();
     return Keymaster.getInstance().bindCredentialInternal(
       schemaId,
       subjectId,
-      options
+      options,
     );
   }
 
@@ -144,12 +144,12 @@ export class Keymaster {
    */
   public static async createResponse(
     challengeDID: string,
-    options?: CreateResponseOptions
+    options?: CreateResponseOptions,
   ): Promise<string> {
     Keymaster.getInstance().ensureInitialized();
     return Keymaster.getInstance().createResponseInternal(
       challengeDID,
-      options
+      options,
     );
   }
 
@@ -173,7 +173,7 @@ export class Keymaster {
    */
   public static async issueCredential(
     credential: Partial<VerifiableCredential>,
-    options?: IssueCredentialsOptions
+    options?: IssueCredentialsOptions,
   ): Promise<string> {
     Keymaster.getInstance().ensureInitialized();
     return Keymaster.getInstance().issueCredentialInternal(credential, options);
@@ -190,7 +190,7 @@ export class Keymaster {
     did: string,
     options?: {
       reveal?: boolean;
-    }
+    },
   ): Promise<VerifiableCredential> {
     Keymaster.getInstance().ensureInitialized();
     return Keymaster.getInstance().publishCredentialInternal(did, options);
@@ -226,7 +226,7 @@ export class Keymaster {
    */
   public static async verifyResponse(
     did: string,
-    options?: { retries?: number; delay?: number }
+    options?: { retries?: number; delay?: number },
   ): Promise<ChallengeResponse> {
     Keymaster.getInstance().ensureInitialized();
     return Keymaster.getInstance().verifyResponseInternal(did, options);
@@ -260,7 +260,7 @@ export class Keymaster {
    * @returns A promise with the credential data or null if not found.
    */
   public static async getCredential(
-    id: string
+    id: string,
   ): Promise<VerifiableCredential | null> {
     Keymaster.getInstance().ensureInitialized();
     return Keymaster.getInstance().getCredentialInternal(id);
@@ -286,7 +286,7 @@ export class Keymaster {
    */
   public static async updateCredential(
     did: string,
-    credential: VerifiableCredential
+    credential: VerifiableCredential,
   ): Promise<boolean> {
     Keymaster.getInstance().ensureInitialized();
     return Keymaster.getInstance().updateCredentialInternal(did, credential);
@@ -303,7 +303,7 @@ export class Keymaster {
     name: string,
     options?: {
       registry?: string;
-    }
+    },
   ): Promise<string> {
     Keymaster.getInstance().ensureInitialized();
     return Keymaster.getInstance().createIdInternal(name, options);
@@ -329,7 +329,7 @@ export class Keymaster {
    */
   public static async resolveDID(
     did: string,
-    options?: ResolveDIDOptions
+    options?: ResolveDIDOptions,
   ): Promise<MdipDocument> {
     Keymaster.getInstance().ensureInitialized();
     return Keymaster.getInstance().resolveDIDInternal(did, options);
@@ -355,7 +355,7 @@ export class Keymaster {
    */
   public static async createSchema(
     schema?: unknown,
-    options?: CreateAssetOptions
+    options?: CreateAssetOptions,
   ): Promise<string> {
     Keymaster.getInstance().ensureInitialized();
     return Keymaster.getInstance().createSchemaInternal(schema, options);
@@ -370,7 +370,7 @@ export class Keymaster {
    */
   public static async updateSchema(
     id: string,
-    schema?: unknown
+    schema?: unknown,
   ): Promise<boolean> {
     Keymaster.getInstance().ensureInitialized();
     return Keymaster.getInstance().setSchemaInternal(id, schema);
@@ -385,7 +385,7 @@ export class Keymaster {
    */
   public static async newWallet(
     mnemonic?: string,
-    overwrite?: boolean
+    overwrite?: boolean,
   ): Promise<WalletFile> {
     Keymaster.getInstance().ensureInitialized();
     return Keymaster.getInstance().newWalletInternal(mnemonic, overwrite);
@@ -406,7 +406,7 @@ export class Keymaster {
   private static getInstance(): Keymaster {
     if (!Keymaster.instance) {
       throw new Error(
-        "Keymaster not initialized. Call Keymaster.initialize() first."
+        "Keymaster not initialized. Call Keymaster.initialize() first.",
       );
     }
     return Keymaster.instance;
@@ -452,7 +452,7 @@ export class Keymaster {
         if (this.config.gatekeeperConfig?.token) {
           this.gatekeeper.addCustomHeader(
             "authorization",
-            `Bearer ${this.config.gatekeeperConfig.token}`
+            `Bearer ${this.config.gatekeeperConfig.token}`,
           );
         }
         const cipher = new CipherNode();
@@ -477,12 +477,12 @@ export class Keymaster {
 
   private async createChallengeInternal(
     spec: CreateChallengeSpec,
-    options?: CreateAssetOptions
+    options?: CreateAssetOptions,
   ): Promise<CreateChallengeResponse> {
     await this.ensureServiceIsRunning();
     const challenge: string = await this.keymasterService.createChallenge(
       spec,
-      options
+      options,
     );
     return {
       challenge: challenge,
@@ -497,7 +497,7 @@ export class Keymaster {
       validFrom?: string;
       validUntil?: string;
       credential?: Record<string, unknown>;
-    } = {}
+    } = {},
   ): Promise<VerifiableCredential> {
     await this.ensureServiceIsRunning();
     return this.keymasterService.bindCredential(schemaId, subjectId, options);
@@ -505,7 +505,7 @@ export class Keymaster {
 
   private async createResponseInternal(
     challengeDID: string,
-    options?: CreateResponseOptions
+    options?: CreateResponseOptions,
   ): Promise<string> {
     await this.ensureServiceIsRunning();
     return this.keymasterService.createResponse(challengeDID, options);
@@ -518,7 +518,7 @@ export class Keymaster {
 
   private async issueCredentialInternal(
     credential: Partial<VerifiableCredential>,
-    options: IssueCredentialsOptions = {}
+    options: IssueCredentialsOptions = {},
   ): Promise<string> {
     await this.ensureServiceIsRunning();
     return this.keymasterService.issueCredential(credential, options);
@@ -526,7 +526,7 @@ export class Keymaster {
 
   private async publishCredentialInternal(
     did: string,
-    options: { reveal?: boolean } = {}
+    options: { reveal?: boolean } = {},
   ): Promise<VerifiableCredential> {
     await this.ensureServiceIsRunning();
     return this.keymasterService.publishCredential(did, options);
@@ -544,7 +544,7 @@ export class Keymaster {
 
   private async verifyResponseInternal(
     did: string,
-    options?: { retries?: number; delay?: number }
+    options?: { retries?: number; delay?: number },
   ): Promise<ChallengeResponse> {
     await this.ensureServiceIsRunning();
     return this.keymasterService.verifyResponse(did, options);
@@ -659,12 +659,18 @@ export class Keymaster {
       return;
     }
 
-    console.log("Creating a new wallet with ID", walletConfig.id);
+    console.log(
+      "Creating a new wallet with ID",
+      walletConfig.id,
+      "walletConfig.registry",
+      walletConfig.registry,
+    );
 
     await this.keymasterService.newWallet(walletConfig?.mnemonic ?? "", true);
-    await this.keymasterService.createId(walletConfig.id, {
+    const newId = await this.keymasterService.createId(walletConfig.id, {
       registry: walletConfig.registry,
     });
+    console.log("Created new ID", newId);
   }
 
   private async serviceRunning(): Promise<boolean> {

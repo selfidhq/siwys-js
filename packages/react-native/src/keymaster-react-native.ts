@@ -60,6 +60,15 @@ export class KeymasterReactNative {
     }
   }
 
+  /**
+   * Resets the KeymasterReactNative instance.
+   * This clears the singleton instance, allowing for re-initialization.
+   */
+  public static resetInstance(): void {
+    KeymasterReactNative.instance = null;
+    console.log("✅ KeymasterReactNative instance reset");
+  }
+
   // Ensures the instance is initialized
   private ensureInitialized(): void {
     if (!KeymasterReactNative.instance) {

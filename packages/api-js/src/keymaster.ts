@@ -23,7 +23,7 @@ import type { MdipDocument, ResolveDIDOptions } from "@mdip/gatekeeper";
 export interface KeymasterConfig {
   gatekeeperConfig?: SdkConfig;
   walletDb?: WalletBase;
-  walletConfig?: WalletConfig;
+  walletConfig: WalletConfig;
   passphrase: string;
 }
 

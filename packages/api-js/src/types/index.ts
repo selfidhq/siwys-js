@@ -19,6 +19,14 @@ export interface SdkConfig {
 }
 export interface WalletConfig {
   id: string;
+  registry:
+    | "local"
+    | "hyperswarm"
+    | "TESS"
+    | "TBTC"
+    | "TFTC"
+    | "Signet"
+    | "Signet-Inscription"
+    | "BTC-Inscription";
   mnemonic?: string;
-  registry?: string;
 }

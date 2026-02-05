@@ -2248,22 +2248,6 @@
   resolved "https://registry.yarnpkg.com/@mdip/common/-/common-0.6.0.tgz#fbc2e6147834c77289b21ac4aad301e3bbbf9c38"
   integrity sha512-Z6r24Gnt3jG5zyG+igp9P/0McfwOoXwHFtmWoQh5mbcnV83GTUORo97L9G6rWot/LbC+Jr6nep/FyuBpUsS7mA==
 
-"@mdip/gatekeeper@^1.3.0":
-  version "1.3.0"
-  resolved "https://registry.yarnpkg.com/@mdip/gatekeeper/-/gatekeeper-1.3.0.tgz#37f9bb1b9f12e889801022dacc7e7ffb73e8b632"
-  integrity sha512-69d9AIiFDdg79j6t7O0RUBsen6I/TzAwR5ZDl5KUVav3aq5mKWYUk9QryO8aLEqEkMelOPfaMfabDZNYhf0yBA==
-  dependencies:
-    "@mdip/cipher" "*"
-    "@mdip/common" "*"
-    "@mdip/ipfs" "*"
-    axios "^1.7.7"
-    canonicalize "^2.0.0"
-    dotenv "^16.4.5"
-    ioredis "^5.4.1"
-    mongodb "^6.5.0"
-    sqlite "^5.1.1"
-    sqlite3 "^5.1.7"
-
 "@mdip/ipfs@*":
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/@mdip/ipfs/-/ipfs-1.1.2.tgz#c6eb9eca4194171a7b37684f7851be7e9e350bc5"
@@ -2277,20 +2261,6 @@
     ip "^2.0.1"
     kubo-rpc-client "^5.1.0"
     multiformats "^13.3.3"
-
-"@mdip/keymaster@^1.3.2":
-  version "1.3.2"
-  resolved "https://registry.yarnpkg.com/@mdip/keymaster/-/keymaster-1.3.2.tgz#746e989544f8901a46498503416ab76532f3c148"
-  integrity sha512-2jN/frn3AqTbo/bENRcwfEk8vU+8w1ulyMYUA2HGNLXxVILR+tUBij7Ile3IZjEs+OD7j8NIIxi5k9cOx+KZwg==
-  dependencies:
-    "@mdip/common" "*"
-    axios "^1.7.7"
-    file-type "^21.0.0"
-    image-size "^2.0.1"
-    ioredis "^5.4.1"
-    mongodb "^6.5.0"
-    sqlite "^5.1.1"
-    sqlite3 "^5.1.7"
 
 "@mongodb-js/saslprep@^1.1.5":
   version "1.1.9"

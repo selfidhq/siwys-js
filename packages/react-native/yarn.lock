@@ -2276,43 +2276,12 @@
     hdkey "^2.1.0"
     multiformats "^13.0.0"
 
-"@mdip/cipher@^1.3.0":
-  version "1.3.0"
-  resolved "https://registry.yarnpkg.com/@mdip/cipher/-/cipher-1.3.0.tgz#83fb3d9e8a8b97b17910523a5e470d9163de71ec"
-  integrity sha512-TqgfJQ80LJUkllBujG+G2JWjqj10K3Bf+59wHn6/1albxhCZnpkodzxXYpWhtSxE3zElBNqrcOAuXfNbk8pvow==
-  dependencies:
-    "@mdip/browser-hdkey" "^0.1.8"
-    "@noble/ciphers" "^0.4.1"
-    "@noble/hashes" "^1.3.3"
-    "@noble/secp256k1" "^2.0.0"
-    bip39 "^3.1.0"
-    buffer "^6.0.3"
-    canonicalize "^2.0.0"
-    hdkey "^2.1.0"
-    multiformats "^13.0.0"
-
 "@mdip/common@*":
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/@mdip/common/-/common-1.1.0.tgz#67790f2266e26e7561cb045ae8faee39e6367623"
   integrity sha512-WY/qnk9j+21ZkJg4sB8Dp9VT96LdoyO3QjdL+A7eSoS1CJsRPEJVzTkDPHcd4/e5EjdxvBP+oJA2MrGnGSh55w==
   dependencies:
     "@mdip/ipfs" "*"
-
-"@mdip/gatekeeper@^1.3.0":
-  version "1.3.0"
-  resolved "https://registry.yarnpkg.com/@mdip/gatekeeper/-/gatekeeper-1.3.0.tgz#37f9bb1b9f12e889801022dacc7e7ffb73e8b632"
-  integrity sha512-69d9AIiFDdg79j6t7O0RUBsen6I/TzAwR5ZDl5KUVav3aq5mKWYUk9QryO8aLEqEkMelOPfaMfabDZNYhf0yBA==
-  dependencies:
-    "@mdip/cipher" "*"
-    "@mdip/common" "*"
-    "@mdip/ipfs" "*"
-    axios "^1.7.7"
-    canonicalize "^2.0.0"
-    dotenv "^16.4.5"
-    ioredis "^5.4.1"
-    mongodb "^6.5.0"
-    sqlite "^5.1.1"
-    sqlite3 "^5.1.7"
 
 "@mdip/ipfs@*":
   version "1.1.2"
@@ -2327,20 +2296,6 @@
     ip "^2.0.1"
     kubo-rpc-client "^5.1.0"
     multiformats "^13.3.3"
-
-"@mdip/keymaster@1.4.0-beta.2":
-  version "1.4.0-beta.2"
-  resolved "https://registry.yarnpkg.com/@mdip/keymaster/-/keymaster-1.4.0-beta.2.tgz#40f824f290af31ba6223dc0e47eda0ed3565b090"
-  integrity sha512-En2/ZIMUCtaigke5YzcV2WZJ6XW8yNIIvAuU1WZ/zTd/FW77FqUJaY9njUBtVkB99ABxjs6YrePdk4BSQn9kIQ==
-  dependencies:
-    "@mdip/common" "*"
-    axios "^1.7.7"
-    file-type "^21.0.0"
-    image-size "^2.0.1"
-    ioredis "^5.4.1"
-    mongodb "^6.5.0"
-    sqlite "^5.1.1"
-    sqlite3 "^5.1.7"
 
 "@mongodb-js/saslprep@^1.1.9":
   version "1.2.2"

@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# 0.31.0 (2026-02-05)
+
+
+### Features
+
+* added optional wallet parameter to backup wallet method ([#77](https://github.com/selfidhq/siwys-js/issues/77)) ([60faff6](https://github.com/selfidhq/siwys-js/commit/60faff61883ea7c366b00fbe5dcf7d93798f6433))
+
+
+
+
+
 ## 0.30.5 (2026-01-28)
 
 **Note:** Version bump only for package @yourself_id/siwys-react-js

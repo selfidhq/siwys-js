@@ -55,7 +55,7 @@ export class KeymasterReactNative {
       KeymasterReactNative.instance = new KeymasterReactNative(config);
     } else {
       console.warn(
-        "KeymasterReactNative already initialized, ignoring re-initialization."
+        "KeymasterReactNative already initialized, ignoring re-initialization.",
       );
     }
   }
@@ -73,7 +73,7 @@ export class KeymasterReactNative {
   private ensureInitialized(): void {
     if (!KeymasterReactNative.instance) {
       throw new Error(
-        "KeymasterReactNative not initialized. Call KeymasterReactNative.initialize() first."
+        "KeymasterReactNative not initialized. Call KeymasterReactNative.initialize() first.",
       );
     }
   }
@@ -96,12 +96,12 @@ export class KeymasterReactNative {
    */
   public static async createChallenge(
     spec: CreateChallengeSpec,
-    options?: CreateAssetOptions
+    options?: CreateAssetOptions,
   ): Promise<CreateChallengeResponse> {
     KeymasterReactNative.getInstance().ensureInitialized();
     return KeymasterReactNative.getInstance().createChallengeInternal(
       spec,
-      options
+      options,
     );
   }
 
@@ -120,13 +120,13 @@ export class KeymasterReactNative {
       validFrom?: string;
       validUntil?: string;
       credential?: Record<string, unknown>;
-    }
+    },
   ): Promise<VerifiableCredential> {
     KeymasterReactNative.getInstance().ensureInitialized();
     return KeymasterReactNative.getInstance().bindCredentialInternal(
       schemaId,
       subjectId,
-      options
+      options,
     );
   }
 
@@ -139,12 +139,12 @@ export class KeymasterReactNative {
    */
   public static async createResponse(
     challengeDID: string,
-    options?: CreateResponseOptions
+    options?: CreateResponseOptions,
   ): Promise<string> {
     KeymasterReactNative.getInstance().ensureInitialized();
     return KeymasterReactNative.getInstance().createResponseInternal(
       challengeDID,
-      options
+      options,
     );
   }
 
@@ -154,9 +154,15 @@ export class KeymasterReactNative {
    * @param registry Optional registry URL for the wallet backup.
    * @returns A promise with a backup string (e.g., backup URL).
    */
-  public static async backupWallet(registry?: string): Promise<string> {
+  public static async backupWallet(
+    registry?: string,
+    wallet?: WalletFile,
+  ): Promise<string> {
     KeymasterReactNative.getInstance().ensureInitialized();
-    return KeymasterReactNative.getInstance().backupWalletInternal(registry);
+    return KeymasterReactNative.getInstance().backupWalletInternal(
+      registry,
+      wallet,
+    );
   }
 
   // Issue credential to a user
@@ -168,12 +174,12 @@ export class KeymasterReactNative {
    */
   public static async issueCredential(
     credential: Partial<VerifiableCredential>,
-    options?: IssueCredentialsOptions
+    options?: IssueCredentialsOptions,
   ): Promise<string> {
     KeymasterReactNative.getInstance().ensureInitialized();
     return KeymasterReactNative.getInstance().issueCredentialInternal(
       credential,
-      options
+      options,
     );
   }
 
@@ -188,12 +194,12 @@ export class KeymasterReactNative {
     did: string,
     options?: {
       reveal?: boolean;
-    }
+    },
   ): Promise<VerifiableCredential> {
     KeymasterReactNative.getInstance().ensureInitialized();
     return KeymasterReactNative.getInstance().publishCredentialInternal(
       did,
-      options
+      options,
     );
   }
 
@@ -227,12 +233,12 @@ export class KeymasterReactNative {
    */
   public static async verifyResponse(
     did: string,
-    options?: { retries?: number; delay?: number }
+    options?: { retries?: number; delay?: number },
   ): Promise<ChallengeResponse> {
     KeymasterReactNative.getInstance().ensureInitialized();
     return KeymasterReactNative.getInstance().verifyResponseInternal(
       did,
-      options
+      options,
     );
   }
 
@@ -264,7 +270,7 @@ export class KeymasterReactNative {
    * @returns A promise with the credential data or null if not found.
    */
   public static async getCredential(
-    id: string
+    id: string,
   ): Promise<VerifiableCredential | null> {
     KeymasterReactNative.getInstance().ensureInitialized();
     return KeymasterReactNative.getInstance().getCredentialInternal(id);
@@ -290,12 +296,12 @@ export class KeymasterReactNative {
    */
   public static async updateCredential(
     did: string,
-    credential: VerifiableCredential
+    credential: VerifiableCredential,
   ): Promise<boolean> {
     KeymasterReactNative.getInstance().ensureInitialized();
     return KeymasterReactNative.getInstance().updateCredentialInternal(
       did,
-      credential
+      credential,
     );
   }
 
@@ -310,7 +316,7 @@ export class KeymasterReactNative {
     name: string,
     options?: {
       registry?: string;
-    }
+    },
   ): Promise<string> {
     KeymasterReactNative.getInstance().ensureInitialized();
     return KeymasterReactNative.getInstance().createIdInternal(name, options);
@@ -328,10 +334,14 @@ export class KeymasterReactNative {
     account: number,
     options?: {
       registry?: string;
-    }
+    },
   ): Promise<Operation> {
     KeymasterReactNative.getInstance().ensureInitialized();
-    return KeymasterReactNative.getInstance().createIdOperationInternal(name, account, options);
+    return KeymasterReactNative.getInstance().createIdOperationInternal(
+      name,
+      account,
+      options,
+    );
   }
 
   // Remove an ID
@@ -354,7 +364,7 @@ export class KeymasterReactNative {
    */
   public static async resolveDID(
     did: string,
-    options?: ResolveDIDOptions
+    options?: ResolveDIDOptions,
   ): Promise<MdipDocument> {
     KeymasterReactNative.getInstance().ensureInitialized();
     return KeymasterReactNative.getInstance().resolveDIDInternal(did, options);
@@ -380,12 +390,12 @@ export class KeymasterReactNative {
    */
   public static async createSchema(
     schema?: unknown,
-    options?: CreateAssetOptions
+    options?: CreateAssetOptions,
   ): Promise<string> {
     KeymasterReactNative.getInstance().ensureInitialized();
     return KeymasterReactNative.getInstance().createSchemaInternal(
       schema,
-      options
+      options,
     );
   }
 
@@ -408,12 +418,12 @@ export class KeymasterReactNative {
    */
   public static async saveWallet(
     wallet: StoredWallet,
-    overwrite = true
+    overwrite = true,
   ): Promise<boolean> {
     KeymasterReactNative.getInstance().ensureInitialized();
     return KeymasterReactNative.getInstance().saveWalletInternal(
       wallet,
-      overwrite
+      overwrite,
     );
   }
 
@@ -426,12 +436,12 @@ export class KeymasterReactNative {
    */
   public static async newWallet(
     mnemonic?: string,
-    overwrite?: boolean
+    overwrite?: boolean,
   ): Promise<WalletFile> {
     KeymasterReactNative.getInstance().ensureInitialized();
     return KeymasterReactNative.getInstance().newWalletInternal(
       mnemonic,
-      overwrite
+      overwrite,
     );
   }
 
@@ -471,7 +481,7 @@ export class KeymasterReactNative {
   private static getInstance(): KeymasterReactNative {
     if (!KeymasterReactNative.instance) {
       throw new Error(
-        "KeymasterReactNative not initialized. Call KeymasterReactNative.initialize() first."
+        "KeymasterReactNative not initialized. Call KeymasterReactNative.initialize() first.",
       );
     }
     return KeymasterReactNative.instance;
@@ -509,7 +519,7 @@ export class KeymasterReactNative {
         if (this.config.gatekeeperConfig?.token) {
           this.gatekeeper.addCustomHeader(
             "authorization",
-            `Bearer ${this.config.gatekeeperConfig.token}`
+            `Bearer ${this.config.gatekeeperConfig.token}`,
           );
         }
         this.keymasterService = new Keymaster({
@@ -530,11 +540,11 @@ export class KeymasterReactNative {
 
   private async createChallengeInternal(
     spec: CreateChallengeSpec,
-    options?: CreateAssetOptions
+    options?: CreateAssetOptions,
   ): Promise<CreateChallengeResponse> {
     const challenge: string = await this.keymasterService.createChallenge(
       spec,
-      options
+      options,
     );
     return {
       challenge: challenge,
@@ -554,8 +564,11 @@ export class KeymasterReactNative {
     return this.keymasterService.createResponse(...args);
   }
 
-  private async backupWalletInternal(registry?: string): Promise<string> {
-    return this.keymasterService.backupWallet(registry);
+  private async backupWalletInternal(
+    registry?: string,
+    wallet?: WalletFile,
+  ): Promise<string> {
+    return this.keymasterService.backupWallet(registry, wallet);
   }
 
   private async issueCredentialInternal(
@@ -656,7 +669,7 @@ export class KeymasterReactNative {
 
   private async saveWalletInternal(
     wallet: StoredWallet,
-    overwrite = true
+    overwrite = true,
   ): Promise<boolean> {
     return this.keymasterService.saveWallet(wallet, overwrite);
   }

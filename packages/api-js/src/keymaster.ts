@@ -159,9 +159,12 @@ export class Keymaster {
    * @param registry Optional registry URL for the wallet backup.
    * @returns A promise with a backup string (e.g., backup URL).
    */
-  public static async backupWallet(registry?: string): Promise<string> {
+  public static async backupWallet(
+    registry?: string,
+    wallet?: WalletFile,
+  ): Promise<string> {
     Keymaster.getInstance().ensureInitialized();
-    return Keymaster.getInstance().backupWalletInternal(registry);
+    return Keymaster.getInstance().backupWalletInternal(registry, wallet);
   }
 
   // Issue credential to a user
@@ -511,9 +514,12 @@ export class Keymaster {
     return this.keymasterService.createResponse(challengeDID, options);
   }
 
-  private async backupWalletInternal(registry?: string): Promise<string> {
+  private async backupWalletInternal(
+    registry?: string,
+    wallet?: WalletFile,
+  ): Promise<string> {
     await this.ensureServiceIsRunning();
-    return this.keymasterService.backupWallet(registry);
+    return this.keymasterService.backupWallet(registry, wallet);
   }
 
   private async issueCredentialInternal(

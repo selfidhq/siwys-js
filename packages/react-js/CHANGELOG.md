@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# 0.32.0 (2026-02-09)
+
+
+### Features
+
+* unit test for pkgs ([#79](https://github.com/selfidhq/siwys-js/issues/79)) ([80a1b47](https://github.com/selfidhq/siwys-js/commit/80a1b4780e549431c72dc0d536a48c6a536a508a))
+
+
+
+
+
 ## 0.31.1 (2026-02-06)
 
 **Note:** Version bump only for package @yourself_id/siwys-react-js

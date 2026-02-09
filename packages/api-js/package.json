@@ -22,7 +22,8 @@
   },
   "scripts": {
     "build": "tsup",
-    "test": "echo 'no tests yet'"
+    "test": "jest",
+    "test:cov": "jest --coverage"
   },
   "dependencies": {
     "@mdip/cipher": "^1.4.1",

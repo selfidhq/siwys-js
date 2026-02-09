@@ -21,7 +21,11 @@
     "test:siwys-react-js": "lerna run test --scope @yourself_id/siwys-react-js",
     "test:siwys-react-native": "lerna run test --scope @yourself_id/siwys-react-native",
     "test:siwys-api-js": "lerna run test --scope @yourself_id/siwys-api-js",
-    "test": "yarn test:siwys-react-js && yarn test:siwys-react-native && yarn test:siwys-api-js"
+    "test:cov:siwys-react-js": "lerna run test:cov --scope @yourself_id/siwys-react-js",
+    "test:cov:siwys-react-native": "lerna run test:cov --scope @yourself_id/siwys-react-native",
+    "test:cov:siwys-api-js": "lerna run test:cov --scope @yourself_id/siwys-api-js",
+    "test": "yarn test:siwys-react-js && yarn test:siwys-react-native && yarn test:siwys-api-js",
+    "test:cov": "yarn test:cov:siwys-react-js && yarn test:cov:siwys-react-native && yarn test:cov:siwys-api-js"
   },
   "devDependencies": {
     "@commitlint/cli": "^19.5.0",

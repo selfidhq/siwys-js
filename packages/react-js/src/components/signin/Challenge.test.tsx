@@ -1,6 +1,7 @@
 import React from "react";
 import "@testing-library/jest-dom";
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 
 import Challenge from "./Challenge";
 
@@ -46,5 +47,14 @@ describe("Challenge Component", () => {
     // find the logo based on its encoded dataUrl
     const logo = imgs[0].querySelector(`[href^="data:image/svg+xml"]`);
     expect(logo).toBeInTheDocument();
+  });
+
+  it("should call the button onClick handler when clicked", async () => {
+    const consoleSpy = jest.spyOn(console, "log").mockImplementation();
+    render(<Challenge challengeUrl="http://challenge-api-url" />);
+    const button = screen.getByRole("button", { name: /Sign in with your/i });
+    await userEvent.click(button);
+    expect(consoleSpy).toHaveBeenCalledWith("Open SELF App");
+    consoleSpy.mockRestore();
   });
 });

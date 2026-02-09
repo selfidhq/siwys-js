@@ -1,6 +1,6 @@
 import React from "react";
 import "@testing-library/jest-dom";
-import { render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { SignInWithYourSelf } from "../..";
 
@@ -291,5 +291,69 @@ describe("SignInWithYourSelf Component", () => {
 
       expect(screen.queryByText("Sign in with your SELF™ Guide:")).not.toBeInTheDocument();
     });
+  });
+
+  it("should open challengeUrl in new window when onSiwysPress is not provided", () => {
+    global.window.open = jest.fn();
+    render(
+      <SignInWithYourSelf
+        challengeDID={challengeDid}
+      />
+    );
+    const signInButton = screen.getByRole("button", {
+      name: /Sign in with your/i,
+    });
+    fireEvent.click(signInButton);
+    expect(global.window.open).toHaveBeenCalledWith(
+      expect.stringContaining("challenge="),
+      "_blank"
+    );
+  });
+
+  it("should handle non-200 polling response without setting authenticated", async () => {
+    jest.useFakeTimers();
+    const non200FetchMock = jest.fn().mockImplementation((input: RequestInfo | URL) => {
+      const url = input.toString();
+      if (url.includes("/challenges")) {
+        return Promise.resolve({
+          status: 200,
+          json: () => Promise.resolve({
+            challenge: challengeDid,
+            challengeUrl: "http://challenge-url",
+          }),
+        });
+      }
+      if (url.includes("/auth")) {
+        return Promise.resolve({
+          status: 500,
+          json: () => Promise.resolve({ error: "Server Error" }),
+        });
+      }
+      return Promise.resolve({ status: 404, json: () => Promise.resolve({}) });
+    });
+    window.fetch = non200FetchMock;
+
+    render(
+      <SignInWithYourSelf
+        createChallengeUrl={createChallengeUrl}
+        pollForAuthUrl={checkAuthUrl}
+        challengeDID={challengeDid}
+        onSiwysPress={onSiwysPress}
+        successComponent={<div data-testid="success">Success</div>}
+      />
+    );
+
+    await waitFor(
+      () => {
+        expect(non200FetchMock).toHaveBeenLastCalledWith(
+          `${checkAuthUrl}?challenge=${challengeDid}`
+        );
+      },
+      { timeout: 6000 }
+    );
+
+    jest.advanceTimersByTime(5000);
+
+    expect(screen.queryByTestId("success")).not.toBeInTheDocument();
   });
 });

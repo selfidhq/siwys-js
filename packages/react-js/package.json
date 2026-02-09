@@ -17,7 +17,8 @@
     "build": "tsup",
     "dev": "vite",
     "generate-icons": "npx @svgr/cli --typescript --icon --out-dir src/icons icons",
-    "test": "jest"
+    "test": "jest",
+    "test:cov": "jest --coverage"
   },
   "dependencies": {
     "@fontsource/inter": "^5.2.5",

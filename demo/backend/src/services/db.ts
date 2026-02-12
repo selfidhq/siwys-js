@@ -10,7 +10,7 @@ function loadDb() {
   }
 }
 
-function writeDb(db) {
+function writeDb(db: Record<string, unknown>) {
   fs.writeFileSync(dbName, JSON.stringify(db, null, 4));
 }
 

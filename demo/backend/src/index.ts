@@ -1,22 +1,24 @@
+import "dotenv/config";
 import express from "express";
 import cors from "cors";
 
 import { startKeymaster } from "./services/keymaster.js";
 import { Keymaster } from "@yourself_id/siwys-api-js";
-import { loadWallet, saveWallet } from "./services/wallet.js";
+import { loadWallet, saveWallet, updateWallet } from "./services/wallet.js";
 import { writeToDb } from "./services/db.js";
 
 const app = express();
 const port = 3001;
+const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:3001";
 
-let LOGINS: string[] = [];
+const LOGINS: Record<string, unknown> = {};
 
 app.use(cors());
 app.use(express.json());
 
 app.post("/challenges", async (_, res) => {
   const challengeDTO = {
-    callback: "http://localhost:3001/login",
+    callback: `${BACKEND_URL}/login`,
   };
   try {
     const challenge = await Keymaster.createChallenge(challengeDTO);
@@ -34,6 +36,56 @@ app.get("/check-auth", async (req, res) => {
   } else {
     res.status(404).send({ error: "Challenge: " + challenge + " not found" });
   }
+});
+
+app.get("/login", async (req, res) => {
+  const challenge = req.query.challenge;
+  res.send(`
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <title>Authentication Callback</title>
+        <style>
+          body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+          }
+          .container {
+            text-align: center;
+            padding: 2rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+          }
+          h1 { margin: 0 0 1rem 0; }
+          p { margin: 0.5rem 0; }
+          .challenge { 
+            background: rgba(0, 0, 0, 0.2);
+            padding: 1rem;
+            border-radius: 5px;
+            word-break: break-all;
+            margin-top: 1rem;
+            font-family: monospace;
+            font-size: 0.9rem;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <h1>🔐 Authentication Callback</h1>
+          <p>This is the authentication callback endpoint.</p>
+          ${challenge ? `<div class="challenge">Challenge: ${challenge}</div>` : ""}
+          <p style="margin-top: 1rem; font-size: 0.9rem;">You can close this window and return to the app.</p>
+        </div>
+      </body>
+    </html>
+  `);
 });
 
 app.post("/login", async (req, res) => {
@@ -59,14 +111,17 @@ app.post("/login", async (req, res) => {
 app.listen(port, () => {
   startKeymaster({
     gatekeeperConfig: {
-      url: "http://localhost:4224",
+      url: process.env.GATEKEEPER_URL || "http://localhost:4422",
     },
     walletConfig: {
       id: "demo-wallet",
+      registry: "hyperswarm",
     },
     walletDb: {
       saveWallet: saveWallet,
       loadWallet: loadWallet,
+      updateWallet: updateWallet,
     },
+    passphrase: "demo-passphrase",
   });
 });

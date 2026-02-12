@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# 0.33.0 (2026-02-12)
+
+
+### Features
+
+* update cys/siwys demo ([#80](https://github.com/selfidhq/siwys-js/issues/80)) ([e41651a](https://github.com/selfidhq/siwys-js/commit/e41651a187bdce8e675e26522e42e8084107a714))
+
+
+
+
+
 # 0.32.0 (2026-02-09)
 
 

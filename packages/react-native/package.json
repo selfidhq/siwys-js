@@ -27,6 +27,7 @@
   },
   "dependencies": {
     "@mdip/cipher": "^1.4.1",
+    "@scure/bip32": "^1.6.2",
     "@mdip/gatekeeper": "^1.4.1",
     "@mdip/keymaster": "^1.4.1"
   },

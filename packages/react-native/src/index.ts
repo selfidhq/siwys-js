@@ -3,6 +3,7 @@ export {
   KeymasterConfig as KeymasterReactNativeConfig,
 } from "./keymaster-react-native.js";
 export { GatekeeperReactNative } from "./gatekeeper-react-native.js";
+export { default as CipherWeb } from "@mdip/cipher/web";
 
 export {
   SdkConfig,

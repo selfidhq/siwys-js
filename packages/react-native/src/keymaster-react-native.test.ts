@@ -44,7 +44,7 @@ jest.mock("@mdip/gatekeeper", () => ({
   })),
 }));
 
-jest.mock("@mdip/cipher", () => ({
+jest.mock("@mdip/cipher/web", () => ({
   default: jest.fn(),
 }));
 

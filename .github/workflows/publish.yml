@@ -41,7 +41,7 @@ jobs:
         env:
           npm_config_provenance: true
           npm_config_access: public
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           # Detect if we are on the main branch
           IS_MAIN=$([[ "${{ github.ref }}" == "refs/heads/main" || "${{ github.base_ref }}" == "main" ]] && [[ "${{ github.event_name }}" == "push" ]] && echo "true" || echo "false")

@@ -2,7 +2,11 @@
   "name": "@yourself_id/siwys-react-js",
   "version": "0.33.0",
   "description": "A React component library",
-  "repository": "https://github.com/selfidhq/siwys-js",
+    "repository": {
+    "type": "git",
+    "url": "https://github.com/selfidhq/siwys-js.git",
+    "directory": "packages/siwys-react-js"
+  },
   "main": "dist/index.js",
   "module": "dist/index.js",
   "types": "dist/index.d.ts",

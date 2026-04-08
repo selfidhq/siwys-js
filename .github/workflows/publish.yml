@@ -1,0 +1,87 @@
+name: Publish Packages
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types: [opened, synchronize]
+
+permissions:
+  contents: write
+  id-token: write
+  packages: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.ref || github.ref }}
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+          registry-url: 'https://registry.npmjs.org/'
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Install & Build
+        run: |
+          yarn install --frozen-lockfile
+          yarn build
+
+      - name: Version and Publish
+        env:
+          npm_config_provenance: true
+          npm_config_access: public
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Detect if we are on the main branch
+          IS_MAIN=$([[ "${{ github.ref }}" == "refs/heads/main" || "${{ github.base_ref }}" == "main" ]] && [[ "${{ github.event_name }}" == "push" ]] && echo "true" || echo "false")
+
+          if [ "$IS_MAIN" = "true" ]; then
+            echo "🚀 Performing Official Release to Main..."
+            yarn lerna publish \
+              --conventional-commits \
+              -m "chore(release): published by lerna" \
+              --create-release github \
+              --yes
+          else
+            echo "🧪 Performing Canary Release for Branch..."
+            
+            # 1. Get branch name
+            RAW_BRANCH="${{ github.head_ref || github.ref_name }}"
+            SAFE_BRANCH=$(echo "$RAW_BRANCH" | sed 's/\//-/g' | sed 's/refs-heads-//g')
+
+            # 2. Use the GitHub Run Number to force an increment
+            VERSION_ID="$SAFE_BRANCH.${{ github.run_number }}"
+
+            echo "🚀 Versioning with ID: $VERSION_ID"
+
+            yarn lerna version prerelease \
+              --preid "$VERSION_ID" \
+              --yes \
+              --no-push \
+              --no-git-tag-version \
+              --force-publish \
+              --allow-branch '*'
+
+            # 3. Clean the tree
+            git add .
+            git commit -m "chore: temporary canary bump for run ${{ github.run_number }}"
+
+            # 4. Publish
+            # Using --dist-tag to keep it on the branch name tag
+            yarn lerna publish from-package \
+              --dist-tag "$SAFE_BRANCH" \
+              --no-verify-access \
+              --concurrency 1 \
+              --yes
+          fi

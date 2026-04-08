@@ -1,17 +1,21 @@
 {
+  "$schema": "node_modules/lerna/schemas/lerna-schema.json",
+  "npmClient": "yarn",
+  "useNx": true,
+  "version": "independent",
+  "packages": [
+    "packages/*"
+  ],
   "command": {
-    "publish": {
-      "access": "public",
-      "registry": "https://registry.npmjs.org/"
-    },
     "version": {
       "allowBranch": ["main", "sapp-76-react-js-sdk"],
-      "conventionalCommits": true
+      "conventionalCommits": true,
+      "createRelease": "github",
+      "message": "chore(release): publish %s"
+    },
+    "publish": {
+      "registry": "https://registry.npmjs.org/",
+      "npmClient": "npm"
     }
-  },
-  "packages": ["packages/*"],
-  "$schema": "node_modules/lerna/schemas/lerna-schema.json",
-  "useNx": true,
-  "npmClient": "yarn",
-  "version": "independent"
+  }
 }

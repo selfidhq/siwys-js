@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.33.1](https://github.com/selfidhq/siwys-js/compare/@yourself_id/siwys-api-js@0.33.0...@yourself_id/siwys-api-js@0.33.1) (2026-04-08)
+
+**Note:** Version bump only for package @yourself_id/siwys-api-js
+
+
+
+
+
 # 0.33.0 (2026-02-12)
 
 

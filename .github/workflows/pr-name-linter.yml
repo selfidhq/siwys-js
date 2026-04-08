@@ -3,12 +3,16 @@ on:
   pull_request:
     types: ["opened", "edited", "reopened", "synchronize"]
 
+permissions:
+  contents: read
+  packages: read
+
 jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
       - name: Check Out Files
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
           persist-credentials: false
@@ -22,7 +26,5 @@ jobs:
       - name: Install Dependencies
         run: yarn add @commitlint/config-conventional@17 --ignore-workspace-root-check
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_ACCESS_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.NPM_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - uses: JulienKode/pull-request-name-linter-action@v0.5.0

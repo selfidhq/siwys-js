@@ -140,6 +140,15 @@ export class KeymasterExternalClient {
     return response;
   }
 
+  async publishReceipt(
+    response: ChallengeResponse
+  ): Promise<void> {
+    if (!this.serviceRunning()) {
+      throw new Error("Keymaster service not running");
+    }
+    await this.keymasterService.publishChallengeReceipts(response);
+  }
+
   private async serviceRunning(): Promise<boolean> {
     return this.serviceStarted || (await this.start());
   }

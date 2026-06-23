@@ -235,6 +235,19 @@ export class Keymaster {
     return Keymaster.getInstance().verifyResponseInternal(did, options);
   }
 
+  // Publish challenge receipt
+  /**
+   * Publishes a receipt for a challenge response.
+   * @param response The challenge response to publish a receipt for.
+   * @returns A promise indicating the publish operation completes.
+   */
+  public static async publishReceipt(
+    response: ChallengeResponse
+  ): Promise<void> {
+    Keymaster.getInstance().ensureInitialized();
+    return Keymaster.getInstance().publishReceiptInternal(response);
+  }
+
   // Decrypt a message
   /**
    * Decrypts a message using the current key.
@@ -554,6 +567,13 @@ export class Keymaster {
   ): Promise<ChallengeResponse> {
     await this.ensureServiceIsRunning();
     return this.keymasterService.verifyResponse(did, options);
+  }
+
+  private async publishReceiptInternal(
+    response: ChallengeResponse
+  ): Promise<void> {
+    await this.ensureServiceIsRunning();
+    return this.keymasterService.publishChallengeReceipts(response);
   }
 
   private async decryptMessageInternal(

@@ -229,7 +229,7 @@ export class Keymaster {
    */
   public static async verifyResponse(
     did: string,
-    options?: { retries?: number; delay?: number },
+    options?: { retries?: number; delay?: number, publishReceipt?: boolean },
   ): Promise<ChallengeResponse> {
     Keymaster.getInstance().ensureInitialized();
     return Keymaster.getInstance().verifyResponseInternal(did, options);
@@ -550,7 +550,7 @@ export class Keymaster {
 
   private async verifyResponseInternal(
     did: string,
-    options?: { retries?: number; delay?: number },
+    options?: { retries?: number; delay?: number, publishReceipt?: boolean },
   ): Promise<ChallengeResponse> {
     await this.ensureServiceIsRunning();
     return this.keymasterService.verifyResponse(did, options);

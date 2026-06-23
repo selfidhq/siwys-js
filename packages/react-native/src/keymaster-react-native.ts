@@ -233,7 +233,7 @@ export class KeymasterReactNative {
    */
   public static async verifyResponse(
     did: string,
-    options?: { retries?: number; delay?: number },
+    options?: { retries?: number; delay?: number, publishReceipt?: boolean },
   ): Promise<ChallengeResponse> {
     KeymasterReactNative.getInstance().ensureInitialized();
     return KeymasterReactNative.getInstance().verifyResponseInternal(

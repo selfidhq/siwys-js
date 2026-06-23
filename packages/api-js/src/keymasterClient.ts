@@ -130,6 +130,7 @@ export class KeymasterExternalClient {
     options?: {
       retries?: number;
       delay?: number;
+      publishReceipt?: boolean;
     }
   ): Promise<ChallengeResponse> {
     if (!this.serviceRunning()) {

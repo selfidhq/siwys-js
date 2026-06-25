@@ -1,5 +1,5 @@
 // Imports
-import CipherNode from "@mdip/cipher";
+import CipherReactNative from "./cipher-react-native.js";
 import {
   ChallengeResponse,
   CreateAssetOptions,
@@ -32,7 +32,7 @@ const Keymaster = KeymasterModule?.default || KeymasterModule;
 export interface KeymasterConfig {
   gatekeeperConfig?: SdkConfig;
   walletDb?: WalletBase;
-  cipher?: CipherNode;
+  cipher?: CipherReactNative;
   passphrase: string;
 }
 export class KeymasterReactNative {

@@ -1,6 +1,6 @@
 {
   "name": "@yourself_id/siwys-react-native",
-  "version": "0.33.1",
+  "version": "0.34.0",
   "description": "A React Native component library",
   "repository": {
     "type": "git",
@@ -32,7 +32,14 @@
   "dependencies": {
     "@mdip/cipher": "^1.4.1",
     "@mdip/gatekeeper": "^1.4.1",
-    "@mdip/keymaster": "^1.4.1"
+    "@mdip/keymaster": "^1.4.1",
+    "@noble/ciphers": "^0.4.1",
+    "@noble/hashes": "^1.8.0",
+    "@noble/secp256k1": "^2.2.3",
+    "@scure/bip32": "^1.6.2",
+    "bip39": "^3.1.0",
+    "canonicalize": "^2.1.0",
+    "multiformats": "^13.3.4"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.25.8",

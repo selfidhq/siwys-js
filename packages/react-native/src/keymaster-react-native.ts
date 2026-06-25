@@ -478,22 +478,22 @@ export class KeymasterReactNative {
     return KeymasterReactNative.getInstance().recoverWalletInternal(did);
   }
 
-  // Re-encrypt the wallet's stored mnemonic
+  // Recover a wallet, repairing a corrupted mnemonicEnc
   /**
-   * Re-encrypts the wallet's `seed.mnemonicEnc` from a known-good mnemonic
-   * using the current passphrase, leaving the rest of the wallet (encrypted
-   * ids, counter, names) untouched. Used to recover from a corrupted or
-   * double-encrypted `mnemonicEnc` without destroying wallet contents.
-   * @param mnemonic The plaintext mnemonic to re-encrypt and store.
-   * @returns A promise with the updated wallet.
+   * Recovers a wallet from its backup like {@link recoverWallet}, but repairs a
+   * stale or corrupted `seed.mnemonicEnc` before decrypting the backup. The
+   * backup's encrypted ids (`enc`) can only be decrypted by first recovering the
+   * mnemonic from `mnemonicEnc`; if that blob is corrupted, the standard
+   * `recoverWallet` silently fails and returns an empty wallet. This method
+   * re-encrypts `mnemonicEnc` from the known-good local mnemonic (set by
+   * `newWallet` during import) so the ids can be recovered. The repair is
+   * idempotent when `mnemonicEnc` is already valid.
+   * @param did The backup DID to recover from (optional).
+   * @returns A promise with the recovered wallet.
    */
-  public static async resetMnemonicEncryption(
-    mnemonic: string,
-  ): Promise<WalletFile> {
+  public static async recoverWalletWithRepair(did?: string): Promise<WalletFile> {
     KeymasterReactNative.getInstance().ensureInitialized();
-    return KeymasterReactNative.getInstance().resetMnemonicEncryptionInternal(
-      mnemonic,
-    );
+    return KeymasterReactNative.getInstance().recoverWalletWithRepairInternal(did);
   }
 
   // Helper method to retrieve the instance
@@ -705,13 +705,52 @@ export class KeymasterReactNative {
     return this.keymasterService.recoverWallet(...args);
   }
 
-  private async resetMnemonicEncryptionInternal(
-    mnemonic: string,
+  private async recoverWalletWithRepairInternal(
+    did?: string,
   ): Promise<WalletFile> {
-    const wallet: WalletFile = await this.keymasterService.loadWallet();
-    wallet.seed.mnemonicEnc = await encMnemonic(mnemonic, this.config.passphrase);
-    await this.keymasterService.saveWallet(wallet, true);
-    return wallet;
+    const km = this.keymasterService;
+
+    if (!did) {
+      const seedBank = await km.resolveSeedBank();
+      const data = seedBank?.didDocumentData as { wallet?: string } | undefined;
+      did = data?.wallet;
+      if (!did) {
+        throw new Error("No backup DID found");
+      }
+    }
+
+    if (!this.config.cipher) {
+      throw new Error("Missing cipher");
+    }
+
+    const keypair = await km.hdKeyPair();
+    const asset = await km.resolveAsset(did);
+    if (!asset || typeof asset.backup !== "string") {
+      throw new Error('Asset "backup" is missing or not a string');
+    }
+
+    // CipherReactNative inherits decryptMessage from CipherBase, but the deep
+    // ESM import in cipher-react-native.ts loses its type, so reference it via a
+    // minimal local type.
+    const cipher = this.config.cipher as unknown as {
+      decryptMessage(publicJwk: unknown, privateJwk: unknown, ciphertext: string): string;
+    };
+    const decrypted = cipher.decryptMessage(
+      keypair.publicJwk,
+      keypair.privateJwk,
+      asset.backup,
+    );
+    const wallet: WalletFile = JSON.parse(decrypted);
+
+    // Repair a stale/corrupted mnemonicEnc from the known-good local mnemonic so
+    // the encrypted ids can be decrypted. Idempotent if already valid.
+    if (wallet?.seed) {
+      const mnemonic = await km.decryptMnemonic();
+      wallet.seed.mnemonicEnc = await encMnemonic(mnemonic, this.config.passphrase);
+    }
+
+    await km.saveWallet(wallet, true);
+    return km.loadWallet();
   }
 
   private validateConfig(config: KeymasterConfig): void {

@@ -7,7 +7,7 @@ jest.mock("@mdip/gatekeeper", () => ({
   GatekeeperClient: jest.fn(),
 }));
 
-jest.mock("@mdip/cipher", () => ({
+jest.mock("./cipher-react-native.js", () => ({
   default: jest.fn(),
 }));
 
@@ -22,6 +22,10 @@ describe("index (barrel exports)", () => {
   it("should export GatekeeperReactNative", () => {
     expect(MainExports.GatekeeperReactNative).toBeDefined();
     expect(typeof MainExports.GatekeeperReactNative).toBe("function");
+  });
+
+  it("should export CipherReactNative", () => {
+    expect(MainExports.CipherReactNative).toBeDefined();
   });
 
   it("should export type definitions", () => {

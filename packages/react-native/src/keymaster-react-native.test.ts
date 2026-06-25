@@ -48,6 +48,14 @@ jest.mock("@mdip/cipher", () => ({
   default: jest.fn(),
 }));
 
+const mockEncMnemonic = jest
+  .fn()
+  .mockResolvedValue({ salt: "s", iv: "i", data: "d" });
+
+jest.mock("@mdip/keymaster/encryption", () => ({
+  encMnemonic: (...args: unknown[]) => mockEncMnemonic(...args),
+}));
+
 import {
   KeymasterReactNative,
   KeymasterConfig,
@@ -859,6 +867,46 @@ describe("KeymasterReactNative", () => {
         "did:test:backup",
       );
       expect(result).toEqual({ wallet: "recovered" });
+    });
+  });
+
+  describe("resetMnemonicEncryption()", () => {
+    it("re-encrypts seed.mnemonicEnc from the given mnemonic and saves the wallet", async () => {
+      const existingWallet = {
+        version: 1,
+        seed: { mnemonicEnc: { salt: "old", iv: "old", data: "old" } },
+        enc: "encrypted-ids",
+        counter: 3,
+        ids: { foo: { did: "did:test:foo" } },
+      };
+      mockKeymasterInstance.loadWallet.mockResolvedValueOnce(existingWallet);
+
+      KeymasterReactNative.initialize(validConfig);
+      await KeymasterReactNative.start();
+
+      const mnemonic = "test mnemonic words";
+      const result = await KeymasterReactNative.resetMnemonicEncryption(mnemonic);
+
+      // Re-encrypts using the instance passphrase.
+      expect(mockEncMnemonic).toHaveBeenCalledWith(mnemonic, "test-passphrase");
+
+      // Only seed.mnemonicEnc is replaced; enc/ids/counter are preserved.
+      expect(result.seed.mnemonicEnc).toEqual({ salt: "s", iv: "i", data: "d" });
+      expect((result as any).enc).toBe("encrypted-ids");
+      expect((result as any).ids).toEqual({ foo: { did: "did:test:foo" } });
+      expect((result as any).counter).toBe(3);
+
+      // Persisted with overwrite.
+      expect(mockKeymasterInstance.saveWallet).toHaveBeenCalledWith(
+        result,
+        true,
+      );
+    });
+
+    it("throws when not initialized", async () => {
+      await expect(
+        KeymasterReactNative.resetMnemonicEncryption("words"),
+      ).rejects.toThrow("KeymasterReactNative not initialized");
     });
   });
 

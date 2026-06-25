@@ -23,6 +23,7 @@ import {
   SdkConfig,
 } from "./types/index.js";
 import KeymasterModule from "@mdip/keymaster";
+import { encMnemonic } from "@mdip/keymaster/encryption";
 
 // @ts-ignore
 const Keymaster = KeymasterModule?.default || KeymasterModule;
@@ -477,6 +478,24 @@ export class KeymasterReactNative {
     return KeymasterReactNative.getInstance().recoverWalletInternal(did);
   }
 
+  // Re-encrypt the wallet's stored mnemonic
+  /**
+   * Re-encrypts the wallet's `seed.mnemonicEnc` from a known-good mnemonic
+   * using the current passphrase, leaving the rest of the wallet (encrypted
+   * ids, counter, names) untouched. Used to recover from a corrupted or
+   * double-encrypted `mnemonicEnc` without destroying wallet contents.
+   * @param mnemonic The plaintext mnemonic to re-encrypt and store.
+   * @returns A promise with the updated wallet.
+   */
+  public static async resetMnemonicEncryption(
+    mnemonic: string,
+  ): Promise<WalletFile> {
+    KeymasterReactNative.getInstance().ensureInitialized();
+    return KeymasterReactNative.getInstance().resetMnemonicEncryptionInternal(
+      mnemonic,
+    );
+  }
+
   // Helper method to retrieve the instance
   private static getInstance(): KeymasterReactNative {
     if (!KeymasterReactNative.instance) {
@@ -684,6 +703,15 @@ export class KeymasterReactNative {
     ...args: Parameters<(typeof Keymaster)["recoverWallet"]>
   ) {
     return this.keymasterService.recoverWallet(...args);
+  }
+
+  private async resetMnemonicEncryptionInternal(
+    mnemonic: string,
+  ): Promise<WalletFile> {
+    const wallet: WalletFile = await this.keymasterService.loadWallet();
+    wallet.seed.mnemonicEnc = await encMnemonic(mnemonic, this.config.passphrase);
+    await this.keymasterService.saveWallet(wallet, true);
+    return wallet;
   }
 
   private validateConfig(config: KeymasterConfig): void {

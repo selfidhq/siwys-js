@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.34.0](https://github.com/selfidhq/siwys-js/compare/@yourself_id/siwys-react-native@0.33.1...@yourself_id/siwys-react-native@0.34.0) (2026-06-25)
+
+
+### Features
+
+* export chiper web ([#81](https://github.com/selfidhq/siwys-js/issues/81)) ([e9684ec](https://github.com/selfidhq/siwys-js/commit/e9684ec98f84a27445dfe938be69d79e559ce4c1))
+
+
+
+
+
 ## [0.33.1](https://github.com/selfidhq/siwys-js/compare/@yourself_id/siwys-react-native@0.33.0...@yourself_id/siwys-react-native@0.33.1) (2026-04-08)
 
 **Note:** Version bump only for package @yourself_id/siwys-react-native

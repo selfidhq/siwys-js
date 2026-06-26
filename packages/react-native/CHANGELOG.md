@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.35.0](https://github.com/selfidhq/siwys-js/compare/@yourself_id/siwys-react-native@0.34.0...@yourself_id/siwys-react-native@0.35.0) (2026-06-26)
+
+
+### Features
+
+* reset mnemonic encryption ([#88](https://github.com/selfidhq/siwys-js/issues/88)) ([1c8638b](https://github.com/selfidhq/siwys-js/commit/1c8638be51e8347199bbaf9f9ba7f34d6612cb1e))
+
+
+
+
+
 # [0.34.0](https://github.com/selfidhq/siwys-js/compare/@yourself_id/siwys-react-native@0.33.1...@yourself_id/siwys-react-native@0.34.0) (2026-06-25)
 
 

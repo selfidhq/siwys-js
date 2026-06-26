@@ -23,6 +23,13 @@ const mockKeymasterInstance = {
   saveWallet: jest.fn().mockResolvedValue(true),
   newWallet: jest.fn().mockResolvedValue({ wallet: "new" }),
   recoverWallet: jest.fn().mockResolvedValue({ wallet: "recovered" }),
+  resolveSeedBank: jest
+    .fn()
+    .mockResolvedValue({ didDocumentData: { wallet: "did:test:backup" } }),
+  hdKeyPair: jest
+    .fn()
+    .mockResolvedValue({ publicJwk: { pub: true }, privateJwk: { priv: true } }),
+  resolveAsset: jest.fn().mockResolvedValue({ backup: "encrypted-backup-blob" }),
 };
 
 const mockGatekeeperConnect = jest.fn().mockResolvedValue(undefined);
@@ -48,6 +55,14 @@ jest.mock("./cipher-react-native.js", () => ({
   default: jest.fn(),
 }));
 
+const mockEncMnemonic = jest
+  .fn()
+  .mockResolvedValue({ salt: "s", iv: "i", data: "d" });
+
+jest.mock("@mdip/keymaster/encryption", () => ({
+  encMnemonic: (...args: unknown[]) => mockEncMnemonic(...args),
+}));
+
 import {
   KeymasterReactNative,
   KeymasterConfig,
@@ -59,7 +74,15 @@ describe("KeymasterReactNative", () => {
     saveWallet: jest.fn(),
   };
 
-  const mockCipher = {};
+  const mockCipher = {
+    decryptMessage: jest.fn(() =>
+      JSON.stringify({
+        version: 1,
+        seed: { mnemonicEnc: { salt: "corrupt", iv: "corrupt", data: "corrupt" } },
+        enc: "encrypted-ids",
+      }),
+    ),
+  };
 
   const validConfig: KeymasterConfig = {
     gatekeeperConfig: {
@@ -859,6 +882,65 @@ describe("KeymasterReactNative", () => {
         "did:test:backup",
       );
       expect(result).toEqual({ wallet: "recovered" });
+    });
+  });
+
+  describe("recoverWalletWithRepair()", () => {
+    it("repairs the backup mnemonicEnc before decrypting and returns the loaded wallet", async () => {
+      mockKeymasterInstance.loadWallet.mockResolvedValueOnce({
+        version: 1,
+        ids: { foo: { did: "did:test:foo" } },
+      });
+
+      KeymasterReactNative.initialize(validConfig);
+      await KeymasterReactNative.start();
+
+      const result = await KeymasterReactNative.recoverWalletWithRepair();
+
+      // Resolves the backup DID from the seed bank, then the asset.
+      expect(mockKeymasterInstance.resolveAsset).toHaveBeenCalledWith("did:test:backup");
+      // Decrypts the backup blob with the HD keypair.
+      expect(mockCipher.decryptMessage).toHaveBeenCalledWith(
+        { pub: true },
+        { priv: true },
+        "encrypted-backup-blob",
+      );
+      // Repairs mnemonicEnc from the known-good local mnemonic + passphrase.
+      expect(mockEncMnemonic).toHaveBeenCalledWith("test mnemonic words", "test-passphrase");
+
+      // Saves the repaired wallet (enc preserved, mnemonicEnc rewritten) and reloads.
+      const saved = mockKeymasterInstance.saveWallet.mock.calls[0][0];
+      expect(saved.enc).toBe("encrypted-ids");
+      expect(saved.seed.mnemonicEnc).toEqual({ salt: "s", iv: "i", data: "d" });
+      expect(mockKeymasterInstance.saveWallet).toHaveBeenCalledWith(saved, true);
+      expect(result).toEqual({ version: 1, ids: { foo: { did: "did:test:foo" } } });
+    });
+
+    it("uses the provided did and skips the seed bank lookup", async () => {
+      KeymasterReactNative.initialize(validConfig);
+      await KeymasterReactNative.start();
+
+      await KeymasterReactNative.recoverWalletWithRepair("did:test:explicit");
+
+      expect(mockKeymasterInstance.resolveSeedBank).not.toHaveBeenCalled();
+      expect(mockKeymasterInstance.resolveAsset).toHaveBeenCalledWith("did:test:explicit");
+    });
+
+    it("throws when the backup asset is missing", async () => {
+      mockKeymasterInstance.resolveAsset.mockResolvedValueOnce({});
+
+      KeymasterReactNative.initialize(validConfig);
+      await KeymasterReactNative.start();
+
+      await expect(
+        KeymasterReactNative.recoverWalletWithRepair("did:test:explicit"),
+      ).rejects.toThrow('Asset "backup" is missing or not a string');
+    });
+
+    it("throws when not initialized", async () => {
+      await expect(
+        KeymasterReactNative.recoverWalletWithRepair(),
+      ).rejects.toThrow("KeymasterReactNative not initialized");
     });
   });
 

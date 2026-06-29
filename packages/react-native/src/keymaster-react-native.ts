@@ -243,6 +243,21 @@ export class KeymasterReactNative {
     );
   }
 
+  // Publish challenge receipt
+  /**
+   * Publishes a receipt for a challenge response.
+   * @param response The challenge response to publish a receipt for.
+   * @returns A promise indicating the publish operation completes.
+   */
+  public static async publishReceipt(
+    response: ChallengeResponse,
+  ): Promise<void> {
+    KeymasterReactNative.getInstance().ensureInitialized();
+    return KeymasterReactNative.getInstance().publishReceiptInternal(
+      response,
+    );
+  }
+
   // Decrypt a message
   /**
    * Decrypts a message using the current key.
@@ -616,6 +631,15 @@ export class KeymasterReactNative {
     ...args: Parameters<(typeof Keymaster)["verifyResponse"]>
   ) {
     return this.keymasterService.verifyResponse(...args);
+  }
+
+  private async publishReceiptInternal(
+    ...args: Parameters<(typeof Keymaster)["publishReceipt"]>
+  ) {
+    // Calling publishChallengeReceipts on keymasterService
+    // Keymaster interface uses publishChallengeReceipts under the hood
+    // But since `args` here is `[ChallengeResponse]`, we pass it directly
+    return this.keymasterService.publishChallengeReceipts(...args);
   }
 
   private async decryptMessageInternal(

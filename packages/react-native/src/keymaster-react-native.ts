@@ -5,6 +5,7 @@ import {
   CreateAssetOptions,
   CreateResponseOptions,
   IssueCredentialsOptions,
+  PublishChallengeReceiptOptions,
   StoredWallet,
   VerifiableCredential,
   WalletBase,
@@ -250,11 +251,13 @@ export class KeymasterReactNative {
    * @returns A promise indicating the publish operation completes.
    */
   public static async publishReceipt(
-    response: ChallengeResponse,
-  ): Promise<void> {
+    responseDID: string,
+    options?: PublishChallengeReceiptOptions
+  ): Promise<string[]> {
     KeymasterReactNative.getInstance().ensureInitialized();
     return KeymasterReactNative.getInstance().publishReceiptInternal(
-      response,
+      responseDID,
+      options
     );
   }
 
@@ -636,9 +639,6 @@ export class KeymasterReactNative {
   private async publishReceiptInternal(
     ...args: Parameters<(typeof Keymaster)["publishReceipt"]>
   ) {
-    // Calling publishChallengeReceipts on keymasterService
-    // Keymaster interface uses publishChallengeReceipts under the hood
-    // But since `args` here is `[ChallengeResponse]`, we pass it directly
     return this.keymasterService.publishChallengeReceipts(...args);
   }
 

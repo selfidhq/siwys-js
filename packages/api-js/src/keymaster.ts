@@ -1,7 +1,7 @@
 // Imports
 import { default as GatekeeperClient } from "@mdip/gatekeeper/client";
 import { default as CipherNode } from "@mdip/cipher/node";
-import { default as KeymasterLib } from "@mdip/keymaster";
+import { default as KeymasterLib, PublishChallengeReceiptOptions } from "@mdip/keymaster";
 import {
   CreateChallengeResponse,
   CreateChallengeSpec,
@@ -570,10 +570,11 @@ export class Keymaster {
   }
 
   private async publishReceiptInternal(
-    response: ChallengeResponse
-  ): Promise<void> {
+    responseDID: string,
+    options?: PublishChallengeReceiptOptions
+  ): Promise<string[]> {
     await this.ensureServiceIsRunning();
-    return this.keymasterService.publishChallengeReceipts(response);
+    return this.keymasterService.publishChallengeReceipts(responseDID, options);
   }
 
   private async decryptMessageInternal(

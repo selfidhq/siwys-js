@@ -242,10 +242,11 @@ export class Keymaster {
    * @returns A promise indicating the publish operation completes.
    */
   public static async publishReceipt(
-    response: ChallengeResponse
-  ): Promise<void> {
+    responseDID: string,
+    options?: PublishChallengeReceiptOptions
+  ): Promise<string[]> {
     Keymaster.getInstance().ensureInitialized();
-    return Keymaster.getInstance().publishReceiptInternal(response);
+    return Keymaster.getInstance().publishReceiptInternal(responseDID, options);
   }
 
   // Decrypt a message

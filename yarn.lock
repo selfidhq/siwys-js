@@ -2753,10 +2753,10 @@
     hdkey "^2.1.0"
     multiformats "^13.0.0"
 
-"@mdip/cipher@^2.0.0-beta.2":
-  version "2.0.0-beta.2"
-  resolved "https://registry.yarnpkg.com/@mdip/cipher/-/cipher-2.0.0-beta.2.tgz#0695aaf31c2c085ea82300b20ab6221a41273b71"
-  integrity sha512-3Vh9qkWQ8j5PK4Vk7ZMbYvAS6LjXYP51R7U4P5Pri1Z4GXVJowf9MqY4ASpqLfJjlSTW++FTtSQWnygPNYkIAg==
+"@mdip/cipher@^2.0.0":
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/@mdip/cipher/-/cipher-2.0.0.tgz#a0a099968fe9ee8b2d96de9a5c309df76957b520"
+  integrity sha512-62ZBlKqXML2jwOcmJOGQMaSRe+zSc45fIILeF7SL4ARp2GsvIi6rcmEFRW9G08CsB48Axrlq9h9vnsLGpPRj0w==
   dependencies:
     "@mdip/browser-hdkey" "^0.1.8"
     "@noble/ciphers" "^2.1.1"
@@ -2776,10 +2776,10 @@
     pino "^9.0.0"
     pino-pretty "^10.3.0"
 
-"@mdip/gatekeeper@^2.0.0-beta.2":
-  version "2.0.0-beta.2"
-  resolved "https://registry.yarnpkg.com/@mdip/gatekeeper/-/gatekeeper-2.0.0-beta.2.tgz#64e01bb7255526325935a20dd9e4e66729bf3afe"
-  integrity sha512-0DRhC+mZXsPgZGWyheEnlFiccKLhePJ/8Zp2NwruQv6j8HzytNLP/O6AsoPQSQGntONmmOc5f0IQjOldrj02kQ==
+"@mdip/gatekeeper@^2.0.0":
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/@mdip/gatekeeper/-/gatekeeper-2.0.0.tgz#d0b2d0180d76f8fea233ad0304e8c324e60b89cf"
+  integrity sha512-sCAM9aTXwi27sbQnbAigAmjLYgEp66mr1fGe9qhYDiZjGgFYfkLWiR36jv0pVclZ6hXOtZRBMRSSPxHgsr7IVA==
   dependencies:
     "@mdip/cipher" "*"
     "@mdip/common" "*"
@@ -2808,10 +2808,10 @@
     kubo-rpc-client "^5.1.0"
     multiformats "^13.3.3"
 
-"@mdip/keymaster@^2.0.0-beta.2":
-  version "2.0.0-beta.2"
-  resolved "https://registry.yarnpkg.com/@mdip/keymaster/-/keymaster-2.0.0-beta.2.tgz#0517c446df35103af8a0c1cd51f9b095f5c9735a"
-  integrity sha512-k3KkitEv/WqBNj5vUpGo3bd+DrS8D9UoO22cRT8HDZeAIKPO0WBb5nqkbY17ZIMfAToucUPJasOzv5MJFG6yMQ==
+"@mdip/keymaster@^2.0.0":
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/@mdip/keymaster/-/keymaster-2.0.0.tgz#82a3c9b1ca8932b60e226b6f6fc0fbeae37e6e91"
+  integrity sha512-7vJ4Sg8VYTEbwfDcnU1GupjliFyAwup21nacEMIVFQw86uWEQBf7iV0DKybGf4KP3WpevSM5drdKxCeuPCKpKg==
   dependencies:
     "@mdip/common" "*"
     axios "^1.13.6"

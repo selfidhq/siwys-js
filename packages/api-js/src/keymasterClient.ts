@@ -3,6 +3,7 @@ import {
   ChallengeResponse,
   CreateAssetOptions,
   IssueCredentialsOptions,
+  PublishChallengeReceiptOptions,
   VerifiableCredential,
 } from "@mdip/keymaster";
 import {
@@ -138,6 +139,16 @@ export class KeymasterExternalClient {
     const response: ChallengeResponse =
       await this.keymasterService.verifyResponse(did, options);
     return response;
+  }
+
+  async publishReceipt(
+    responseDID: string,
+    options?: PublishChallengeReceiptOptions
+  ): Promise<string[]> {
+    if (!this.serviceRunning()) {
+      throw new Error("Keymaster service not running");
+    }
+    return this.keymasterService.publishChallengeReceipts(responseDID, options);
   }
 
   private async serviceRunning(): Promise<boolean> {

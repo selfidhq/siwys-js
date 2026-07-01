@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.34.0](https://github.com/selfidhq/siwys-js/compare/@yourself_id/siwys-api-js@0.33.1...@yourself_id/siwys-api-js@0.34.0) (2026-07-01)
+
+
+### Features
+
+* **sapp1127:** publish challenge receipt ([#90](https://github.com/selfidhq/siwys-js/issues/90)) ([3660409](https://github.com/selfidhq/siwys-js/commit/36604094d83b5e075ca268a66c4db1cf52fad69a))
+
+
+
+
+
 ## [0.33.1](https://github.com/selfidhq/siwys-js/compare/@yourself_id/siwys-api-js@0.33.0...@yourself_id/siwys-api-js@0.33.1) (2026-04-08)
 
 **Note:** Version bump only for package @yourself_id/siwys-api-js

@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.36.0](https://github.com/selfidhq/siwys-js/compare/@yourself_id/siwys-react-native@0.35.0...@yourself_id/siwys-react-native@0.36.0) (2026-07-01)
+
+
+### Features
+
+* **sapp1127:** publish challenge receipt ([#90](https://github.com/selfidhq/siwys-js/issues/90)) ([3660409](https://github.com/selfidhq/siwys-js/commit/36604094d83b5e075ca268a66c4db1cf52fad69a))
+
+
+
+
+
 # [0.35.0](https://github.com/selfidhq/siwys-js/compare/@yourself_id/siwys-react-native@0.34.0...@yourself_id/siwys-react-native@0.35.0) (2026-06-26)
 
 

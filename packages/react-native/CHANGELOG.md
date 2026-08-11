@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.36.1](https://github.com/selfidhq/siwys-js/compare/@yourself_id/siwys-react-native@0.36.0...@yourself_id/siwys-react-native@0.36.1) (2026-08-11)
+
+**Note:** Version bump only for package @yourself_id/siwys-react-native
+
+
+
+
+
 # [0.36.0](https://github.com/selfidhq/siwys-js/compare/@yourself_id/siwys-react-native@0.35.0...@yourself_id/siwys-react-native@0.36.0) (2026-07-01)
 
 

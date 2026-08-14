@@ -14,6 +14,7 @@ import {
 
 export interface KeymasterConfig {
   keymasterConfig?: SdkConfig;
+  didPrefix?: string;
 }
 
 export class KeymasterExternalClient {
@@ -158,6 +159,10 @@ export class KeymasterExternalClient {
   private validateConfig(config: KeymasterConfig): void {
     if (!config.keymasterConfig) {
       throw new Error("Missing Keymaster config");
+    }
+
+    if (!config.didPrefix) {
+      throw new Error("Missing didPrefix config");
     }
   }
 }

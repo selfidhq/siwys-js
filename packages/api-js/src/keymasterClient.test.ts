@@ -25,6 +25,7 @@ import { KeymasterExternalClient } from "./keymasterClient.js";
 
 const validConfig = {
   keymasterConfig: { url: "http://localhost:4226" },
+  didPrefix: "did:test",
 };
 
 describe("KeymasterExternalClient", () => {
@@ -39,8 +40,14 @@ describe("KeymasterExternalClient", () => {
     });
 
     it("should throw if keymasterConfig is missing", () => {
-      expect(() => new KeymasterExternalClient({} as any)).toThrow(
+      expect(() => new KeymasterExternalClient({ didPrefix: "did:test" } as any)).toThrow(
         "Missing Keymaster config",
+      );
+    });
+
+    it("should throw if didPrefix is missing", () => {
+      expect(() => new KeymasterExternalClient({ keymasterConfig: { url: "http://localhost:4226" } } as any)).toThrow(
+        "Missing didPrefix config",
       );
     });
   });

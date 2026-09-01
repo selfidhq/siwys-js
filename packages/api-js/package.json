@@ -31,8 +31,8 @@
   },
   "dependencies": {
     "@mdip/cipher": "2.1.1-beta.0",
-    "@mdip/gatekeeper": "2.1.1-beta.0",
-    "@mdip/keymaster": "2.1.1-beta.0"
+    "@mdip/gatekeeper": "2.1.1-beta.1",
+    "@mdip/keymaster": "2.1.1-beta.1"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.25.8",

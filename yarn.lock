@@ -2798,14 +2798,14 @@
     pino "^10.3.1"
     pino-pretty "^13.1.3"
 
-"@mdip/gatekeeper@2.1.1-beta.0":
-  version "2.1.1-beta.0"
-  resolved "https://registry.yarnpkg.com/@mdip/gatekeeper/-/gatekeeper-2.1.1-beta.0.tgz#87b170c3cd9d88d40f5aa4e6d072b753f309fad1"
-  integrity sha512-7cmUpZSFz4F1KdCsY2gBWY3C+KA/V9/SiNj6I/RhucWwActUBjvCRRsUfg8jR20sgNRfU9ro3ZSsA4vL5p4xeA==
+"@mdip/gatekeeper@2.1.1-beta.1":
+  version "2.1.1-beta.1"
+  resolved "https://registry.yarnpkg.com/@mdip/gatekeeper/-/gatekeeper-2.1.1-beta.1.tgz#36ba2dde5df4d1ddaa5780a0ccdd9a61b1949f51"
+  integrity sha512-pQX7zSOjRCegneA6z3BM/Ao5Zuh9d5Eiotx7lcUbmKT6ujeDpg3MctP2aSnncV/4NDxKmY+U5iqeAtXrZz/EZg==
   dependencies:
     "@mdip/cipher" "^2.1.1-beta.0"
     "@mdip/common" "^2.1.1-beta.0"
-    "@mdip/ipfs" "^2.1.1-beta.0"
+    "@mdip/ipfs" "^2.1.1-beta.1"
     axios "^1.13.6"
     canonicalize "^2.1.0"
     dotenv "^17.3.1"
@@ -2815,10 +2815,10 @@
     sqlite "^5.1.1"
     sqlite3 "^5.1.7"
 
-"@mdip/ipfs@^2.1.1-beta.0":
-  version "2.1.1-beta.0"
-  resolved "https://registry.yarnpkg.com/@mdip/ipfs/-/ipfs-2.1.1-beta.0.tgz#a41bf3623f9653c428d2cac5d379054ffc97095b"
-  integrity sha512-kATzPK1DNfC68NNVzO4l6YhmgGO+1ivB1px7HfuUbO4qjLJvdlg2AM6vjMavrfeCL4y1agSKCF6kG2jU4U0RxA==
+"@mdip/ipfs@^2.1.1-beta.1":
+  version "2.1.1-beta.1"
+  resolved "https://registry.yarnpkg.com/@mdip/ipfs/-/ipfs-2.1.1-beta.1.tgz#9da867943dfa89677157ecd8fde8c6d0664368f6"
+  integrity sha512-k3U5Qd0n9OsPWifhv4ug6S9BeHeALCUXhM0qWZmo0Gmz7CrerM2YowsetaS+hudu0xHqIXzbneNs8lA5lFTDDQ==
   dependencies:
     "@helia/json" "^5.0.7"
     "@helia/unixfs" "^7.0.4"
@@ -2830,10 +2830,10 @@
     kubo-rpc-client "^6.1.0"
     multiformats "^13.4.2"
 
-"@mdip/keymaster@2.1.1-beta.0":
-  version "2.1.1-beta.0"
-  resolved "https://registry.yarnpkg.com/@mdip/keymaster/-/keymaster-2.1.1-beta.0.tgz#caacac3008a38c30a717c19e12ab1b6b1a6881f4"
-  integrity sha512-7ofhHhz0vlBwZWnqCE1+kDlgBCqWQV6bxuilYYUneeLzZP3WG9C2CZGOKD50xbrsUkLvIVvxYBXg5UzQWAM8jQ==
+"@mdip/keymaster@2.1.1-beta.1":
+  version "2.1.1-beta.1"
+  resolved "https://registry.yarnpkg.com/@mdip/keymaster/-/keymaster-2.1.1-beta.1.tgz#b5b8087b87b0070dc183115fc2473121bf2239ff"
+  integrity sha512-Q67WPS5Z48ulqE3YE4zp7eutpd9fKTu7K5I8l64keMqjBQC8kTew5mp7htQT7ND20dm3fDN5+/ZbhqUsaXVAMQ==
   dependencies:
     "@mdip/common" "^2.1.1-beta.0"
     axios "^1.13.6"

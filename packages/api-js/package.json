@@ -30,9 +30,9 @@
     "test:cov": "jest --coverage"
   },
   "dependencies": {
-    "@mdip/cipher": "2.1.1-beta.0",
-    "@mdip/gatekeeper": "2.1.1-beta.1",
-    "@mdip/keymaster": "2.1.1-beta.1"
+    "@mdip/cipher": "2.2.0",
+    "@mdip/gatekeeper": "2.2.0",
+    "@mdip/keymaster": "2.2.0"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.25.8",

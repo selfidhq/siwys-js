@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.37.0](https://github.com/selfidhq/siwys-js/compare/@yourself_id/siwys-react-native@0.36.1...@yourself_id/siwys-react-native@0.37.0) (2026-09-02)
+
+
+### Features
+
+* **sapp-1241:** update Keymaster 2.2.0 ([#94](https://github.com/selfidhq/siwys-js/issues/94)) ([bbd7686](https://github.com/selfidhq/siwys-js/commit/bbd76868b356c3d3fcd72331bcf35c091e8e4114))
+
+
+### BREAKING CHANGES
+
+* **sapp-1241:** property is required by SDK, will throw error if not provided
+
+
+
+
+
 ## [0.36.1](https://github.com/selfidhq/siwys-js/compare/@yourself_id/siwys-react-native@0.36.0...@yourself_id/siwys-react-native@0.36.1) (2026-08-11)
 
 **Note:** Version bump only for package @yourself_id/siwys-react-native

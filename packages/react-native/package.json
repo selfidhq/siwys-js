@@ -1,6 +1,6 @@
 {
   "name": "@yourself_id/siwys-react-native",
-  "version": "0.36.1",
+  "version": "0.37.0",
   "description": "A React Native component library",
   "repository": {
     "type": "git",
@@ -28,7 +28,7 @@
     "build": "tsup",
     "test": "jest",
     "test:cov": "jest --coverage"
-  }, 
+  },
   "dependencies": {
     "@mdip/cipher": "2.2.0",
     "@mdip/gatekeeper": "2.2.0",

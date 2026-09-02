@@ -38,7 +38,7 @@ Releases are automatically versioned and published via lerna in github actions.
 
 This repository requires adhering to semantic release commit formatting [Semantic Release](https://github.com/semantic-release/semantic-release). To properly setup your env please make sure you run the prepare script at the root of the project.
 
-Each commit, and the PR title, must follow the exact semantic release commit formatting rules for lerna to properly version and publish the package. Here are example commits for patch, minor, and major release updates:
+Each commit, and the PR title, must follow the semantic release commit formatting rules for lerna to properly version and publish the package. Here are example commits for patch, minor, and major release updates:
 
 ### Fix
 

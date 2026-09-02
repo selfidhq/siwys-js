@@ -28,11 +28,11 @@
     "build": "tsup",
     "test": "jest",
     "test:cov": "jest --coverage"
-  },
+  }, 
   "dependencies": {
-    "@mdip/cipher": "^2.1.0",
-    "@mdip/gatekeeper": "^2.1.0",
-    "@mdip/keymaster": "^2.1.0",
+    "@mdip/cipher": "2.2.0",
+    "@mdip/gatekeeper": "2.2.0",
+    "@mdip/keymaster": "2.2.0",
     "@noble/ciphers": "^0.4.1",
     "@noble/hashes": "^1.8.0",
     "@noble/secp256k1": "^2.2.3",

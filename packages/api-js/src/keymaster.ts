@@ -25,6 +25,7 @@ export interface KeymasterConfig {
   walletDb?: WalletBase;
   walletConfig: WalletConfig;
   passphrase: string;
+  didPrefix?: string;
 }
 
 export class Keymaster {
@@ -478,6 +479,7 @@ export class Keymaster {
           wallet: this.config.walletDb,
           cipher,
           passphrase: this.config.passphrase,
+          didPrefix: this.config.didPrefix,
         });
         await this.ensureWalletExists();
       } else {
@@ -708,6 +710,10 @@ export class Keymaster {
   private validateConfig(config: KeymasterConfig): void {
     if (!config.gatekeeperConfig) {
       throw new Error("Missing Gatekeeper config");
+    }
+
+    if (!config.didPrefix) {
+      throw new Error("Missing didPrefix config");
     }
 
     if (config.gatekeeperConfig) {

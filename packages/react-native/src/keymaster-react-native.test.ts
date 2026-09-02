@@ -94,6 +94,7 @@ describe("KeymasterReactNative", () => {
     walletDb: mockWalletDb as any,
     cipher: mockCipher as any,
     passphrase: "test-passphrase",
+    didPrefix: "did:test",
   };
 
   beforeEach(() => {
@@ -156,6 +157,17 @@ describe("KeymasterReactNative", () => {
       expect(() => {
         KeymasterReactNative.initialize(invalidConfig);
       }).toThrow("Missing Gatekeeper config");
+    });
+
+    it("should throw when didPrefix is missing", () => {
+      const invalidConfig = {
+        ...validConfig,
+        didPrefix: undefined,
+      } as any;
+
+      expect(() => {
+        KeymasterReactNative.initialize(invalidConfig);
+      }).toThrow("Missing didPrefix config");
     });
 
     it("should throw when walletDb.loadWallet is missing", () => {

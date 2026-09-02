@@ -35,6 +35,7 @@ export interface KeymasterConfig {
   walletDb?: WalletBase;
   cipher?: CipherReactNative;
   passphrase: string;
+  didPrefix?: string;
 }
 export class KeymasterReactNative {
   private static instance: KeymasterReactNative | null = null;
@@ -564,6 +565,7 @@ export class KeymasterReactNative {
           wallet: this.config.walletDb,
           cipher: this.config.cipher,
           passphrase: this.config.passphrase,
+          didPrefix: this.config.didPrefix,
         });
       } else {
         return false;
@@ -780,6 +782,10 @@ export class KeymasterReactNative {
   private validateConfig(config: KeymasterConfig): void {
     if (!config.gatekeeperConfig) {
       throw new Error("Missing Gatekeeper config");
+    }
+
+    if (!config.didPrefix) {
+      throw new Error("Missing didPrefix config");
     }
 
     if (config.gatekeeperConfig) {

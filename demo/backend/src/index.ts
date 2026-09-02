@@ -123,5 +123,6 @@ app.listen(port, () => {
       updateWallet: updateWallet,
     },
     passphrase: "demo-passphrase",
+    didPrefix: "did:test",
   });
 });

@@ -86,6 +86,7 @@ const createValidConfig = () => ({
     saveWallet: mockSaveWalletDb,
   } as any,
   passphrase: "test-passphrase",
+  didPrefix: "did:test",
 });
 
 describe("Keymaster", () => {
@@ -137,8 +138,23 @@ describe("Keymaster", () => {
             saveWallet: mockSaveWalletDb,
           },
           passphrase: "test",
+          didPrefix: "did:test",
         } as any),
       ).toThrow("Missing Gatekeeper config");
+    });
+
+    it("should throw if didPrefix is missing", () => {
+      expect(() =>
+        Keymaster.initialize({
+          gatekeeperConfig: { url: "http://localhost:4224" },
+          walletConfig: { id: "test", registry: "local" },
+          walletDb: {
+            loadWallet: mockLoadWalletDb,
+            saveWallet: mockSaveWalletDb,
+          },
+          passphrase: "test",
+        } as any),
+      ).toThrow("Missing didPrefix config");
     });
 
     it("should throw if walletConfig is missing", () => {
@@ -150,6 +166,7 @@ describe("Keymaster", () => {
             saveWallet: mockSaveWalletDb,
           },
           passphrase: "test",
+          didPrefix: "did:test",
         } as any),
       ).toThrow("Missing wallet config");
     });
@@ -161,6 +178,7 @@ describe("Keymaster", () => {
           walletConfig: { id: "test", registry: "local" },
           walletDb: { saveWallet: mockSaveWalletDb } as any,
           passphrase: "test",
+          didPrefix: "did:test",
         }),
       ).toThrow("Missing load wallet callback");
     });
@@ -172,6 +190,7 @@ describe("Keymaster", () => {
           walletConfig: { id: "test", registry: "local" },
           walletDb: { loadWallet: mockLoadWalletDb } as any,
           passphrase: "test",
+          didPrefix: "did:test",
         }),
       ).toThrow("Missing save wallet callback");
     });

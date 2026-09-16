@@ -6,6 +6,7 @@ const mockKeymasterInstance = {
   backupWallet: jest.fn().mockResolvedValue("backup-url"),
   issueCredential: jest.fn().mockResolvedValue("credential-did"),
   publishCredential: jest.fn().mockResolvedValue({ published: true }),
+  unpublishCredential: jest.fn().mockResolvedValue("unpublished-did"),
   acceptCredential: jest.fn().mockResolvedValue(true),
   decryptMnemonic: jest.fn().mockResolvedValue("test mnemonic words"),
   verifyResponse: jest.fn().mockResolvedValue({ verified: true }),
@@ -480,6 +481,18 @@ describe("KeymasterReactNative", () => {
         "cred-did",
         options,
       );
+    });
+  });
+
+  describe("unpublishCredential()", () => {
+    it("should unpublish credential", async () => {
+      KeymasterReactNative.initialize(validConfig);
+      await KeymasterReactNative.start();
+
+      const result = await KeymasterReactNative.unpublishCredential("cred-did");
+
+      expect(mockKeymasterInstance.unpublishCredential).toHaveBeenCalledWith("cred-did");
+      expect(result).toBe("unpublished-did");
     });
   });
 

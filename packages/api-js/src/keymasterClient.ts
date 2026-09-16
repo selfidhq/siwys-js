@@ -112,6 +112,14 @@ export class KeymasterExternalClient {
     return this.keymasterService.publishCredential(did, options);
   }
 
+  async unpublishCredential(did: string): Promise<boolean> {
+    if (!this.serviceRunning()) {
+      throw new Error("Keymaster service not running");
+    }
+
+    return this.keymasterService.unpublishCredential(did);
+  }
+
   async acceptCredential(did: string): Promise<boolean> {
     if (!this.serviceRunning()) {
       throw new Error("Keymaster service not running");

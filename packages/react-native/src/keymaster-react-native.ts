@@ -206,6 +206,21 @@ export class KeymasterReactNative {
     );
   }
 
+  // Unpublish a credential
+  /**
+   * Removes a credential from the agent manifest.
+   * @param did The DID of the credential.
+   * @returns A promise indicating whether the credential was successfully unpublished.
+   */
+  public static async unpublishCredential(
+    did: string,
+  ): Promise<boolean | string> {
+    KeymasterReactNative.getInstance().ensureInitialized();
+    return KeymasterReactNative.getInstance().unpublishCredentialInternal(
+      did,
+    );
+  }
+
   // Accept a credential
   /**
    * Accepts a credential.
@@ -620,6 +635,12 @@ export class KeymasterReactNative {
     ...args: Parameters<(typeof Keymaster)["publishCredential"]>
   ) {
     return this.keymasterService.publishCredential(...args);
+  }
+
+  private async unpublishCredentialInternal(
+    ...args: Parameters<(typeof Keymaster)["unpublishCredential"]>
+  ) {
+    return this.keymasterService.unpublishCredential(...args);
   }
 
   private async acceptCredentialInternal(

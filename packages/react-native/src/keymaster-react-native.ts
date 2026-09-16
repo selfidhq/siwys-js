@@ -208,7 +208,7 @@ export class KeymasterReactNative {
 
   // Unpublish a credential
   /**
-   * Unpublishes a verifiable credential.
+   * Removes a credential from the agent manifest.
    * @param did The DID of the credential.
    * @returns A promise indicating whether the credential was successfully unpublished.
    */

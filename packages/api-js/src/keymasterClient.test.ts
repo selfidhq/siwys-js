@@ -3,6 +3,7 @@ const mockCreateChallenge = jest.fn().mockResolvedValue("did:test:challenge");
 const mockBindCredential = jest.fn().mockResolvedValue({ id: "vc-1" });
 const mockIssueCredential = jest.fn().mockResolvedValue("issued-did");
 const mockPublishCredential = jest.fn().mockResolvedValue(true);
+const mockUnpublishCredential = jest.fn().mockResolvedValue(true);
 const mockAcceptCredential = jest.fn().mockResolvedValue(true);
 const mockDecryptMnemonic = jest.fn().mockResolvedValue("word1 word2 word3");
 const mockVerifyResponse = jest.fn().mockResolvedValue({ match: true });
@@ -15,6 +16,7 @@ jest.mock("@mdip/keymaster/client", () => ({
     bindCredential: mockBindCredential,
     issueCredential: mockIssueCredential,
     publishCredential: mockPublishCredential,
+    unpublishCredential: mockUnpublishCredential,
     acceptCredential: mockAcceptCredential,
     decryptMnemonic: mockDecryptMnemonic,
     verifyResponse: mockVerifyResponse,
@@ -161,6 +163,17 @@ describe("KeymasterExternalClient", () => {
 
       const result = await client.publishCredential("did:cred:1");
       expect(mockPublishCredential).toHaveBeenCalledWith("did:cred:1", {});
+      expect(result).toBe(true);
+    });
+  });
+
+  describe("unpublishCredential()", () => {
+    it("should delegate to keymasterService.unpublishCredential()", async () => {
+      const client = new KeymasterExternalClient(validConfig);
+      await client.start();
+
+      const result = await client.unpublishCredential("did:cred:1");
+      expect(mockUnpublishCredential).toHaveBeenCalledWith("did:cred:1");
       expect(result).toBe(true);
     });
   });

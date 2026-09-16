@@ -12,6 +12,7 @@ const mockKmIssueCredential = jest.fn().mockResolvedValue("issued-did");
 const mockKmPublishCredential = jest
   .fn()
   .mockResolvedValue({ type: ["VerifiableCredential"] });
+const mockKmUnpublishCredential = jest.fn().mockResolvedValue("unpublished-did");
 const mockKmAcceptCredential = jest.fn().mockResolvedValue(true);
 const mockKmDecryptMnemonic = jest.fn().mockResolvedValue("word1 word2 word3");
 const mockKmVerifyResponse = jest.fn().mockResolvedValue({ match: true });
@@ -54,6 +55,7 @@ jest.mock("@mdip/keymaster", () => ({
     backupWallet: mockKmBackupWallet,
     issueCredential: mockKmIssueCredential,
     publishCredential: mockKmPublishCredential,
+    unpublishCredential: mockKmUnpublishCredential,
     acceptCredential: mockKmAcceptCredential,
     decryptMnemonic: mockKmDecryptMnemonic,
     verifyResponse: mockKmVerifyResponse,
@@ -398,6 +400,12 @@ describe("Keymaster", () => {
       const result = await Keymaster.publishCredential("did:cred:1");
       expect(mockKmPublishCredential).toHaveBeenCalledWith("did:cred:1", {});
       expect(result).toEqual({ type: ["VerifiableCredential"] });
+    });
+
+    it("unpublishCredential()", async () => {
+      const result = await Keymaster.unpublishCredential("did:cred:1");
+      expect(mockKmUnpublishCredential).toHaveBeenCalledWith("did:cred:1");
+      expect(result).toBe("unpublished-did");
     });
 
     it("acceptCredential()", async () => {

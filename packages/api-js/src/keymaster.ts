@@ -200,6 +200,19 @@ export class Keymaster {
     return Keymaster.getInstance().publishCredentialInternal(did, options);
   }
 
+  // Unpublish a credential
+  /**
+   * Unpublishes a verifiable credential.
+   * @param did The DID of the credential.
+   * @returns A promise indicating whether the credential was successfully unpublished.
+   */
+  public static async unpublishCredential(
+    did: string,
+  ): Promise<boolean | string> {
+    Keymaster.getInstance().ensureInitialized();
+    return Keymaster.getInstance().unpublishCredentialInternal(did);
+  }
+
   // Accept a credential
   /**
    * Accepts a credential.
@@ -552,6 +565,13 @@ export class Keymaster {
   ): Promise<VerifiableCredential> {
     await this.ensureServiceIsRunning();
     return this.keymasterService.publishCredential(did, options);
+  }
+
+  private async unpublishCredentialInternal(
+    ...args: Parameters<KeymasterLib["unpublishCredential"]>
+  ) {
+    await this.ensureServiceIsRunning();
+    return this.keymasterService.unpublishCredential(...args);
   }
 
   private async acceptCredentialInternal(did: string): Promise<boolean> {

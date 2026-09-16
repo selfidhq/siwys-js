@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.38.0](https://github.com/selfidhq/siwys-js/compare/@yourself_id/siwys-react-native@0.37.0...@yourself_id/siwys-react-native@0.38.0) (2026-09-16)
+
+
+### Features
+
+* add unpublishCredential to keymaster SDK packages ([#95](https://github.com/selfidhq/siwys-js/issues/95)) ([9bff448](https://github.com/selfidhq/siwys-js/commit/9bff4480c69f1c29166dd20813bf6d3527b8f0cb))
+
+
+
+
+
 # [0.37.0](https://github.com/selfidhq/siwys-js/compare/@yourself_id/siwys-react-native@0.36.1...@yourself_id/siwys-react-native@0.37.0) (2026-09-02)
 
 

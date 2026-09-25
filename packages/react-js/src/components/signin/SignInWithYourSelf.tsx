@@ -1,7 +1,14 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import styled from "styled-components";
 import QRCode from "./QrCode";
 import { CysButton, SiwysButton } from "../button/SignInButton";
+import Button from "../button/Button";
+import {
+  detectExtension,
+  ExtensionBridgeConfig,
+  isDesktopChromiumBrowser,
+  requestExtensionSignIn,
+} from "../../extensionBridge";
 
 import {
   AppleAppStore,
@@ -16,18 +23,37 @@ import {
 
 type ThemeProp = "light" | "dark";
 
-interface SignInProps {
-  challengeDID: string;
+interface SignInPropsBase {
   challengeBaseUrl?: string;
   isCYS?: boolean;
-  createChallengeUrl?: string;
   onSiwysPress?: () => void;
   pollForAuthUrl?: string;
   successComponent?: React.ReactNode;
   theme?: ThemeProp;
   showLogo?: boolean;
   showInstructions?: boolean;
+  extensionConfig?: ExtensionBridgeConfig | false;
 }
+
+type SignInProps =
+  | (SignInPropsBase & {
+      challengeDID: string;
+      createChallengeUrl?: string;
+    })
+  | (SignInPropsBase & {
+      challengeDID?: string;
+      createChallengeUrl: string;
+    });
+
+type ExtensionFlowState =
+  | "idle"
+  | "checking"
+  | "ready"
+  | "pending"
+  | "approved"
+  | "unavailable"
+  | "rejected"
+  | "error";
 
 const Wrapper = styled.div`
   position: relative;
@@ -204,6 +230,26 @@ const AppIconsContainer = styled.div`
   }
 `;
 
+const ExtensionNotice = styled.div<{ $theme: ThemeProp }>`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+  color: ${(props) => (props.$theme === "dark" ? "#0F0F10" : "#ffffff")};
+  font-family: "Inter", sans-serif;
+  font-size: 14px;
+  text-align: center;
+`;
+
+const ChallengeMessage = styled.p<{ $theme: ThemeProp }>`
+  margin: 0;
+  color: ${(props) => (props.$theme === "dark" ? "#0F0F10" : "#ffffff")};
+  font-family: "Inter", sans-serif;
+  font-size: 14px;
+  text-align: center;
+`;
+
 const SignInWithYourSelf: React.FC<SignInProps> = ({
   challengeDID,
   onSiwysPress,
@@ -215,26 +261,66 @@ const SignInWithYourSelf: React.FC<SignInProps> = ({
   challengeBaseUrl = "",
   showLogo = true,
   showInstructions = true,
+  extensionConfig,
 }) => {
   const [challengeUrl, setChallengeUrl] = useState<string>(
     challengeBaseUrl
       ? `${challengeBaseUrl}/challenge?challenge=${challengeDID || ""}`
-      : `https://www.selfid.link/challenge?challenge=${challengeDID || ""}`
+      : `https://www.selfid.link/challenge?challenge=${challengeDID || ""}`,
   );
-  const [challengeDid, setChallengeDid] = useState<string>("");
+  const [challengeDid, setChallengeDid] = useState<string>(challengeDID || "");
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [challengeError, setChallengeError] = useState<string>("");
+  const [extensionFlowState, setExtensionFlowState] =
+    useState<ExtensionFlowState>("idle");
+  const [extensionError, setExtensionError] = useState<string>("");
+  const removeStatusListener = useRef<() => void>();
 
   useEffect(() => {
-    if (createChallengeUrl) {
-      fetch(createChallengeUrl, {
-        method: "POST",
+    return () => {
+      removeStatusListener.current?.();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!createChallengeUrl) return;
+
+    let isActive = true;
+    setChallengeError("");
+    fetch(createChallengeUrl, {
+      method: "POST",
+    })
+      .then((resp) => {
+        if (resp.status < 200 || resp.status >= 300) {
+          throw new Error("Challenge creation failed");
+        }
+        return resp.json();
       })
-        .then((resp) => resp.json())
-        .then((json) => {
-          setChallengeDid(json.challenge);
+      .then((json) => {
+        const did = json?.challenge ?? json?.challengeDid;
+        if (
+          typeof did !== "string" ||
+          !did ||
+          typeof json?.challengeUrl !== "string" ||
+          !json.challengeUrl
+        ) {
+          throw new Error("Invalid challenge response");
+        }
+
+        if (isActive) {
+          setChallengeDid(did);
           setChallengeUrl(json.challengeUrl);
-        });
-    }
+        }
+      })
+      .catch(() => {
+        if (isActive && !challengeDID) {
+          setChallengeError("Unable to create a sign-in challenge.");
+        }
+      });
+
+    return () => {
+      isActive = false;
+    };
   }, [createChallengeUrl]);
 
   useEffect(() => {
@@ -272,14 +358,83 @@ const SignInWithYourSelf: React.FC<SignInProps> = ({
     window.open(appStoreURL, "_blank");
   };
 
+  const openExtensionInstallPage = useCallback(() => {
+    if (extensionConfig && extensionConfig.installUrl) {
+      window.open(extensionConfig.installUrl, "_blank");
+    }
+  }, [extensionConfig]);
+
+  const startExtensionSignIn = useCallback(async () => {
+    setExtensionFlowState("checking");
+    setExtensionError("");
+
+    const detectionTimeoutMs =
+      extensionConfig === false
+        ? undefined
+        : extensionConfig?.detectionTimeoutMs;
+    const extensionAvailable = await detectExtension(detectionTimeoutMs);
+
+    if (!extensionAvailable) {
+      setExtensionFlowState("unavailable");
+      return;
+    }
+
+    setExtensionFlowState("pending");
+    removeStatusListener.current?.();
+    removeStatusListener.current = requestExtensionSignIn(
+      { challengeDID: challengeDid, challengeUrl },
+      ({ status, error }) => {
+        setExtensionFlowState(status);
+        setExtensionError(error || "");
+      },
+    );
+  }, [challengeDID, challengeDid, challengeUrl, extensionConfig]);
+
   const defaultSiwysClick = useCallback(() => {
     if (onSiwysPress) {
       onSiwysPress();
       return;
     }
 
+    if (extensionConfig !== false && isDesktopChromiumBrowser()) {
+      startExtensionSignIn();
+      return;
+    }
+
     window.open(challengeUrl, "_blank");
-  }, [challengeUrl, onSiwysPress]);
+  }, [challengeUrl, extensionConfig, onSiwysPress, startExtensionSignIn]);
+
+  const extensionNotice = (() => {
+    if (extensionFlowState === "checking") {
+      return "Looking for the SELF browser extension...";
+    }
+    if (extensionFlowState === "ready") {
+      return "Opening the SELF browser extension...";
+    }
+    if (extensionFlowState === "pending") {
+      return "Approve the request in the SELF browser extension.";
+    }
+    if (extensionFlowState === "approved") {
+      return "Approval received. Completing sign-in...";
+    }
+    if (extensionFlowState === "rejected") {
+      return "The request was rejected in the SELF browser extension.";
+    }
+    if (extensionFlowState === "error") {
+      return (
+        extensionError ||
+        "The SELF browser extension could not complete the request."
+      );
+    }
+    if (extensionFlowState === "unavailable") {
+      return "Install the SELF browser extension to continue on this device.";
+    }
+    return "";
+  })();
+
+  const isCreatingChallenge = Boolean(
+    createChallengeUrl && !challengeDid && !challengeError,
+  );
 
   if (isAuthenticated) {
     return <Wrapper>{successComponent}</Wrapper>;
@@ -307,13 +462,43 @@ const SignInWithYourSelf: React.FC<SignInProps> = ({
             </TitleContainer>
           </>
         )}
-        <QRContainer $theme={theme}>
-          <QRCode challengeUrl={challengeUrl} size={200} level="H" />
-        </QRContainer>
-        {isCYS ? (
-          <CysButton colorTheme={theme} onClick={defaultSiwysClick} glow />
-        ) : (
-          <SiwysButton colorTheme={theme} onClick={defaultSiwysClick} glow />
+        {isCreatingChallenge && (
+          <ChallengeMessage $theme={theme} role="status">
+            Creating sign-in challenge...
+          </ChallengeMessage>
+        )}
+        {challengeError && (
+          <ChallengeMessage $theme={theme} role="alert">
+            {challengeError}
+          </ChallengeMessage>
+        )}
+        {!isCreatingChallenge && !challengeError && (
+          <>
+            <QRContainer $theme={theme}>
+              <QRCode challengeUrl={challengeUrl} size={200} level="H" />
+            </QRContainer>
+            {isCYS ? (
+              <CysButton colorTheme={theme} onClick={defaultSiwysClick} glow />
+            ) : (
+              <SiwysButton
+                colorTheme={theme}
+                onClick={defaultSiwysClick}
+                glow
+              />
+            )}
+          </>
+        )}
+        {extensionNotice && (
+          <ExtensionNotice $theme={theme} role="status">
+            <span>{extensionNotice}</span>
+            {extensionFlowState === "unavailable" &&
+              extensionConfig &&
+              extensionConfig.installUrl && (
+                <Button colorTheme={theme} onClick={openExtensionInstallPage}>
+                  Install extension
+                </Button>
+              )}
+          </ExtensionNotice>
         )}
       </SignInContainer>
 

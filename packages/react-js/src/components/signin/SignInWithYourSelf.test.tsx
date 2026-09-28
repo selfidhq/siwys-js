@@ -439,6 +439,7 @@ describe("SignInWithYourSelf Component", () => {
       configurable: true,
       value: "Mozilla/5.0 Chrome/123.0.0.0 Safari/537.36",
     });
+    const logSpy = jest.spyOn(console, "info").mockImplementation();
     let signInRequest: any;
     const extensionResponder = (event: MessageEvent) => {
       const request = event.data;
@@ -480,53 +481,63 @@ describe("SignInWithYourSelf Component", () => {
       screen.getByRole("button", { name: /Sign in with your/i })
     );
 
-    await waitFor(() => {
-      expect(screen.getByRole("status")).toHaveTextContent(
-        "Approve the request in the SELF browser extension."
-      );
-    });
+    await waitFor(() => expect(signInRequest).toBeDefined());
     expect(signInRequest.payload).toEqual({
       challengeDID: challengeDid,
       challengeUrl: expect.stringContaining(`challenge=${challengeDid}`),
     });
-
+    expect(
+      screen.queryByText("Approve the request in the SELF browser extension.")
+    ).not.toBeInTheDocument();
     await waitFor(() => {
-      expect(screen.getByRole("status")).toHaveTextContent(
-        "Approval received. Completing sign-in..."
-      );
+      expect(
+        logSpy.mock.calls.some(([, message]) =>
+          String(message).includes("Approval received")
+        )
+      ).toBe(true);
     });
 
     window.removeEventListener("message", extensionResponder);
+    logSpy.mockRestore();
   });
 
-  it("shows the configured installation action when the extension is unavailable", async () => {
+  it("dismisses the install prompt and allows retrying extension detection", async () => {
     Object.defineProperty(window.navigator, "userAgent", {
       configurable: true,
       value: "Mozilla/5.0 Chrome/123.0.0.0 Safari/537.36",
     });
-    global.window.open = jest.fn();
+    let detectionRequests = 0;
+    const countDetectionRequests = (event: MessageEvent) => {
+      if (event.data?.type === "self-id:extension:detect") {
+        detectionRequests += 1;
+      }
+    };
+    window.addEventListener("message", countDetectionRequests);
 
     render(
       <SignInWithYourSelf
         challengeDID={challengeDid}
-        extensionConfig={{
-          installUrl: "https://example.test/install-extension",
-          detectionTimeoutMs: 1,
-        }}
+        extensionConfig={{ detectionTimeoutMs: 1 }}
       />
     );
     await userEvent.click(
       screen.getByRole("button", { name: /Sign in with your/i })
     );
 
-    const installButton = await screen.findByRole("button", {
-      name: "Install extension",
+    const installDialog = await screen.findByRole("dialog", {
+      name: "SELF browser extension not detected",
     });
-    await userEvent.click(installButton);
+    await userEvent.click(screen.getByRole("button", { name: "Cancel" }));
+    expect(installDialog).not.toBeInTheDocument();
 
-    expect(global.window.open).toHaveBeenCalledWith(
-      "https://example.test/install-extension",
-      "_blank"
+    await userEvent.click(
+      screen.getByRole("button", { name: /Sign in with your/i })
     );
+    await screen.findByRole("dialog", {
+      name: "SELF browser extension not detected",
+    });
+    expect(detectionRequests).toBe(2);
+
+    window.removeEventListener("message", countDetectionRequests);
   });
 });

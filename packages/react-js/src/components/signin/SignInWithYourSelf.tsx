@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import styled from "styled-components";
 import QRCode from "./QrCode";
+import ExtensionInstallToast from "./ExtensionInstallToast";
 import { CysButton, SiwysButton } from "../button/SignInButton";
-import Button from "../button/Button";
 import {
   detectExtension,
   ExtensionBridgeConfig,
@@ -230,18 +230,6 @@ const AppIconsContainer = styled.div`
   }
 `;
 
-const ExtensionNotice = styled.div<{ $theme: ThemeProp }>`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-  margin-top: 16px;
-  color: ${(props) => (props.$theme === "dark" ? "#0F0F10" : "#ffffff")};
-  font-family: "Inter", sans-serif;
-  font-size: 14px;
-  text-align: center;
-`;
-
 const ChallengeMessage = styled.p<{ $theme: ThemeProp }>`
   margin: 0;
   color: ${(props) => (props.$theme === "dark" ? "#0F0F10" : "#ffffff")};
@@ -266,7 +254,7 @@ const SignInWithYourSelf: React.FC<SignInProps> = ({
   const [challengeUrl, setChallengeUrl] = useState<string>(
     challengeBaseUrl
       ? `${challengeBaseUrl}/challenge?challenge=${challengeDID || ""}`
-      : `https://www.selfid.link/challenge?challenge=${challengeDID || ""}`,
+      : `https://www.selfid.link/challenge?challenge=${challengeDID || ""}`
   );
   const [challengeDid, setChallengeDid] = useState<string>(challengeDID || "");
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
@@ -274,6 +262,8 @@ const SignInWithYourSelf: React.FC<SignInProps> = ({
   const [extensionFlowState, setExtensionFlowState] =
     useState<ExtensionFlowState>("idle");
   const [extensionError, setExtensionError] = useState<string>("");
+  const [isInstallPromptDismissed, setIsInstallPromptDismissed] =
+    useState<boolean>(false);
   const removeStatusListener = useRef<() => void>();
 
   useEffect(() => {
@@ -367,6 +357,7 @@ const SignInWithYourSelf: React.FC<SignInProps> = ({
   const startExtensionSignIn = useCallback(async () => {
     setExtensionFlowState("checking");
     setExtensionError("");
+    setIsInstallPromptDismissed(false);
 
     const detectionTimeoutMs =
       extensionConfig === false
@@ -386,7 +377,7 @@ const SignInWithYourSelf: React.FC<SignInProps> = ({
       ({ status, error }) => {
         setExtensionFlowState(status);
         setExtensionError(error || "");
-      },
+      }
     );
   }, [challengeDID, challengeDid, challengeUrl, extensionConfig]);
 
@@ -432,8 +423,19 @@ const SignInWithYourSelf: React.FC<SignInProps> = ({
     return "";
   })();
 
+  useEffect(() => {
+    if (extensionNotice) {
+      console.info("[SELF browser extension]", extensionNotice);
+    }
+  }, [extensionNotice]);
+
+  const isExtensionRequestActive =
+    extensionFlowState === "checking" ||
+    extensionFlowState === "ready" ||
+    extensionFlowState === "pending";
+
   const isCreatingChallenge = Boolean(
-    createChallengeUrl && !challengeDid && !challengeError,
+    createChallengeUrl && !challengeDid && !challengeError
   );
 
   if (isAuthenticated) {
@@ -478,29 +480,37 @@ const SignInWithYourSelf: React.FC<SignInProps> = ({
               <QRCode challengeUrl={challengeUrl} size={200} level="H" />
             </QRContainer>
             {isCYS ? (
-              <CysButton colorTheme={theme} onClick={defaultSiwysClick} glow />
-            ) : (
-              <SiwysButton
+              <CysButton
+                key={extensionFlowState}
                 colorTheme={theme}
                 onClick={defaultSiwysClick}
+                disabled={isExtensionRequestActive}
+                glow
+              />
+            ) : (
+              <SiwysButton
+                key={extensionFlowState}
+                colorTheme={theme}
+                onClick={defaultSiwysClick}
+                disabled={isExtensionRequestActive}
                 glow
               />
             )}
           </>
         )}
-        {extensionNotice && (
-          <ExtensionNotice $theme={theme} role="status">
-            <span>{extensionNotice}</span>
-            {extensionFlowState === "unavailable" &&
-              extensionConfig &&
-              extensionConfig.installUrl && (
-                <Button colorTheme={theme} onClick={openExtensionInstallPage}>
-                  Install extension
-                </Button>
-              )}
-          </ExtensionNotice>
-        )}
       </SignInContainer>
+
+      {extensionFlowState === "unavailable" && !isInstallPromptDismissed && (
+        <ExtensionInstallToast
+          theme={theme}
+          onCancel={() => setIsInstallPromptDismissed(true)}
+          onInstall={
+            extensionConfig && extensionConfig.installUrl
+              ? openExtensionInstallPage
+              : undefined
+          }
+        />
+      )}
 
       {showInstructions && (
         <InstructionsContainer>

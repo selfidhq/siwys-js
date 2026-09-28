@@ -149,11 +149,16 @@ describe("ConnectYourSelf Component", () => {
       screen.getByRole("button", { name: /Connect your/i })
     );
 
-    const installButton = await screen.findByRole("button", {
-      name: "Install extension",
+    const installDialog = await screen.findByRole("dialog", {
+      name: "SELF browser extension not detected",
     });
+    const installButton = screen.getByRole("button", { name: "Install" });
+    expect(screen.getByRole("button", { name: "Cancel" })).toBeInTheDocument();
     await userEvent.click(installButton);
 
+    expect(installDialog).toHaveTextContent(
+      "SELF browser extension not detected. Install it to continue."
+    );
     expect(global.window.open).toHaveBeenCalledWith(
       "https://example.test/install-extension",
       "_blank"

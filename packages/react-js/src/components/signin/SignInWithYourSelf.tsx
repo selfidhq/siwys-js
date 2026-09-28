@@ -8,7 +8,7 @@ import {
   ExtensionBridgeConfig,
   isDesktopChromiumBrowser,
   requestExtensionSignIn,
-} from "../../extensionBridge";
+} from "../../utils/extensionBridge";
 
 import {
   AppleAppStore,

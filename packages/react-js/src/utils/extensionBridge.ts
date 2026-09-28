@@ -97,7 +97,7 @@ export const isDesktopChromiumBrowser = (): boolean => {
 };
 
 export const detectExtension = (
-  detectionTimeoutMs = DEFAULT_DETECTION_TIMEOUT_MS,
+  detectionTimeoutMs = DEFAULT_DETECTION_TIMEOUT_MS
 ): Promise<boolean> => {
   if (typeof window === "undefined") return Promise.resolve(false);
 
@@ -138,7 +138,7 @@ export const detectExtension = (
 
 export const requestExtensionSignIn = (
   request: ExtensionSignInRequest,
-  onStatus: (message: ExtensionStatusMessage) => void,
+  onStatus: (message: ExtensionStatusMessage) => void
 ): (() => void) => {
   if (typeof window === "undefined") return () => {};
 

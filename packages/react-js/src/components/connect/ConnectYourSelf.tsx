@@ -1,6 +1,6 @@
 import React from "react";
 import SignInWithYourSelf from "../signin/SignInWithYourSelf";
-import type { ExtensionBridgeConfig } from "../../extensionBridge";
+import type { ExtensionBridgeConfig } from "../../utils/extensionBridge";
 
 interface ConnectYourSelfProps {
   challengeDID: string;

@@ -10,6 +10,7 @@ const challengeDid = "did:challenge";
 const checkAuthUrl = "http//backend/auth";
 const createChallengeUrl = "http//backend/challenges";
 let fetchMock: any;
+const originalUserAgent = navigator.userAgent;
 
 const fetchMockImpl = (input: RequestInfo | URL) => {
   const url = input.toString();
@@ -60,6 +61,14 @@ describe("SignInWithYourSelf Component", () => {
     jest.clearAllMocks();
   });
 
+  afterEach(() => {
+    jest.useRealTimers();
+    Object.defineProperty(window.navigator, "userAgent", {
+      configurable: true,
+      value: originalUserAgent,
+    });
+  });
+
   it("should call the createChallengeUrl to generate a Challange", async () => {
     render(
       <SignInWithYourSelf
@@ -75,6 +84,66 @@ describe("SignInWithYourSelf Component", () => {
         method: "POST",
       })
     );
+  });
+
+  it("accepts a challenge response without requiring challengeDID", async () => {
+    window.fetch = jest.fn().mockResolvedValue({
+      status: 201,
+      json: () =>
+        Promise.resolve({
+          challenge: challengeDid,
+          challengeUrl,
+        }),
+    });
+
+    render(<SignInWithYourSelf createChallengeUrl={createChallengeUrl} />);
+
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "Creating sign-in challenge..."
+    );
+    expect(await screen.findByTestId("qr-code")).toBeInTheDocument();
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  });
+
+  it("accepts challengeDid from the challenge creation response", async () => {
+    window.fetch = jest.fn().mockResolvedValue({
+      status: 200,
+      json: () =>
+        Promise.resolve({
+          challengeDid,
+          challengeUrl,
+        }),
+    });
+
+    render(<SignInWithYourSelf createChallengeUrl={createChallengeUrl} />);
+
+    expect(await screen.findByTestId("qr-code")).toBeInTheDocument();
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  });
+
+  it("shows an error when challenge creation fails", async () => {
+    window.fetch = jest.fn().mockRejectedValue(new Error("Network error"));
+
+    render(<SignInWithYourSelf createChallengeUrl={createChallengeUrl} />);
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Unable to create a sign-in challenge."
+    );
+    expect(screen.queryByTestId("qr-code")).not.toBeInTheDocument();
+  });
+
+  it("shows an error for an invalid challenge creation response", async () => {
+    window.fetch = jest.fn().mockResolvedValue({
+      status: 200,
+      json: () => Promise.resolve({ challengeUrl }),
+    });
+
+    render(<SignInWithYourSelf createChallengeUrl={createChallengeUrl} />);
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Unable to create a sign-in challenge."
+    );
+    expect(screen.queryByTestId("qr-code")).not.toBeInTheDocument();
   });
 
   it("renders the QR code with the provided challenge URL", () => {
@@ -264,8 +333,10 @@ describe("SignInWithYourSelf Component", () => {
           onSiwysPress={onSiwysPress}
         />
       );
-      
-      expect(screen.getByText("Sign in with your SELF™ Guide:")).toBeInTheDocument();
+
+      expect(
+        screen.getByText("Sign in with your SELF™ Guide:")
+      ).toBeInTheDocument();
     });
 
     it("should show instructions when showInstructions is explicitly true", () => {
@@ -276,8 +347,10 @@ describe("SignInWithYourSelf Component", () => {
           showInstructions={true}
         />
       );
-      
-      expect(screen.getByText("Sign in with your SELF™ Guide:")).toBeInTheDocument();
+
+      expect(
+        screen.getByText("Sign in with your SELF™ Guide:")
+      ).toBeInTheDocument();
     });
 
     it("should hide instructions when showInstructions is false", () => {
@@ -289,17 +362,15 @@ describe("SignInWithYourSelf Component", () => {
         />
       );
 
-      expect(screen.queryByText("Sign in with your SELF™ Guide:")).not.toBeInTheDocument();
+      expect(
+        screen.queryByText("Sign in with your SELF™ Guide:")
+      ).not.toBeInTheDocument();
     });
   });
 
   it("should open challengeUrl in new window when onSiwysPress is not provided", () => {
     global.window.open = jest.fn();
-    render(
-      <SignInWithYourSelf
-        challengeDID={challengeDid}
-      />
-    );
+    render(<SignInWithYourSelf challengeDID={challengeDid} />);
     const signInButton = screen.getByRole("button", {
       name: /Sign in with your/i,
     });
@@ -312,25 +383,31 @@ describe("SignInWithYourSelf Component", () => {
 
   it("should handle non-200 polling response without setting authenticated", async () => {
     jest.useFakeTimers();
-    const non200FetchMock = jest.fn().mockImplementation((input: RequestInfo | URL) => {
-      const url = input.toString();
-      if (url.includes("/challenges")) {
+    const non200FetchMock = jest
+      .fn()
+      .mockImplementation((input: RequestInfo | URL) => {
+        const url = input.toString();
+        if (url.includes("/challenges")) {
+          return Promise.resolve({
+            status: 200,
+            json: () =>
+              Promise.resolve({
+                challenge: challengeDid,
+                challengeUrl: "http://challenge-url",
+              }),
+          });
+        }
+        if (url.includes("/auth")) {
+          return Promise.resolve({
+            status: 500,
+            json: () => Promise.resolve({ error: "Server Error" }),
+          });
+        }
         return Promise.resolve({
-          status: 200,
-          json: () => Promise.resolve({
-            challenge: challengeDid,
-            challengeUrl: "http://challenge-url",
-          }),
+          status: 404,
+          json: () => Promise.resolve({}),
         });
-      }
-      if (url.includes("/auth")) {
-        return Promise.resolve({
-          status: 500,
-          json: () => Promise.resolve({ error: "Server Error" }),
-        });
-      }
-      return Promise.resolve({ status: 404, json: () => Promise.resolve({}) });
-    });
+      });
     window.fetch = non200FetchMock;
 
     render(
@@ -355,5 +432,112 @@ describe("SignInWithYourSelf Component", () => {
     jest.advanceTimersByTime(5000);
 
     expect(screen.queryByTestId("success")).not.toBeInTheDocument();
+  });
+
+  it("starts the extension sign-in flow on desktop Chromium", async () => {
+    Object.defineProperty(window.navigator, "userAgent", {
+      configurable: true,
+      value: "Mozilla/5.0 Chrome/123.0.0.0 Safari/537.36",
+    });
+    const logSpy = jest.spyOn(console, "info").mockImplementation();
+    let signInRequest: any;
+    const extensionResponder = (event: MessageEvent) => {
+      const request = event.data;
+      if (request.source !== "self-id-partner-web-sdk") return;
+
+      if (request.type === "self-id:extension:detect") {
+        window.dispatchEvent(
+          new MessageEvent("message", {
+            source: window,
+            data: {
+              source: "self-id-browser-extension",
+              version: "1",
+              type: "self-id:extension:available",
+              requestId: request.requestId,
+            },
+          })
+        );
+      }
+      if (request.type === "self-id:extension:sign-in") {
+        signInRequest = request;
+        window.dispatchEvent(
+          new MessageEvent("message", {
+            source: window,
+            data: {
+              source: "self-id-browser-extension",
+              version: "1",
+              type: "self-id:extension:status",
+              requestId: request.requestId,
+              status: "approved",
+            },
+          })
+        );
+      }
+    };
+    window.addEventListener("message", extensionResponder);
+
+    render(<SignInWithYourSelf challengeDID={challengeDid} />);
+    await userEvent.click(
+      screen.getByRole("button", { name: /Sign in with your/i })
+    );
+
+    await waitFor(() => expect(signInRequest).toBeDefined());
+    expect(signInRequest.payload).toEqual({
+      challengeDID: challengeDid,
+      challengeUrl: expect.stringContaining(`challenge=${challengeDid}`),
+    });
+    expect(
+      screen.queryByText("Approve the request in the SELF browser extension.")
+    ).not.toBeInTheDocument();
+    await waitFor(() => {
+      expect(
+        logSpy.mock.calls.some(([, message]) =>
+          String(message).includes("Approval received")
+        )
+      ).toBe(true);
+    });
+
+    window.removeEventListener("message", extensionResponder);
+    logSpy.mockRestore();
+  });
+
+  it("dismisses the install prompt and allows retrying extension detection", async () => {
+    Object.defineProperty(window.navigator, "userAgent", {
+      configurable: true,
+      value: "Mozilla/5.0 Chrome/123.0.0.0 Safari/537.36",
+    });
+    let detectionRequests = 0;
+    const countDetectionRequests = (event: MessageEvent) => {
+      if (event.data?.type === "self-id:extension:detect") {
+        detectionRequests += 1;
+      }
+    };
+    window.addEventListener("message", countDetectionRequests);
+
+    render(
+      <SignInWithYourSelf
+        challengeDID={challengeDid}
+        extensionConfig={{ detectionTimeoutMs: 1 }}
+      />
+    );
+    await userEvent.click(
+      screen.getByRole("button", { name: /Sign in with your/i })
+    );
+
+    const installDialog = await screen.findByRole("dialog", {
+      name: "SELF browser extension not detected",
+    });
+    await userEvent.click(screen.getByRole("button", { name: "CANCEL" }));
+    expect(installDialog).not.toBeInTheDocument();
+
+    await userEvent.click(
+      screen.getByRole("button", { name: /Sign in with your/i })
+    );
+    await screen.findByRole("dialog", {
+      name: "SELF browser extension not detected",
+    });
+    expect(detectionRequests).toBe(2);
+
+    window.removeEventListener("message", countDetectionRequests);
   });
 });

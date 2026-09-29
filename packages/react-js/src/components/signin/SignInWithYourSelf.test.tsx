@@ -527,7 +527,7 @@ describe("SignInWithYourSelf Component", () => {
     const installDialog = await screen.findByRole("dialog", {
       name: "SELF browser extension not detected",
     });
-    await userEvent.click(screen.getByRole("button", { name: "Cancel" }));
+    await userEvent.click(screen.getByRole("button", { name: "CANCEL" }));
     expect(installDialog).not.toBeInTheDocument();
 
     await userEvent.click(

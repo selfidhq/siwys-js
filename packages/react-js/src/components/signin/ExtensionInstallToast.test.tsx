@@ -13,12 +13,19 @@ describe("ExtensionInstallToast", () => {
       screen.getByRole("dialog", {
         name: "SELF browser extension not detected",
       })
+    ).toHaveTextContent("Browser Extension required!");
+    expect(
+      screen.getByRole("dialog", {
+        name: "SELF browser extension not detected",
+      })
     ).toHaveTextContent(
-      "SELF browser extension not detected. Install it to continue."
+      "Install now to connect straight from your browser."
     );
-    expect(screen.queryByRole("button", { name: "Install" })).toBeNull();
+    expect(
+      screen.queryByRole("button", { name: "INSTALL EXTENSION" })
+    ).toBeNull();
 
-    fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
+    fireEvent.click(screen.getByRole("button", { name: "CANCEL" }));
     expect(onCancel).toHaveBeenCalledTimes(1);
   });
 
@@ -33,7 +40,7 @@ describe("ExtensionInstallToast", () => {
       />
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "Install" }));
+    fireEvent.click(screen.getByRole("button", { name: "INSTALL EXTENSION" }));
     expect(onInstall).toHaveBeenCalledTimes(1);
   });
 });

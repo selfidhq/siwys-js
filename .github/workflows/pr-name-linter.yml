@@ -12,19 +12,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check Out Files
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
           persist-credentials: false
       - name: Use Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v6
         with:
           node-version: "22.x"
           registry-url: "https://npm.pkg.github.com"
           scope: "@selfidhq"
-          always-auth: true
       - name: Install Dependencies
         run: yarn add @commitlint/config-conventional@17 --ignore-workspace-root-check
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - uses: JulienKode/pull-request-name-linter-action@v0.5.0
+      - uses: JulienKode/pull-request-name-linter-action@v20.1.0

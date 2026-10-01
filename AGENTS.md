@@ -53,10 +53,79 @@ Keymaster in-process via                      Keymaster REST Microservice
 
 ## 3. Partner Use Cases & Implementation Recipes
 
-### Recipe 1: Partner Web Authentication (React Frontend + Express Backend)
+> **Execution Order Note for Coding Agents:** **Recipe 1** is the foundational prerequisite. Keymaster must be initialized and running with persistent wallet storage before an application can generate challenges, verify responses (Recipe 2), or issue credentials (Recipe 3).
 
-#### Step 1.1: Backend Challenge and Verification Endpoints
-Install `@yourself_id/siwys-api-js` on the partner server:
+---
+
+### Recipe 1: Initializing Keymaster (Prerequisite Infrastructure)
+
+Partners need a running Keymaster instance to sign operations, create challenges, and issue credentials. Choose the path that matches the partner's architecture:
+
+#### Path A: Embedded Keymaster (Node.js Process)
+Use the `Keymaster` singleton from `@yourself_id/siwys-api-js`.
+
+**Agent Requirement:** Always provide a durable `walletDb` (`saveWallet`, `loadWallet`, `updateWallet`). If omitted or transient, Keymaster generates a brand new wallet and DID on every server restart, causing authentication failures and data loss.
+
+```typescript
+import { Keymaster } from "@yourself_id/siwys-api-js";
+import { saveWallet, loadWallet, updateWallet } from "./services/walletStore";
+
+Keymaster.initialize({
+  gatekeeperConfig: {
+    url: process.env.GATEKEEPER_URL || "https://gatekeeper.example.com",
+    waitUntilReady: true,
+  },
+  walletConfig: {
+    id: process.env.KEYMASTER_NODE_ID || "partner-org-wallet",
+    registry: "hyperswarm",
+    mnemonic: process.env.WALLET_MNEMONIC, // optional seed phrase for initial recovery
+  },
+  walletDb: { saveWallet, loadWallet, updateWallet },
+  passphrase: process.env.KEYMASTER_PASSPHRASE!, // Encrypts wallet at rest
+  didPrefix: process.env.KEYMASTER_DID_PREFIX || "did:test",
+});
+
+await Keymaster.start();
+console.log("Keymaster initialized and ready.");
+```
+
+#### Path B: Standalone Docker Service (Microservice)
+When the partner backend is written in Python, Go, Java, or runs in a microservice container architecture:
+1. Run the Keymaster Docker container from [KeychainMDIP/kc](https://github.com/KeychainMDIP/kc):
+   ```yaml
+   keymaster:
+     image: keychainmdip/keymaster
+     environment:
+       - KC_GATEKEEPER_URL=http://gatekeeper:4224
+       - KC_KEYMASTER_PORT=4226
+       - KC_KEYMASTER_DB=postgres # or sqlite, redis, mongodb, json
+       - KC_NODE_ID=partner-node
+       - KC_ENCRYPTED_PASSPHRASE=secure-passphrase-here
+       - KC_DEFAULT_REGISTRY=hyperswarm
+       - KC_KEYMASTER_DID_PREFIX=did:test
+     ports:
+       - "4226:4226"
+   ```
+2. In Node.js services, connect via `KeymasterExternalClient`:
+   ```typescript
+   import { KeymasterExternalClient } from "@yourself_id/siwys-api-js";
+
+   const keymaster = new KeymasterExternalClient({
+     keymasterConfig: { url: "http://keymaster:4226" },
+     didPrefix: "did:test",
+   });
+
+   await keymaster.start();
+   ```
+
+---
+
+### Recipe 2: Web Authentication Flow (Express Backend + React Frontend)
+
+Once Keymaster is running (via Recipe 1), implement the end-to-end login flow:
+
+#### Step 2.1: Backend Challenge and Verification Endpoints
+Use `@yourself_id/siwys-api-js` to handle challenges and callbacks:
 
 ```typescript
 import express from "express";
@@ -113,7 +182,7 @@ app.get("/api/check-auth", (req, res) => {
 });
 ```
 
-#### Step 1.2: Frontend Sign-In Component
+#### Step 2.2: Frontend Sign-In Component
 Install `@yourself_id/siwys-react-js` and `styled-components` in the React app:
 
 ```tsx
@@ -138,68 +207,6 @@ export function LoginPage() {
   );
 }
 ```
-
----
-
-### Recipe 2: Running Keymaster (Embedded vs. Standalone)
-
-Partners need to run Keymaster to issue credentials and create challenges. Coding agents should choose the path fitting the partner's infrastructure:
-
-#### Path A: Embedded Keymaster (Node.js Process)
-Use `Keymaster` class from `@yourself_id/siwys-api-js`.
-
-**Agent Requirement:** Ensure `walletDb` is supplied with permanent storage (`loadWallet`, `saveWallet`, `updateWallet`). If omitted, a fresh wallet is generated on every restart, causing key mismatch and data loss.
-
-```typescript
-import { Keymaster } from "@yourself_id/siwys-api-js";
-import { saveWallet, loadWallet, updateWallet } from "./services/walletStore";
-
-Keymaster.initialize({
-  gatekeeperConfig: {
-    url: process.env.GATEKEEPER_URL || "https://gatekeeper.example.com",
-    waitUntilReady: true,
-  },
-  walletConfig: {
-    id: process.env.KEYMASTER_NODE_ID || "partner-org-wallet",
-    registry: "hyperswarm",
-    mnemonic: process.env.WALLET_MNEMONIC, // optional seed recovery
-  },
-  walletDb: { saveWallet, loadWallet, updateWallet },
-  passphrase: process.env.KEYMASTER_PASSPHRASE!,
-  didPrefix: process.env.KEYMASTER_DID_PREFIX || "did:test",
-});
-
-await Keymaster.start();
-```
-
-#### Path B: Standalone Docker Service (Microservice)
-When the partner backend is written in Python, Go, Java, or runs as microservices:
-1. Run the Keymaster Docker container from [KeychainMDIP/kc](https://github.com/KeychainMDIP/kc):
-   ```yaml
-   keymaster:
-     image: keychainmdip/keymaster
-     environment:
-       - KC_GATEKEEPER_URL=http://gatekeeper:4224
-       - KC_KEYMASTER_PORT=4226
-       - KC_KEYMASTER_DB=postgres # or sqlite, redis, mongodb, json
-       - KC_NODE_ID=partner-node
-       - KC_ENCRYPTED_PASSPHRASE=secure-passphrase-here
-       - KC_DEFAULT_REGISTRY=hyperswarm
-       - KC_KEYMASTER_DID_PREFIX=did:test
-     ports:
-       - "4226:4226"
-   ```
-2. In Node.js services, connect via `KeymasterExternalClient`:
-   ```typescript
-   import { KeymasterExternalClient } from "@yourself_id/siwys-api-js";
-
-   const keymaster = new KeymasterExternalClient({
-     keymasterConfig: { url: "http://keymaster:4226" },
-     didPrefix: "did:test",
-   });
-
-   await keymaster.start();
-   ```
 
 ---
 

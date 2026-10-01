@@ -18,10 +18,11 @@ Ask the user one focused question at a time using the `ask_user` tool (with mult
 ### Question 1: Integration Goal
 * **Question:** "What would you like to implement with Self ID?"
 * **Choices:**
-  - "Web authentication (Sign In With YourSelf) (Recommended)"
+  - "User login / auth replacement (SIWYS) (Recommended)"
+  - "Attest or request data / credentials from users (CYS)"
   - "Issue Verifiable Credentials (VCs)"
   - "Mobile identity wallet / client (React Native)"
-  - "Full partner integration (Authentication + Credential Issuance)"
+  - "Full partner integration (Auth + Attestations + Credentials)"
 
 ### Question 2: Keymaster Architecture
 * **Question:** "How would you like to run Keymaster to manage private keys and signing operations?"

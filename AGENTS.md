@@ -39,6 +39,12 @@ Keymaster in-process via                      Keymaster REST Microservice
                              MDIP Gatekeeper Service
 ```
 
+### SIWYS vs. CYS Concept Guide
+* **SIWYS (Sign In With YourSelf):** Drop-in authentication replacement (similar to "Sign in with Google" or "Sign in with Apple"). Use when the goal is logging a user in or authenticating their session.
+  * Primary components: `<SignInWithYourSelf />`, `<SiwysButton />`.
+* **CYS (Connect YourSelf):** Attesting and requesting data from users. Use when an app needs to request specific Verifiable Credentials, claims, or proofs from the user's wallet, or attest new data to their DID.
+  * Primary components: `<ConnectYourSelf />`, `<CysButton />`.
+
 ---
 
 ## 2. Monorepo Package Directory

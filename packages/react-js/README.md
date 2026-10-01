@@ -6,6 +6,15 @@ This package provides pre-built, accessible, and customizable React components t
 
 ---
 
+## SIWYS vs. CYS: When to Use Which?
+
+* **SIWYS (`<SignInWithYourSelf />` / `<SiwysButton />`)**: **Authentication Replacement**  
+  Use for user login and identity verification. It serves as a decentralized, drop-in replacement for federated login providers like "Sign in with Google" or "Sign in with Apple".
+* **CYS (`<ConnectYourSelf />` / `<CysButton />`)**: **Attestation & Data Requests**  
+  Use when requesting specific data, credentials, or claims from users (e.g. proof of age, memberships, KYC attestations) or establishing a persistent data-sharing connection.
+
+---
+
 ## Installation
 
 ```bash

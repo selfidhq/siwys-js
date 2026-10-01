@@ -106,17 +106,17 @@ Stop and restart both backend and frontend to pick up the new environment variab
 
 ## Demo Features
 
-### Sign In With YourSelf (Fully Managed)
-A complete, ready-to-use authentication component that handles:
+### Sign In With YourSelf (SIWYS - Authentication Replacement)
+A complete, ready-to-use drop-in authentication flow (similar to "Sign in with Google") for user login and identity verification. It handles:
 - Challenge creation
 - QR code display
 - Polling for authentication
 - Success state
 
-### Connect YourSelf (Manual Control)
-A customizable flow where you manually manage:
-- Challenge creation via API
-- Authentication polling
+### Connect YourSelf (CYS - Attestation & Data Requests)
+A customizable flow for attesting and requesting data from users (e.g. verified credentials, claims, or data exchange). It handles:
+- Challenge creation via API (with optional credential requirements)
+- Authentication and attestation polling
 - State management
 - Custom UI/UX
 

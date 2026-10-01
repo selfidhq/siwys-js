@@ -14,9 +14,10 @@ SIWYS-JS is a monorepo designed to support Self's JavaScript and TypeScript pack
 
 ## Documentation for AI Coding Agents
 
-If you or your partners are using AI coding agents (such as GitHub Copilot, Claude Code, Cursor, or Codex) to integrate Self ID or SIWYS, refer to our dedicated coding agent reference:
+If you or your partners are using AI coding agents (such as GitHub Copilot, Claude Code, Cursor, or Codex) to integrate Self ID or SIWYS:
 
-👉 **[AGENTS.md](AGENTS.md)** — Architectural rules, code recipes, environment requirements, and implementation guidelines for coding agents.
+* 👉 **[AGENTS.md](AGENTS.md)** — Architectural rules, code recipes, environment requirements, and implementation guidelines for coding agents.
+* 👉 **Interactive Setup Skill (`siwys-setup`)** — An interactive agent skill (`.agents/skills/siwys-setup/SKILL.md`) that interviews the developer, gathers configuration, and automatically scaffolds Keymaster, API endpoints, and frontend components for their specific architecture.
 
 ## Integrating Keymaster
 

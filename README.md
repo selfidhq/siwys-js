@@ -7,16 +7,16 @@ SIWYS-JS is a monorepo designed to support Self's JavaScript and TypeScript pack
 ## Packages
 
 | Package | Directory | Description |
-|---|---|---|
+| --- | --- | --- |
 | [`@yourself_id/siwys-api-js`](packages/api-js/README.md) | `packages/api-js` | Node.js backend SDK for Keymaster, Gatekeeper client, challenges, and verifiable credentials. |
 | [`@yourself_id/siwys-react-js`](packages/react-js/README.md) | `packages/react-js` | React component library for web authentication (`SignInWithYourSelf`, `ConnectYourSelf`, QR code, branded buttons). |
 | [`@yourself_id/siwys-react-native`](packages/react-native/README.md) | `packages/react-native` | React Native client SDK for iOS and Android identity and wallet operations. |
 
 ## Documentation for AI Coding Agents
 
-If you or your partners are using AI coding agents (such as GitHub Copilot, Claude Code, Cursor, or Codex) to integrate Self ID or SIWYS:
+If you or your partners are using AI coding agents to integrate Self ID or SIWYS:
 
-* 👉 **[AGENTS.md](AGENTS.md)** — Architectural rules, code recipes, environment requirements, and implementation guidelines for coding agents.
+* 👉 [**AGENTS.md**](AGENTS.md) — Architectural rules, code recipes, environment requirements, and implementation guidelines for coding agents.
 * 👉 **Interactive Setup Skill (`siwys-setup`)** — An interactive agent skill (`.github/skills/siwys-setup/SKILL.md` and `.agents/skills/siwys-setup/SKILL.md`) that interviews the developer, gathers configuration, and automatically scaffolds Keymaster, API endpoints, and frontend components for their specific architecture.
 
 ### How Partners Can Run the Skill
@@ -29,12 +29,12 @@ A partner working in their own codebase does not need to clone this entire repos
    The agent will read the architecture recipes and guide you through the setup.
 
 2. **Drop the Skill into Your Repo:**  
-   Copy just the skill definition into your project:
+   Copy the skill definition into your project:
    ```bash
-   # For GitHub Copilot:
+   # Standard location:
    mkdir -p .github/skills/siwys-setup && curl -sSL https://raw.githubusercontent.com/selfidhq/siwys-js/main/.github/skills/siwys-setup/SKILL.md -o .github/skills/siwys-setup/SKILL.md
 
-   # For Claude Code / Cursor / Codex:
+   # Alternative agent location:
    mkdir -p .agents/skills/siwys-setup && curl -sSL https://raw.githubusercontent.com/selfidhq/siwys-js/main/.agents/skills/siwys-setup/SKILL.md -o .agents/skills/siwys-setup/SKILL.md
    ```
    Your agent will then recognize `/siwys-setup` locally and walk you through the interactive setup.

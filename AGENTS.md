@@ -1,6 +1,6 @@
 # AGENTS.md — Coding Agent Integration Guide for SIWYS & Self ID
 
-This document is specifically structured for AI coding agents (such as GitHub Copilot, Claude Code, Cursor, and Codex) assisting developers and partners in implementing the **Sign In With YourSelf (SIWYS)** and **Self ID** SDKs.
+This document is specifically structured for AI coding agents assisting developers and partners in implementing the **Sign In With YourSelf (SIWYS)** and **Self ID** SDKs.
 
 > 💡 **Interactive Assistant Skill:** You can invoke the `siwys-setup` skill (`.github/skills/siwys-setup/SKILL.md` or `.agents/skills/siwys-setup/SKILL.md`) to guide the developer through an interactive architectural interview and automatically scaffold Keymaster, API endpoints, and frontend components. External partners can run this skill in their own project without cloning the entire repository by copying the skill definition file or referencing this document's raw URL.
 

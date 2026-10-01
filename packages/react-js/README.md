@@ -13,6 +13,12 @@ This package provides pre-built, accessible, and customizable React components t
 * **CYS (`<ConnectYourSelf />` / `<CysButton />`)**: **Attestation & Data Requests**  
   Use when requesting specific data, credentials, or claims from users (e.g. proof of age, memberships, KYC attestations) or establishing a persistent data-sharing connection.
 
+### Combining Both (Common Partner Pattern)
+
+Many partners use both components together in a chained lifecycle:
+1. **Initial Login:** The user authenticates into the application using a **SIWYS** button.
+2. **Attestation / Credential Exchange:** Once inside the session, an Identity Verification (IDV) or partner service uses a **CYS** button or QR code to request verified attributes from the user or attest new verified identity credentials directly to their SELF wallet.
+
 ---
 
 ## Installation

@@ -120,6 +120,8 @@ A customizable flow for attesting and requesting data from users (e.g. verified 
 - State management
 - Custom UI/UX
 
+> **Combined IDV Flow:** Many partners combine both flows sequentially—first authenticating the user via SIWYS, and subsequently using CYS to attest verified identity data or credentials back to the user's wallet.
+
 ## API Endpoints
 
 - `POST /challenges` - Create a new authentication challenge

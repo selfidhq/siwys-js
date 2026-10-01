@@ -74,3 +74,7 @@ Stop with:
 View SIWYS demo at http://localhost:5173
 
 See [demo/README.md](demo/README.md) for more information.
+
+## Integrating Keymaster
+
+For a detailed guide on how partners can run their own Keymaster (embedded or standalone via Docker) to create challenges, issue credentials, and integrate with the frontend application, see the [Keymaster Integration Guide in demo/README.md](demo/README.md#integrating-keymaster).

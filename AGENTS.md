@@ -45,10 +45,10 @@ Keymaster in-process via                      Keymaster REST Microservice
 * **CYS (Connect YourSelf):** Attesting and requesting data from users. Use when an app needs to request specific Verifiable Credentials, claims, or proofs from the user's wallet, or attest new data to their DID.
   * Primary components: `<ConnectYourSelf />`, `<CysButton />`.
 
-**Chained Partner Workflow (e.g. Identity Verification / IDV):**  
+**Chained Partner Workflow:**  
 Partners often implement both sequentially:
 1. User logs in to the partner app with a **SIWYS** button.
-2. In the authenticated session, the partner initiates a **CYS** flow (via button or QR code) to attest verified identity attributes (e.g. verified credentials) directly to the user's wallet.
+2. In the authenticated session, the partner initiates a **CYS** flow (via button or QR code) to attest new data or credentials directly to the user's wallet, or request verified user attributes.
 
 ---
 

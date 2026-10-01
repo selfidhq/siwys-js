@@ -23,6 +23,7 @@ const EXTENSION_BRIDGE = {
   messages: {
     detect: "self-id:extension:detect",
     signIn: "self-id:extension:sign-in",
+    cancel: "self-id:extension:cancel",
     available: "self-id:extension:available",
     status: "self-id:extension:status",
   },
@@ -32,6 +33,7 @@ const SDK_SOURCE = EXTENSION_BRIDGE.sdkSource;
 const EXTENSION_SOURCE = EXTENSION_BRIDGE.extensionSource;
 const BRIDGE_VERSION = EXTENSION_BRIDGE.version;
 const DEFAULT_DETECTION_TIMEOUT_MS = 750;
+const DEFAULT_SIGN_IN_TIMEOUT_MS = 5 * 60 * 1000;
 const EXTENSION_STATUSES: ExtensionStatus[] = [
   "ready",
   "pending",
@@ -45,7 +47,8 @@ interface ExtensionBridgeRequest {
   version: typeof BRIDGE_VERSION;
   type:
     | typeof EXTENSION_BRIDGE.messages.detect
-    | typeof EXTENSION_BRIDGE.messages.signIn;
+    | typeof EXTENSION_BRIDGE.messages.signIn
+    | typeof EXTENSION_BRIDGE.messages.cancel;
   requestId: string;
   payload?: ExtensionSignInRequest;
 }
@@ -138,11 +141,22 @@ export const detectExtension = (
 
 export const requestExtensionSignIn = (
   request: ExtensionSignInRequest,
-  onStatus: (message: ExtensionStatusMessage) => void
+  onStatus: (message: ExtensionStatusMessage) => void,
+  timeoutMs = DEFAULT_SIGN_IN_TIMEOUT_MS
 ): (() => void) => {
   if (typeof window === "undefined") return () => {};
 
   const requestId = createRequestId();
+  let isSettled = false;
+  const timeout = window.setTimeout(() => {
+    cleanup();
+    onStatus({
+      requestId,
+      status: "error",
+      error: "The SELF browser extension request timed out.",
+    });
+  }, timeoutMs);
+
   const handleMessage = (event: MessageEvent<unknown>) => {
     if (event.source !== window || !isBridgeResponse(event.data)) return;
     if (
@@ -150,6 +164,14 @@ export const requestExtensionSignIn = (
       event.data.requestId === requestId &&
       event.data.status
     ) {
+      if (
+        event.data.status === "approved" ||
+        event.data.status === "rejected" ||
+        event.data.status === "error"
+      ) {
+        isSettled = true;
+        window.clearTimeout(timeout);
+      }
       onStatus({
         requestId,
         status: event.data.status,
@@ -168,7 +190,19 @@ export const requestExtensionSignIn = (
   };
   window.postMessage(bridgeRequest, window.location.origin);
 
-  return () => {
+  const cleanup = () => {
+    window.clearTimeout(timeout);
     window.removeEventListener("message", handleMessage);
+    if (isSettled) return;
+    isSettled = true;
+    const cancelRequest: ExtensionBridgeRequest = {
+      source: SDK_SOURCE,
+      version: BRIDGE_VERSION,
+      type: EXTENSION_BRIDGE.messages.cancel,
+      requestId,
+    };
+    window.postMessage(cancelRequest, window.location.origin);
   };
+
+  return cleanup;
 };

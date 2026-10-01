@@ -501,6 +501,45 @@ describe("SignInWithYourSelf Component", () => {
     logSpy.mockRestore();
   });
 
+  it("does not send a sign-in request when unmounted during extension detection", async () => {
+    Object.defineProperty(window.navigator, "userAgent", {
+      configurable: true,
+      value: "Mozilla/5.0 Chrome/123.0.0.0 Safari/537.36",
+    });
+    const postMessageSpy = jest
+      .spyOn(window, "postMessage")
+      .mockImplementation(() => {});
+
+    const { unmount } = render(
+      <SignInWithYourSelf challengeDID={challengeDid} />
+    );
+    await userEvent.click(
+      screen.getByRole("button", { name: /Sign in with your/i })
+    );
+    await waitFor(() => expect(postMessageSpy).toHaveBeenCalled());
+    const detectRequest = postMessageSpy.mock.calls[0][0];
+    expect(detectRequest.type).toBe("self-id:extension:detect");
+
+    unmount();
+    window.dispatchEvent(
+      new MessageEvent("message", {
+        source: window,
+        data: {
+          source: "self-id-browser-extension",
+          version: "1",
+          type: "self-id:extension:available",
+          requestId: detectRequest.requestId,
+        },
+      })
+    );
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect(
+      postMessageSpy.mock.calls.map(([message]) => message.type)
+    ).toEqual(["self-id:extension:detect"]);
+    postMessageSpy.mockRestore();
+  });
+
   it("dismisses the install prompt and allows retrying extension detection", async () => {
     Object.defineProperty(window.navigator, "userAgent", {
       configurable: true,

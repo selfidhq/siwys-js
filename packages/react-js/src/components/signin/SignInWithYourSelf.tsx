@@ -265,9 +265,12 @@ const SignInWithYourSelf: React.FC<SignInProps> = ({
   const [isInstallPromptDismissed, setIsInstallPromptDismissed] =
     useState<boolean>(false);
   const removeStatusListener = useRef<() => void>();
+  const isMounted = useRef(true);
 
   useEffect(() => {
+    isMounted.current = true;
     return () => {
+      isMounted.current = false;
       removeStatusListener.current?.();
     };
   }, []);
@@ -364,6 +367,7 @@ const SignInWithYourSelf: React.FC<SignInProps> = ({
         ? undefined
         : extensionConfig?.detectionTimeoutMs;
     const extensionAvailable = await detectExtension(detectionTimeoutMs);
+    if (!isMounted.current) return;
 
     if (!extensionAvailable) {
       setExtensionFlowState("unavailable");

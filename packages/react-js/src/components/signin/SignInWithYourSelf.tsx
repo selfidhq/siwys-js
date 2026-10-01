@@ -358,6 +358,8 @@ const SignInWithYourSelf: React.FC<SignInProps> = ({
   }, [extensionConfig]);
 
   const startExtensionSignIn = useCallback(async () => {
+    removeStatusListener.current?.();
+    removeStatusListener.current = undefined;
     setExtensionFlowState("checking");
     setExtensionError("");
     setIsInstallPromptDismissed(false);
@@ -375,7 +377,6 @@ const SignInWithYourSelf: React.FC<SignInProps> = ({
     }
 
     setExtensionFlowState("pending");
-    removeStatusListener.current?.();
     removeStatusListener.current = requestExtensionSignIn(
       { challengeDID: challengeDid, challengeUrl },
       ({ status, error }) => {
@@ -433,10 +434,7 @@ const SignInWithYourSelf: React.FC<SignInProps> = ({
     }
   }, [extensionNotice]);
 
-  const isExtensionRequestActive =
-    extensionFlowState === "checking" ||
-    extensionFlowState === "ready" ||
-    extensionFlowState === "pending";
+  const isExtensionRequestActive = extensionFlowState === "checking";
 
   const isCreatingChallenge = Boolean(
     createChallengeUrl && !challengeDid && !challengeError

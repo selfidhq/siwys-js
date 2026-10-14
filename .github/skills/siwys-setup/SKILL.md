@@ -65,7 +65,7 @@ Ask the user one focused question at a time using the `ask_user` tool (with mult
 ### Question 6: Target Environment
 * **Question:** "What environment are you targeting for this setup?"
 * **Choices:**
-  - "Local development (Gatekeeper at http://localhost:4422, did:test) (Recommended)"
+  - "Local development (Gatekeeper at http://localhost:4224, did:test) (Recommended)"
   - "Staging / Production (Custom Gatekeeper cluster, production DID prefix)"
 
 ---
@@ -73,7 +73,7 @@ Ask the user one focused question at a time using the `ask_user` tool (with mult
 ## Phase 2: Configuration & Environment Gathering
 
 Based on the interview responses, summarize the selected options in a clear Markdown table and prompt the user for any specific secrets:
-1. `GATEKEEPER_URL` (Default: `http://localhost:4422` for local, or partner cluster URL)
+1. `GATEKEEPER_URL` (Default: `http://localhost:4224` for local, or partner cluster URL)
 2. `KEYMASTER_NODE_ID` (e.g. `company-auth-node`)
 3. `KEYMASTER_PASSPHRASE` (Secure passphrase used to encrypt the wallet at rest)
 4. `KEYMASTER_DID_PREFIX` (Default: `did:test` for dev, or custom prefix)

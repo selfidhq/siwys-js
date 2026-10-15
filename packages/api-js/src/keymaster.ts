@@ -2,6 +2,7 @@
 import { default as GatekeeperClient } from "@mdip/gatekeeper/client";
 import { default as CipherNode } from "@mdip/cipher/node";
 import { default as KeymasterLib, PublishChallengeReceiptOptions } from "@mdip/keymaster";
+import { encMnemonic } from "@mdip/keymaster/encryption";
 import {
   CreateChallengeResponse,
   CreateChallengeSpec,
@@ -13,17 +14,19 @@ import {
   CreateAssetOptions,
   CreateResponseOptions,
   IssueCredentialsOptions,
+  StoredWallet,
   VerifiableCredential,
   WalletBase,
   WalletFile,
 } from "@mdip/keymaster";
-import type { MdipDocument, ResolveDIDOptions } from "@mdip/gatekeeper";
+import type { MdipDocument, Operation, ResolveDIDOptions } from "@mdip/gatekeeper";
 
 // Keymaster configuration interface
 export interface KeymasterConfig {
   gatekeeperConfig?: SdkConfig;
   walletDb?: WalletBase;
-  walletConfig: WalletConfig;
+  walletConfig?: WalletConfig;
+  autoSetupWallet?: boolean;
   passphrase: string;
   didPrefix?: string;
 }
@@ -55,6 +58,10 @@ export class Keymaster {
         "Keymaster already initialized, ignoring re-initialization.",
       );
     }
+  }
+
+  public static resetInstance(): void {
+    Keymaster.instance = null;
   }
 
   // Ensures the instance is initialized
@@ -340,6 +347,15 @@ export class Keymaster {
     return Keymaster.getInstance().createIdInternal(name, options);
   }
 
+  public static async createIdOperation(
+    name: string,
+    account: number,
+    options?: { registry?: string },
+  ): Promise<Operation> {
+    Keymaster.getInstance().ensureInitialized();
+    return Keymaster.getInstance().createIdOperationInternal(name, account, options);
+  }
+
   // Remove an ID
   /**
    * Removes an existing DID.
@@ -407,6 +423,19 @@ export class Keymaster {
     return Keymaster.getInstance().setSchemaInternal(id, schema);
   }
 
+  public static async loadWallet(): Promise<WalletFile> {
+    Keymaster.getInstance().ensureInitialized();
+    return Keymaster.getInstance().loadWalletInternal();
+  }
+
+  public static async saveWallet(
+    wallet: StoredWallet,
+    overwrite = true,
+  ): Promise<boolean> {
+    Keymaster.getInstance().ensureInitialized();
+    return Keymaster.getInstance().saveWalletInternal(wallet, overwrite);
+  }
+
   // Create a new wallet
   /**
    * Creates a new wallet.
@@ -431,6 +460,11 @@ export class Keymaster {
   public static async recoverWallet(did?: string): Promise<WalletFile> {
     Keymaster.getInstance().ensureInitialized();
     return Keymaster.getInstance().recoverWalletInternal(did);
+  }
+
+  public static async recoverWalletWithRepair(did?: string): Promise<WalletFile> {
+    Keymaster.getInstance().ensureInitialized();
+    return Keymaster.getInstance().recoverWalletWithRepairInternal(did);
   }
 
   // Helper method to retrieve the instance
@@ -494,7 +528,9 @@ export class Keymaster {
           passphrase: this.config.passphrase,
           didPrefix: this.config.didPrefix,
         });
-        await this.ensureWalletExists();
+        if (this.config.autoSetupWallet !== false) {
+          await this.ensureWalletExists();
+        }
       } else {
         return false;
       }
@@ -642,6 +678,13 @@ export class Keymaster {
     return this.keymasterService.createId(...args);
   }
 
+  private async createIdOperationInternal(
+    ...args: Parameters<KeymasterLib["createIdOperation"]>
+  ) {
+    await this.ensureServiceIsRunning();
+    return this.keymasterService.createIdOperation(...args);
+  }
+
   private async removeIdInternal(
     ...args: Parameters<KeymasterLib["removeId"]>
   ) {
@@ -677,6 +720,19 @@ export class Keymaster {
     return this.keymasterService.setSchema(...args);
   }
 
+  private async loadWalletInternal(): Promise<WalletFile> {
+    await this.ensureServiceIsRunning();
+    return this.keymasterService.loadWallet();
+  }
+
+  private async saveWalletInternal(
+    wallet: StoredWallet,
+    overwrite: boolean,
+  ): Promise<boolean> {
+    await this.ensureServiceIsRunning();
+    return this.keymasterService.saveWallet(wallet, overwrite);
+  }
+
   private async newWalletInternal(
     ...args: Parameters<KeymasterLib["newWallet"]>
   ) {
@@ -689,6 +745,67 @@ export class Keymaster {
   ) {
     await this.ensureServiceIsRunning();
     return this.keymasterService.recoverWallet(...args);
+  }
+
+  private async recoverWalletWithRepairInternal(did?: string): Promise<WalletFile> {
+    await this.ensureServiceIsRunning();
+    const keymaster = this.keymasterService;
+    if (!did) {
+      const seedBank = await keymaster.resolveSeedBank();
+      const data = seedBank.didDocumentData as { wallet?: string } | undefined;
+      did = data?.wallet;
+    }
+    if (!did || typeof did !== "string") {
+      throw new Error("No backup DID found");
+    }
+
+    const asset = await keymaster.resolveAsset(did);
+    if (!asset || typeof asset.backup !== "string") {
+      throw new Error('Asset "backup" is missing or not a string');
+    }
+    const cipher = new CipherNode();
+    const keypair = await keymaster.hdKeyPair();
+    const backup = JSON.parse(cipher.decryptMessage(
+      keypair.publicJwk,
+      keypair.privateJwk,
+      asset.backup,
+    ));
+    if (!backup || typeof backup !== "object" || Array.isArray(backup)) {
+      throw new Error("Invalid backup wallet");
+    }
+    const mnemonic = await keymaster.decryptMnemonic();
+    if (backup.version === 1) {
+      if (!backup.seed || typeof backup.seed !== "object" || Array.isArray(backup.seed)) {
+        throw new Error("Invalid backup wallet seed");
+      }
+      backup.seed.mnemonicEnc = await encMnemonic(
+        mnemonic,
+        this.config.passphrase,
+      );
+    }
+
+    const validator = new KeymasterLib({
+      gatekeeper: this.getGatekeeper(),
+      wallet: {
+        loadWallet: async () => backup,
+        saveWallet: async () => true,
+      },
+      cipher,
+      passphrase: this.config.passphrase,
+      didPrefix: this.config.didPrefix,
+    });
+    const wallet = await validator.loadWallet();
+    if (!Number.isInteger(wallet.counter) || wallet.counter < 0 ||
+        !wallet.ids || typeof wallet.ids !== "object" || Array.isArray(wallet.ids)) {
+      throw new Error("Invalid backup wallet contents");
+    }
+    if (await validator.decryptMnemonic() !== mnemonic) {
+      throw new Error("Backup mnemonic does not match local wallet");
+    }
+    if (!await keymaster.saveWallet(wallet, true)) {
+      throw new Error("Failed to save recovered wallet");
+    }
+    return keymaster.loadWallet();
   }
 
   private async ensureWalletExists(): Promise<void> {
@@ -737,7 +854,7 @@ export class Keymaster {
     }
 
     if (config.gatekeeperConfig) {
-      if (!config.walletConfig) {
+      if (config.autoSetupWallet !== false && !config.walletConfig) {
         throw new Error("Missing wallet config");
       }
       if (!config.walletDb?.loadWallet) {

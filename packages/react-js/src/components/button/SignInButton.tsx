@@ -24,6 +24,7 @@ const StyledButton = styled(Button)`
 
 const SignInButton: React.FC<ButtonProps & { type: "signIn" | "connect" }> = ({
   type,
+  disabled,
   ...rest
 }) => {
   const { colorTheme, onClick } = rest;
@@ -50,7 +51,11 @@ const SignInButton: React.FC<ButtonProps & { type: "signIn" | "connect" }> = ({
   };
 
   return (
-    <StyledButton {...rest} disabled={clicked} onClick={handleClick}>
+    <StyledButton
+      {...rest}
+      disabled={clicked || disabled}
+      onClick={handleClick}
+    >
       {!clicked && (
         <>
           {showBlackIcons && <CircleLogoBlack width="1.5rem" height="1.5rem" />}
@@ -69,11 +74,11 @@ const SignInButton: React.FC<ButtonProps & { type: "signIn" | "connect" }> = ({
   );
 };
 
-const CysButton: React.FC<ButtonProps> = ({ ...props }) => {
+const CysButton: React.FC<ButtonProps> = (props) => {
   return <SignInButton type="connect" {...props} />;
 };
 
-const SiwysButton: React.FC<ButtonProps> = ({ ...props }) => {
+const SiwysButton: React.FC<ButtonProps> = (props) => {
   return <SignInButton type="signIn" {...props} />;
 };
 

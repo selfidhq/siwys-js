@@ -21,6 +21,8 @@ const mockKmGetCredential = jest.fn().mockResolvedValue({ id: "cred-1" });
 const mockKmRemoveCredential = jest.fn().mockResolvedValue(true);
 const mockKmUpdateCredential = jest.fn().mockResolvedValue(true);
 const mockKmCreateId = jest.fn().mockResolvedValue("did:test:newid");
+const mockKmCreateIdOperation = jest.fn().mockResolvedValue({ type: "create" });
+const mockKmSaveWallet = jest.fn().mockResolvedValue(true);
 const mockKmRemoveId = jest.fn().mockResolvedValue(true);
 const mockKmResolveDID = jest.fn().mockResolvedValue({ id: "did:test:1" });
 const mockKmSetCurrentId = jest.fn().mockResolvedValue(true);
@@ -38,6 +40,7 @@ jest.mock("@mdip/gatekeeper/client", () => ({
     connect: mockGkConnect,
     addCustomHeader: mockGkAddCustomHeader,
     removeCustomHeader: mockGkRemoveCustomHeader,
+    createDID: jest.fn(),
   })),
 }));
 
@@ -64,6 +67,8 @@ jest.mock("@mdip/keymaster", () => ({
     removeCredential: mockKmRemoveCredential,
     updateCredential: mockKmUpdateCredential,
     createId: mockKmCreateId,
+    createIdOperation: mockKmCreateIdOperation,
+    saveWallet: mockKmSaveWallet,
     removeId: mockKmRemoveId,
     resolveDID: mockKmResolveDID,
     setCurrentId: mockKmSetCurrentId,
@@ -76,6 +81,12 @@ jest.mock("@mdip/keymaster", () => ({
 }));
 
 import { Keymaster } from "./keymaster.js";
+import KeymasterLib, { StoredWallet, WalletFile } from "@mdip/keymaster";
+import CipherNode from "@mdip/cipher/node";
+import { encMnemonic } from "@mdip/keymaster/encryption";
+import { webcrypto } from "node:crypto";
+
+jest.mock("file-type", () => ({ fileTypeFromBuffer: jest.fn() }), { virtual: true });
 
 const mockLoadWalletDb = jest.fn().mockResolvedValue(null);
 const mockSaveWalletDb = jest.fn().mockResolvedValue(undefined);
@@ -195,6 +206,53 @@ describe("Keymaster", () => {
           didPrefix: "did:test",
         }),
       ).toThrow("Missing save wallet callback");
+    });
+  });
+
+  describe("API parity", () => {
+    it("allows reinitialization after reset", () => {
+      Keymaster.initialize(createValidConfig());
+      Keymaster.resetInstance();
+      expect(() => Keymaster.addCustomHeader("X-Test", "value")).toThrow(
+        "Keymaster not initialized",
+      );
+      Keymaster.initialize(createValidConfig());
+      expect(logSpy).toHaveBeenCalledTimes(2);
+    });
+
+    it("starts without provisioning a wallet or ID in manual mode", async () => {
+      const { walletConfig, ...config } = createValidConfig();
+      Keymaster.initialize({ ...config, autoSetupWallet: false });
+      expect(await Keymaster.start()).toBe(true);
+      expect(mockLoadWalletDb).not.toHaveBeenCalled();
+      expect(mockKmNewWallet).not.toHaveBeenCalled();
+      expect(mockKmCreateId).not.toHaveBeenCalled();
+    });
+
+    it("loads a wallet with the existing automatic service guard", async () => {
+      Keymaster.initialize(createValidConfig());
+      expect(await Keymaster.loadWallet()).toEqual({
+        ids: { "test-id": "did:test:1" },
+      });
+      expect(mockGkConnect).toHaveBeenCalled();
+    });
+
+    it("forwards wallet saves and overwrite flags", async () => {
+      Keymaster.initialize(createValidConfig());
+      const wallet = { ids: {} } as any;
+      expect(await Keymaster.saveWallet(wallet)).toBe(true);
+      expect(mockKmSaveWallet).toHaveBeenLastCalledWith(wallet, true);
+      await Keymaster.saveWallet(wallet, false);
+      expect(mockKmSaveWallet).toHaveBeenLastCalledWith(wallet, false);
+    });
+
+    it("forwards ID operation creation", async () => {
+      Keymaster.initialize(createValidConfig());
+      const options = { registry: "local" };
+      expect(await Keymaster.createIdOperation("new-id", 3, options)).toEqual({
+        type: "create",
+      });
+      expect(mockKmCreateIdOperation).toHaveBeenCalledWith("new-id", 3, options);
     });
   });
 
@@ -529,6 +587,147 @@ describe("Keymaster", () => {
       const result = await Keymaster.recoverWallet("did:backup:1");
       expect(mockKmRecoverWallet).toHaveBeenCalledWith("did:backup:1");
       expect(result).toEqual({ ids: {} });
+    });
+  });
+
+  describe("recoverWalletWithRepair()", () => {
+    const RealKeymaster = jest.requireActual("@mdip/keymaster").default;
+    const RealCipher = jest.requireActual("@mdip/cipher/node").default;
+    const mnemonic = "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about";
+    let stored: StoredWallet;
+    let keymaster: KeymasterLib;
+    let cipher: CipherNode;
+    let backup: WalletFile;
+    const originalKeymaster = jest.mocked(KeymasterLib).getMockImplementation();
+    const originalCipher = jest.mocked(CipherNode).getMockImplementation();
+    const originalCrypto = globalThis.crypto;
+
+    beforeEach(async () => {
+      Object.defineProperty(globalThis, "crypto", { configurable: true, value: webcrypto });
+      jest.mocked(KeymasterLib).mockImplementation(options => new RealKeymaster(options));
+      jest.mocked(CipherNode).mockImplementation(() => new RealCipher());
+      stored = null;
+      Keymaster.initialize({
+        ...createValidConfig(),
+        autoSetupWallet: false,
+        walletDb: {
+          loadWallet: async () => stored,
+          saveWallet: jest.fn(async wallet => {
+            stored = wallet;
+            return true;
+          }),
+        },
+      });
+      await Keymaster.newWallet(mnemonic, true);
+      keymaster = (Keymaster as any).instance.keymasterService;
+      cipher = new RealCipher();
+      backup = {
+        ...await Keymaster.loadWallet(),
+        counter: 1,
+        ids: { recovered: { did: "did:test:recovered", account: 0, index: 0 } },
+      };
+      jest.spyOn(keymaster, "resolveSeedBank").mockResolvedValue({
+        didDocumentData: { wallet: "did:test:backup" },
+      });
+    });
+
+    afterEach(() => {
+      jest.mocked(KeymasterLib).mockImplementation(originalKeymaster!);
+      jest.mocked(CipherNode).mockImplementation(originalCipher!);
+      Object.defineProperty(globalThis, "crypto", { configurable: true, value: originalCrypto });
+    });
+
+    const setAsset = async (contents: unknown) => {
+      const keypair = await keymaster.hdKeyPair();
+      jest.spyOn(keymaster, "resolveAsset").mockResolvedValue({
+        backup: cipher.encryptMessage(
+          keypair.publicJwk,
+          keypair.privateJwk,
+          JSON.stringify(contents),
+        ),
+      });
+    };
+
+    it("repairs a decrypted backup encrypted with a different passphrase", async () => {
+      backup.seed = { mnemonicEnc: await encMnemonic(mnemonic, "old-passphrase") };
+      await setAsset(backup);
+      const result = await Keymaster.recoverWalletWithRepair();
+      expect(result.ids).toEqual(backup.ids);
+      expect(await Keymaster.decryptMnemonic()).toBe(mnemonic);
+      expect(keymaster.resolveAsset).toHaveBeenCalledWith("did:test:backup");
+    });
+
+    it("repairs encrypted-storage backups before saving them", async () => {
+      const keypair = await keymaster.hdKeyPair();
+      const { seed, version, ...contents } = backup;
+      await setAsset({
+        version,
+        seed: { mnemonicEnc: { salt: "corrupt", iv: "corrupt", data: "corrupt" } },
+        enc: cipher.encryptMessage(keypair.publicJwk, keypair.privateJwk, JSON.stringify(contents)),
+      });
+      expect((await Keymaster.recoverWalletWithRepair("did:test:explicit")).ids).toEqual(backup.ids);
+      expect(keymaster.resolveSeedBank).not.toHaveBeenCalled();
+      expect(await Keymaster.decryptMnemonic()).toBe(mnemonic);
+    });
+
+    it.each([null, { version: 1 }, { version: 99, seed: {} }])(
+      "rejects malformed backups without replacing storage: %p",
+      async contents => {
+        await setAsset(contents);
+        const previous = stored;
+        await expect(Keymaster.recoverWalletWithRepair()).rejects.toThrow();
+        expect(stored).toBe(previous);
+      },
+    );
+
+    it("rejects malformed encrypted contents without replacing storage", async () => {
+      const keypair = await keymaster.hdKeyPair();
+      await setAsset({
+        version: 1,
+        seed: backup.seed,
+        enc: cipher.encryptMessage(keypair.publicJwk, keypair.privateJwk, "not-json"),
+      });
+      const previous = stored;
+      await expect(Keymaster.recoverWalletWithRepair()).rejects.toThrow();
+      expect(stored).toBe(previous);
+    });
+
+    it("rejects a seed overridden by encrypted contents before saving", async () => {
+      const keypair = await keymaster.hdKeyPair();
+      await setAsset({
+        version: 1,
+        seed: backup.seed,
+        enc: cipher.encryptMessage(keypair.publicJwk, keypair.privateJwk, JSON.stringify({
+          counter: 1,
+          ids: backup.ids,
+          seed: { mnemonicEnc: { salt: "corrupt", iv: "corrupt", data: "corrupt" } },
+        })),
+      });
+      const previous = stored;
+      await expect(Keymaster.recoverWalletWithRepair()).rejects.toThrow();
+      expect(stored).toBe(previous);
+    });
+
+    it("rejects missing backup references and assets", async () => {
+      jest.mocked(keymaster.resolveSeedBank).mockResolvedValueOnce({ didDocumentData: {} });
+      await expect(Keymaster.recoverWalletWithRepair()).rejects.toThrow("No backup DID found");
+      jest.spyOn(keymaster, "resolveAsset").mockResolvedValue({});
+      await expect(Keymaster.recoverWalletWithRepair("did:test:missing")).rejects.toThrow(
+        'Asset "backup" is missing or not a string',
+      );
+    });
+
+    it("reports save failures rather than returning the current wallet", async () => {
+      await setAsset(backup);
+      const previous = stored;
+      jest.spyOn(keymaster, "saveWallet").mockResolvedValueOnce(false);
+      await expect(Keymaster.recoverWalletWithRepair()).rejects.toThrow("Failed to save recovered wallet");
+      expect(stored).toBe(previous);
+    });
+
+    it("requires initialization", async () => {
+      Keymaster.resetInstance();
+      await expect(Keymaster.recoverWalletWithRepair()).rejects.toThrow("Keymaster not initialized");
     });
   });
 

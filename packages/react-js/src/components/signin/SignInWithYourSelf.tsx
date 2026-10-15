@@ -4,10 +4,16 @@ import QRCode from "./QrCode";
 import ExtensionInstallToast from "./ExtensionInstallToast";
 import { CysButton, SiwysButton } from "../button/SignInButton";
 import {
+  EXTENSION_ERROR_CODE,
   detectExtension,
-  ExtensionBridgeConfig,
+  extensionPartnerPayload,
+  extensionSignInResult,
   isDesktopChromiumBrowser,
   requestExtensionSignIn,
+  type ExtensionBridgeConfig,
+  type ExtensionErrorCode,
+  type ExtensionPartner,
+  type ExtensionSignInResult,
 } from "../../utils/extensionBridge";
 
 import {
@@ -33,6 +39,13 @@ interface SignInPropsBase {
   showLogo?: boolean;
   showInstructions?: boolean;
   extensionConfig?: ExtensionBridgeConfig | false;
+  partner?: ExtensionPartner;
+  onAuthenticated?: (session: SignInSession) => void;
+  onExtensionResult?: (result: ExtensionSignInResult) => void;
+}
+
+export interface SignInSession {
+  did?: string;
 }
 
 type SignInProps =
@@ -230,6 +243,44 @@ const AppIconsContainer = styled.div`
   }
 `;
 
+const REPLACE_CHALLENGE_CODES: ExtensionErrorCode[] = [
+  EXTENSION_ERROR_CODE.expired,
+  EXTENSION_ERROR_CODE.timedOut,
+];
+
+function readCreatedChallenge(
+  value: unknown
+): { did: string; url: string } | null {
+  if (typeof value !== "object" || value === null) {
+    return null;
+  }
+  const record = value as Record<string, unknown>;
+  const did = record.challenge ?? record.challengeDid;
+  if (typeof did !== "string" || did.length === 0) {
+    return null;
+  }
+  if (typeof record.challengeUrl !== "string" || record.challengeUrl.length === 0) {
+    return null;
+  }
+  return { did, url: record.challengeUrl };
+}
+
+function readSignInSession(value: unknown): SignInSession | null {
+  if (typeof value !== "object" || value === null) {
+    return null;
+  }
+  const record = value as Record<string, unknown>;
+  const signedIn =
+    record.match === true || record.challengeResponseSuccess === true;
+  if (!signedIn) {
+    return null;
+  }
+  const did = [record.userSessionDid, record.responder, record.userDid].find(
+    (item) => typeof item === "string" && item.length > 0
+  );
+  return { did: typeof did === "string" ? did : undefined };
+}
+
 const ChallengeMessage = styled.p<{ $theme: ThemeProp }>`
   margin: 0;
   color: ${(props) => (props.$theme === "dark" ? "#0F0F10" : "#ffffff")};
@@ -250,6 +301,9 @@ const SignInWithYourSelf: React.FC<SignInProps> = ({
   showLogo = true,
   showInstructions = true,
   extensionConfig,
+  partner,
+  onAuthenticated,
+  onExtensionResult,
 }) => {
   const [challengeUrl, setChallengeUrl] = useState<string>(
     challengeBaseUrl
@@ -264,8 +318,19 @@ const SignInWithYourSelf: React.FC<SignInProps> = ({
   const [extensionError, setExtensionError] = useState<string>("");
   const [isInstallPromptDismissed, setIsInstallPromptDismissed] =
     useState<boolean>(false);
+  const [isReplacingChallenge, setIsReplacingChallenge] = useState(false);
   const removeStatusListener = useRef<() => void>();
   const isMounted = useRef(true);
+  const replacingRef = useRef(false);
+  const challengeRequestRef = useRef(0);
+  const createChallengeUrlRef = useRef(createChallengeUrl);
+  const challengeDidPropRef = useRef(challengeDID);
+  const onAuthenticatedRef = useRef(onAuthenticated);
+  const onExtensionResultRef = useRef(onExtensionResult);
+  createChallengeUrlRef.current = createChallengeUrl;
+  challengeDidPropRef.current = challengeDID;
+  onAuthenticatedRef.current = onAuthenticated;
+  onExtensionResultRef.current = onExtensionResult;
 
   useEffect(() => {
     isMounted.current = true;
@@ -275,9 +340,56 @@ const SignInWithYourSelf: React.FC<SignInProps> = ({
     };
   }, []);
 
+  const replaceChallenge = useCallback(() => {
+    const url = createChallengeUrlRef.current;
+    if (!url || replacingRef.current) {
+      return;
+    }
+
+    replacingRef.current = true;
+    setIsReplacingChallenge(true);
+    const requestId = ++challengeRequestRef.current;
+    fetch(url, { method: "POST" })
+      .then((resp) => {
+        if (resp.status < 200 || resp.status >= 300) {
+          throw new Error("Challenge creation failed");
+        }
+        return resp.json();
+      })
+      .then((json) => {
+        if (requestId !== challengeRequestRef.current || !isMounted.current) {
+          return;
+        }
+        const created = readCreatedChallenge(json);
+        if (!created) {
+          throw new Error("Invalid challenge response");
+        }
+        setChallengeDid(created.did);
+        setChallengeUrl(created.url);
+      })
+      .catch(() => {
+        if (requestId !== challengeRequestRef.current || !isMounted.current) {
+          return;
+        }
+        setChallengeDid("");
+        setChallengeError("Could not start a new sign-in.");
+      })
+      .finally(() => {
+        if (requestId !== challengeRequestRef.current) {
+          return;
+        }
+        replacingRef.current = false;
+        if (!isMounted.current) {
+          return;
+        }
+        setIsReplacingChallenge(false);
+      });
+  }, []);
+
   useEffect(() => {
     if (!createChallengeUrl) return;
 
+    const requestId = ++challengeRequestRef.current;
     let isActive = true;
     setChallengeError("");
     fetch(createChallengeUrl, {
@@ -290,23 +402,22 @@ const SignInWithYourSelf: React.FC<SignInProps> = ({
         return resp.json();
       })
       .then((json) => {
-        const did = json?.challenge ?? json?.challengeDid;
-        if (
-          typeof did !== "string" ||
-          !did ||
-          typeof json?.challengeUrl !== "string" ||
-          !json.challengeUrl
-        ) {
+        if (!isActive || requestId !== challengeRequestRef.current) {
+          return;
+        }
+        const created = readCreatedChallenge(json);
+        if (!created) {
           throw new Error("Invalid challenge response");
         }
-
-        if (isActive) {
-          setChallengeDid(did);
-          setChallengeUrl(json.challengeUrl);
-        }
+        setChallengeDid(created.did);
+        setChallengeUrl(created.url);
       })
       .catch(() => {
-        if (isActive && !challengeDID) {
+        if (
+          isActive &&
+          requestId === challengeRequestRef.current &&
+          !challengeDidPropRef.current
+        ) {
           setChallengeError("Unable to create a sign-in challenge.");
         }
       });
@@ -319,7 +430,9 @@ const SignInWithYourSelf: React.FC<SignInProps> = ({
   useEffect(() => {
     if (!pollForAuthUrl || !challengeDid || isAuthenticated) return;
 
-    const interval = setInterval(async () => {
+    let isActive = true;
+    let completed = false;
+    const interval = setInterval(() => {
       fetch(pollForAuthUrl + `?challenge=${challengeDid}`)
         .then((resp) => {
           if (resp.status === 200) {
@@ -328,14 +441,23 @@ const SignInWithYourSelf: React.FC<SignInProps> = ({
           return { match: false };
         })
         .then((json) => {
-          if (json.match) {
-            setIsAuthenticated(json.match);
+          if (!isActive || completed) {
+            return;
           }
+          const session = readSignInSession(json);
+          if (!session) {
+            return;
+          }
+          completed = true;
+          clearInterval(interval);
+          setIsAuthenticated(true);
+          onAuthenticatedRef.current?.(session);
         })
         .catch(() => {});
     }, 5000);
 
     return () => {
+      isActive = false;
       clearInterval(interval);
     };
   }, [challengeDid, isAuthenticated, pollForAuthUrl]);
@@ -358,6 +480,9 @@ const SignInWithYourSelf: React.FC<SignInProps> = ({
   }, [extensionConfig]);
 
   const startExtensionSignIn = useCallback(async () => {
+    if (replacingRef.current) {
+      return;
+    }
     removeStatusListener.current?.();
     removeStatusListener.current = undefined;
     setExtensionFlowState("checking");
@@ -373,18 +498,49 @@ const SignInWithYourSelf: React.FC<SignInProps> = ({
 
     if (!extensionAvailable) {
       setExtensionFlowState("unavailable");
+      onExtensionResultRef.current?.(
+        extensionSignInResult({
+          challengeDID: challengeDid,
+          status: "unavailable",
+        })
+      );
       return;
     }
 
     setExtensionFlowState("pending");
+    onExtensionResultRef.current?.(
+      extensionSignInResult({
+        challengeDID: challengeDid,
+        status: "pending",
+      })
+    );
+    const partnerPayload = extensionPartnerPayload(partner);
     removeStatusListener.current = requestExtensionSignIn(
-      { challengeDID: challengeDid, challengeUrl },
-      ({ status, error }) => {
+      {
+        challengeDID: challengeDid,
+        challengeUrl,
+        ...(partnerPayload ? { partner: partnerPayload } : {}),
+      },
+      ({ status, error, code }) => {
         setExtensionFlowState(status);
         setExtensionError(error || "");
+        const result = extensionSignInResult({
+          challengeDID: challengeDid,
+          status,
+          error,
+          code,
+        });
+        onExtensionResultRef.current?.(result);
+        if (
+          result.status === "rejected" ||
+          (result.code !== undefined &&
+            REPLACE_CHALLENGE_CODES.includes(result.code))
+        ) {
+          replaceChallenge();
+        }
       }
     );
-  }, [challengeDID, challengeDid, challengeUrl, extensionConfig]);
+  }, [challengeDID, challengeDid, challengeUrl, extensionConfig, partner, replaceChallenge]);
 
   const defaultSiwysClick = useCallback(() => {
     if (onSiwysPress) {
@@ -486,7 +642,7 @@ const SignInWithYourSelf: React.FC<SignInProps> = ({
                 key={extensionFlowState}
                 colorTheme={theme}
                 onClick={defaultSiwysClick}
-                disabled={isExtensionRequestActive}
+                disabled={isExtensionRequestActive || isReplacingChallenge}
                 glow
               />
             ) : (
@@ -494,10 +650,25 @@ const SignInWithYourSelf: React.FC<SignInProps> = ({
                 key={extensionFlowState}
                 colorTheme={theme}
                 onClick={defaultSiwysClick}
-                disabled={isExtensionRequestActive}
+                disabled={isExtensionRequestActive || isReplacingChallenge}
                 glow
               />
             )}
+            {extensionNotice ? (
+              <ChallengeMessage
+                $theme={theme}
+                aria-label={extensionNotice}
+                role={
+                  extensionFlowState === "error" ||
+                  extensionFlowState === "rejected" ||
+                  extensionFlowState === "unavailable"
+                    ? "alert"
+                    : "status"
+                }
+              >
+                {extensionNotice}
+              </ChallengeMessage>
+            ) : null}
           </>
         )}
       </SignInContainer>

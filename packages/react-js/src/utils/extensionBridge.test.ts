@@ -1,4 +1,8 @@
-import { requestExtensionSignIn } from "./extensionBridge";
+import {
+  extensionPartnerPayload,
+  extensionSignInResult,
+  requestExtensionSignIn,
+} from "./extensionBridge";
 
 const request = {
   challengeDID: "did:test:challenge",
@@ -94,6 +98,7 @@ describe("requestExtensionSignIn", () => {
     expect(onStatus).toHaveBeenLastCalledWith({
       requestId: signInRequestId(),
       status: "error",
+      code: "timed_out",
       error: "The SELF browser extension request timed out.",
     });
     expect(sentTypes()).toEqual([
@@ -112,5 +117,60 @@ describe("requestExtensionSignIn", () => {
 
     expect(onStatus).toHaveBeenCalledTimes(1);
     expect(sentTypes()).toEqual(["self-id:extension:sign-in"]);
+  });
+});
+
+describe("extensionPartnerPayload", () => {
+  it("keeps an https image with the partner name", () => {
+    expect(
+      extensionPartnerPayload({
+        name: "  DMV  ",
+        imageUrl: "https://dmv.example/logo.png",
+      })
+    ).toEqual({
+      name: "DMV",
+      imageUrl: "https://dmv.example/logo.png",
+    });
+  });
+
+  it("drops an image that is not https", () => {
+    expect(
+      extensionPartnerPayload({
+        name: "DMV",
+        imageUrl: "javascript:alert(1)",
+      })
+    ).toEqual({ name: "DMV" });
+  });
+
+  it("returns nothing when the name is empty", () => {
+    expect(extensionPartnerPayload({ name: "   " })).toBeUndefined();
+  });
+});
+
+describe("extensionSignInResult", () => {
+  it("maps the extension expiry message to a stable code", () => {
+    expect(
+      extensionSignInResult({
+        challengeDID: "did:test:challenge",
+        status: "error",
+        error: "The request expired.",
+      })
+    ).toEqual({
+      challengeDID: "did:test:challenge",
+      status: "error",
+      code: "expired",
+      message: "The request expired.",
+    });
+  });
+
+  it("prefers a code sent by the extension", () => {
+    expect(
+      extensionSignInResult({
+        challengeDID: "did:test:challenge",
+        status: "error",
+        code: "timed_out",
+        error: "Something else",
+      }).code
+    ).toBe("timed_out");
   });
 });

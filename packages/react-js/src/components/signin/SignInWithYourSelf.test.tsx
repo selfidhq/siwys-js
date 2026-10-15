@@ -501,6 +501,212 @@ describe("SignInWithYourSelf Component", () => {
     logSpy.mockRestore();
   });
 
+  it("reports a stable result and sends the partner mark", async () => {
+    Object.defineProperty(window.navigator, "userAgent", {
+      configurable: true,
+      value: "Mozilla/5.0 Chrome/123.0.0.0 Safari/537.36",
+    });
+    const onExtensionResult = jest.fn();
+    let signInRequest: any;
+    const extensionResponder = (event: MessageEvent) => {
+      const request = event.data;
+      if (request.source !== "self-id-partner-web-sdk") return;
+
+      if (request.type === "self-id:extension:detect") {
+        window.dispatchEvent(
+          new MessageEvent("message", {
+            source: window,
+            data: {
+              source: "self-id-browser-extension",
+              version: "1",
+              type: "self-id:extension:available",
+              requestId: request.requestId,
+            },
+          })
+        );
+      }
+      if (request.type === "self-id:extension:sign-in") {
+        signInRequest = request;
+        window.dispatchEvent(
+          new MessageEvent("message", {
+            source: window,
+            data: {
+              source: "self-id-browser-extension",
+              version: "1",
+              type: "self-id:extension:status",
+              requestId: request.requestId,
+              status: "error",
+              error: "The request expired.",
+            },
+          })
+        );
+      }
+    };
+    window.addEventListener("message", extensionResponder);
+
+    render(
+      <SignInWithYourSelf
+        challengeDID={challengeDid}
+        onExtensionResult={onExtensionResult}
+        partner={{
+          name: "DMV",
+          imageUrl: "javascript:alert(1)",
+        }}
+      />
+    );
+    await userEvent.click(
+      screen.getByRole("button", { name: /Sign in with your/i })
+    );
+
+    await waitFor(() =>
+      expect(onExtensionResult).toHaveBeenCalledWith(
+        expect.objectContaining({
+          challengeDID: challengeDid,
+          status: "error",
+          code: "expired",
+        })
+      )
+    );
+    expect(signInRequest.payload.partner).toEqual({ name: "DMV" });
+    expect(screen.getByRole("alert")).toHaveTextContent("The request expired.");
+
+    window.removeEventListener("message", extensionResponder);
+  });
+
+  it("completes sign-in when the poll reports challengeResponseSuccess", async () => {
+    jest.useFakeTimers();
+    const onAuthenticated = jest.fn();
+    const coreFetch = jest.fn().mockImplementation((input: RequestInfo | URL) => {
+      const url = input.toString();
+      if (url.includes("/challenges")) {
+        return Promise.resolve({
+          status: 200,
+          json: () =>
+            Promise.resolve({
+              challenge: challengeDid,
+              challengeUrl,
+            }),
+        });
+      }
+      return Promise.resolve({
+        status: 200,
+        json: () =>
+          Promise.resolve({
+            challengeResponseSuccess: true,
+            userSessionDid: "did:user",
+          }),
+      });
+    });
+    window.fetch = coreFetch;
+
+    render(
+      <SignInWithYourSelf
+        createChallengeUrl={createChallengeUrl}
+        pollForAuthUrl={checkAuthUrl}
+        onAuthenticated={onAuthenticated}
+        successComponent={<div data-testid="success">Success</div>}
+      />
+    );
+
+    await waitFor(
+      () => {
+        expect(coreFetch).toHaveBeenCalledWith(
+          `${checkAuthUrl}?challenge=${challengeDid}`
+        );
+      },
+      { timeout: 6000 }
+    );
+    jest.advanceTimersByTime(5000);
+
+    await waitFor(() => {
+      expect(screen.getByTestId("success")).toBeInTheDocument();
+    });
+    expect(onAuthenticated).toHaveBeenCalledWith({ did: "did:user" });
+  });
+
+  it("asks for another challenge after the request expires and keeps the notice", async () => {
+    Object.defineProperty(window.navigator, "userAgent", {
+      configurable: true,
+      value: "Mozilla/5.0 Chrome/123.0.0.0 Safari/537.36",
+    });
+    const created = ["did:first", "did:second"];
+    let posts = 0;
+    window.fetch = jest.fn().mockImplementation(() => {
+      const did = created[Math.min(posts, created.length - 1)];
+      posts += 1;
+      return Promise.resolve({
+        status: 200,
+        json: () =>
+          Promise.resolve({
+            challengeDid: did,
+            challengeUrl: `http://challenge-url?challenge=${did}`,
+          }),
+      });
+    });
+    let signInRequest: any;
+    const extensionResponder = (event: MessageEvent) => {
+      const request = event.data;
+      if (request.source !== "self-id-partner-web-sdk") return;
+
+      if (request.type === "self-id:extension:detect") {
+        window.dispatchEvent(
+          new MessageEvent("message", {
+            source: window,
+            data: {
+              source: "self-id-browser-extension",
+              version: "1",
+              type: "self-id:extension:available",
+              requestId: request.requestId,
+            },
+          })
+        );
+      }
+      if (request.type === "self-id:extension:sign-in") {
+        signInRequest = request;
+        window.dispatchEvent(
+          new MessageEvent("message", {
+            source: window,
+            data: {
+              source: "self-id-browser-extension",
+              version: "1",
+              type: "self-id:extension:status",
+              requestId: request.requestId,
+              status: "error",
+              error: "The request expired.",
+            },
+          })
+        );
+      }
+    };
+    window.addEventListener("message", extensionResponder);
+
+    render(<SignInWithYourSelf createChallengeUrl={createChallengeUrl} />);
+    expect(await screen.findByTestId("qr-code")).toBeInTheDocument();
+    await userEvent.click(
+      screen.getByRole("button", { name: /Sign in with your/i })
+    );
+    await waitFor(() =>
+      expect(signInRequest?.payload.challengeDID).toBe("did:first")
+    );
+    await waitFor(() =>
+      expect(
+        screen.getByRole("button", { name: /Sign in with your/i })
+      ).toBeEnabled()
+    );
+    expect(screen.getByRole("alert")).toHaveTextContent("The request expired.");
+    expect(posts).toBe(2);
+
+    signInRequest = undefined;
+    await userEvent.click(
+      screen.getByRole("button", { name: /Sign in with your/i })
+    );
+    await waitFor(() =>
+      expect(signInRequest?.payload.challengeDID).toBe("did:second")
+    );
+
+    window.removeEventListener("message", extensionResponder);
+  });
+
   it("does not send a sign-in request when unmounted during extension detection", async () => {
     Object.defineProperty(window.navigator, "userAgent", {
       configurable: true,

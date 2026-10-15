@@ -1,5 +1,29 @@
 type ExtensionStatus = "ready" | "pending" | "approved" | "rejected" | "error";
 
+export const EXTENSION_ERROR_CODE = {
+  expired: "expired",
+  timedOut: "timed_out",
+  unavailable: "unavailable",
+  failed: "failed",
+} as const;
+
+export type ExtensionErrorCode =
+  (typeof EXTENSION_ERROR_CODE)[keyof typeof EXTENSION_ERROR_CODE];
+
+export type ExtensionSignInStatus = ExtensionStatus | "unavailable";
+
+export interface ExtensionSignInResult {
+  challengeDID: string;
+  status: ExtensionSignInStatus;
+  code?: ExtensionErrorCode;
+  message: string;
+}
+
+export interface ExtensionPartner {
+  name: string;
+  imageUrl?: string;
+}
+
 export interface ExtensionBridgeConfig {
   installUrl?: string;
   detectionTimeoutMs?: number;
@@ -8,12 +32,17 @@ export interface ExtensionBridgeConfig {
 interface ExtensionSignInRequest {
   challengeDID: string;
   challengeUrl: string;
+  partner?: {
+    name: string;
+    imageUrl?: string;
+  };
 }
 
 interface ExtensionStatusMessage {
   requestId: string;
   status: ExtensionStatus;
   error?: string;
+  code?: string;
 }
 
 const EXTENSION_BRIDGE = {
@@ -34,6 +63,11 @@ const EXTENSION_SOURCE = EXTENSION_BRIDGE.extensionSource;
 const BRIDGE_VERSION = EXTENSION_BRIDGE.version;
 const DEFAULT_DETECTION_TIMEOUT_MS = 750;
 const DEFAULT_SIGN_IN_TIMEOUT_MS = 5 * 60 * 1000;
+const PARTNER_NAME_MAX_LENGTH = 80;
+const PARTNER_IMAGE_MAX_LENGTH = 2048;
+const REQUEST_EXPIRED_MESSAGE = "The request expired.";
+const REQUEST_TIMED_OUT_MESSAGE =
+  "The SELF browser extension request timed out.";
 const EXTENSION_STATUSES: ExtensionStatus[] = [
   "ready",
   "pending",
@@ -62,6 +96,7 @@ interface ExtensionBridgeResponse {
   requestId: string;
   status?: ExtensionStatus;
   error?: string;
+  code?: string;
 }
 
 const createRequestId = (): string => {
@@ -87,6 +122,117 @@ const isBridgeResponse = (data: unknown): data is ExtensionBridgeResponse => {
       (typeof response.status === "string" &&
         EXTENSION_STATUSES.includes(response.status as ExtensionStatus)))
   );
+};
+
+const isExtensionErrorCode = (value: string): value is ExtensionErrorCode =>
+  value === EXTENSION_ERROR_CODE.expired ||
+  value === EXTENSION_ERROR_CODE.timedOut ||
+  value === EXTENSION_ERROR_CODE.unavailable ||
+  value === EXTENSION_ERROR_CODE.failed;
+
+export const extensionErrorCode = (
+  error?: string,
+  code?: string
+): ExtensionErrorCode => {
+  if (code && isExtensionErrorCode(code)) {
+    return code;
+  }
+  if (error === REQUEST_EXPIRED_MESSAGE) {
+    return EXTENSION_ERROR_CODE.expired;
+  }
+  if (error === REQUEST_TIMED_OUT_MESSAGE) {
+    return EXTENSION_ERROR_CODE.timedOut;
+  }
+  return EXTENSION_ERROR_CODE.failed;
+};
+
+const isSafePartnerImage = (value: string): boolean => {
+  if (value.length === 0 || value.length > PARTNER_IMAGE_MAX_LENGTH) {
+    return false;
+  }
+
+  let url: URL;
+  try {
+    url = new URL(value);
+  } catch {
+    return false;
+  }
+
+  if (url.username || url.password) {
+    return false;
+  }
+  if (url.protocol === "https:") {
+    return true;
+  }
+  return (
+    url.protocol === "http:" &&
+    (url.hostname === "localhost" || url.hostname === "127.0.0.1")
+  );
+};
+
+export const extensionPartnerPayload = (
+  partner?: ExtensionPartner
+): ExtensionSignInRequest["partner"] => {
+  const name = partner?.name.trim().slice(0, PARTNER_NAME_MAX_LENGTH) ?? "";
+  if (!name) {
+    return undefined;
+  }
+
+  const imageUrl = partner?.imageUrl?.trim() ?? "";
+  if (!isSafePartnerImage(imageUrl)) {
+    return { name };
+  }
+  return { name, imageUrl };
+};
+
+const extensionResultMessage = (
+  status: ExtensionSignInStatus,
+  error?: string
+): string => {
+  if (status === "ready" || status === "pending") {
+    return "Approve the request in the SELF browser extension.";
+  }
+  if (status === "approved") {
+    return "Approval received. Completing sign-in...";
+  }
+  if (status === "rejected") {
+    return "The request was rejected in the SELF browser extension.";
+  }
+  if (status === "unavailable") {
+    return "Install the SELF browser extension to continue on this device.";
+  }
+  return error || "The SELF browser extension could not complete the request.";
+};
+
+export const extensionSignInResult = ({
+  challengeDID,
+  status,
+  error,
+  code,
+}: {
+  challengeDID: string;
+  status: ExtensionSignInStatus;
+  error?: string;
+  code?: string;
+}): ExtensionSignInResult => {
+  const message = extensionResultMessage(status, error);
+  if (status === "error") {
+    return {
+      challengeDID,
+      status,
+      code: extensionErrorCode(error, code),
+      message,
+    };
+  }
+  if (status === "unavailable") {
+    return {
+      challengeDID,
+      status,
+      code: EXTENSION_ERROR_CODE.unavailable,
+      message,
+    };
+  }
+  return { challengeDID, status, message };
 };
 
 export const isDesktopChromiumBrowser = (): boolean => {
@@ -153,7 +299,8 @@ export const requestExtensionSignIn = (
     onStatus({
       requestId,
       status: "error",
-      error: "The SELF browser extension request timed out.",
+      code: EXTENSION_ERROR_CODE.timedOut,
+      error: REQUEST_TIMED_OUT_MESSAGE,
     });
   }, timeoutMs);
 
@@ -176,6 +323,7 @@ export const requestExtensionSignIn = (
         requestId,
         status: event.data.status,
         error: event.data.error,
+        code: typeof event.data.code === "string" ? event.data.code : undefined,
       });
     }
   };

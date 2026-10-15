@@ -392,6 +392,7 @@ const SignInWithYourSelf: React.FC<SignInProps> = ({
     const requestId = ++challengeRequestRef.current;
     let isActive = true;
     setChallengeError("");
+    // The partner server creates the challenge. This request has no body.
     fetch(createChallengeUrl, {
       method: "POST",
     })

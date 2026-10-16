@@ -3,6 +3,18 @@ import "@testing-library/jest-dom";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { SignInWithYourSelf } from "../..";
+import {
+  assignActiveWindow,
+  MOBILE_APP_STORE_URLS,
+} from "../../utils/extensionBridge";
+
+jest.mock("../../utils/extensionBridge", () => {
+  const actual = jest.requireActual("../../utils/extensionBridge");
+  return {
+    ...actual,
+    assignActiveWindow: jest.fn(),
+  };
+});
 
 const challengeUrl = "http://challenge-url";
 const onSiwysPress = jest.fn();
@@ -98,9 +110,9 @@ describe("SignInWithYourSelf Component", () => {
 
     render(<SignInWithYourSelf createChallengeUrl={createChallengeUrl} />);
 
-    expect(screen.getByRole("status")).toHaveTextContent(
-      "Creating sign-in challenge..."
-    );
+    expect(
+      screen.getByRole("status", { name: "Creating sign-in challenge" })
+    ).toBeInTheDocument();
     expect(await screen.findByTestId("qr-code")).toBeInTheDocument();
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   });
@@ -184,7 +196,7 @@ describe("SignInWithYourSelf Component", () => {
   });
 
   it("opens the App Store when Apple button is clicked", async () => {
-    global.window.open = jest.fn();
+    const open = jest.spyOn(window, "open").mockImplementation(() => null);
     render(
       <SignInWithYourSelf
         challengeDID={challengeDid}
@@ -194,14 +206,15 @@ describe("SignInWithYourSelf Component", () => {
     const appStoreButton = screen.getByTestId("apple-store-svg");
     expect(appStoreButton).toBeInTheDocument();
     await userEvent.click(appStoreButton);
-    expect(global.window.open).toHaveBeenCalledWith(
+    expect(open).toHaveBeenCalledWith(
       "https://apps.apple.com/us/app/self-id/id1663745416",
       "_blank"
     );
+    open.mockRestore();
   });
 
   it("opens the Play Store when Google Play button is clicked", async () => {
-    global.window.open = jest.fn();
+    const open = jest.spyOn(window, "open").mockImplementation(() => null);
     render(
       <SignInWithYourSelf
         challengeDID={challengeDid}
@@ -211,10 +224,11 @@ describe("SignInWithYourSelf Component", () => {
     const playStoreButton = screen.getByTestId("play-store-svg");
     expect(playStoreButton).toBeInTheDocument();
     await userEvent.click(playStoreButton);
-    expect(global.window.open).toHaveBeenCalledWith(
+    expect(open).toHaveBeenCalledWith(
       "https://play.google.com/store/apps/details?id=id.selfid",
       "_blank"
     );
+    open.mockRestore();
   });
 
   it("should call the auth URL after receiving Challenge", async () => {
@@ -369,16 +383,37 @@ describe("SignInWithYourSelf Component", () => {
   });
 
   it("should open challengeUrl in new window when onSiwysPress is not provided", () => {
-    global.window.open = jest.fn();
+    const open = jest.spyOn(window, "open").mockImplementation(() => null);
     render(<SignInWithYourSelf challengeDID={challengeDid} />);
     const signInButton = screen.getByRole("button", {
       name: /Sign in with your/i,
     });
     fireEvent.click(signInButton);
-    expect(global.window.open).toHaveBeenCalledWith(
+    expect(open).toHaveBeenCalledWith(
       expect.stringContaining("challenge="),
       "_blank"
     );
+    open.mockRestore();
+  });
+
+  it("should open the iPhone App Store instead of the challenge on mobile Safari", () => {
+    Object.defineProperty(window.navigator, "userAgent", {
+      configurable: true,
+      value:
+        "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 Mobile/15E148 Safari/604.1",
+    });
+    const open = jest.spyOn(window, "open").mockImplementation(() => null);
+    render(<SignInWithYourSelf challengeDID={challengeDid} />);
+    fireEvent.click(
+      screen.getByRole("button", { name: /Sign in with your/i })
+    );
+    expect(assignActiveWindow).toHaveBeenCalledWith(MOBILE_APP_STORE_URLS.ios);
+    expect(open).not.toHaveBeenCalled();
+    open.mockRestore();
+    Object.defineProperty(window.navigator, "userAgent", {
+      configurable: true,
+      value: originalUserAgent,
+    });
   });
 
   it("should handle non-200 polling response without setting authenticated", async () => {
@@ -568,7 +603,7 @@ describe("SignInWithYourSelf Component", () => {
       )
     );
     expect(signInRequest.payload.partner).toEqual({ name: "DMV" });
-    expect(screen.getByRole("alert")).toHaveTextContent("The request expired.");
+    expect(screen.queryByText("The request expired.")).not.toBeInTheDocument();
 
     window.removeEventListener("message", extensionResponder);
   });
@@ -693,7 +728,7 @@ describe("SignInWithYourSelf Component", () => {
         screen.getByRole("button", { name: /Sign in with your/i })
       ).toBeEnabled()
     );
-    expect(screen.getByRole("alert")).toHaveTextContent("The request expired.");
+    expect(screen.queryByText("The request expired.")).not.toBeInTheDocument();
     expect(posts).toBe(2);
 
     signInRequest = undefined;
@@ -746,18 +781,12 @@ describe("SignInWithYourSelf Component", () => {
     postMessageSpy.mockRestore();
   });
 
-  it("dismisses the install prompt and allows retrying extension detection", async () => {
+  it("redirects the active window to the browser store when the extension is missing", async () => {
     Object.defineProperty(window.navigator, "userAgent", {
       configurable: true,
-      value: "Mozilla/5.0 Chrome/123.0.0.0 Safari/537.36",
+      value: "Mozilla/5.0 Firefox/123.0",
     });
-    let detectionRequests = 0;
-    const countDetectionRequests = (event: MessageEvent) => {
-      if (event.data?.type === "self-id:extension:detect") {
-        detectionRequests += 1;
-      }
-    };
-    window.addEventListener("message", countDetectionRequests);
+    const open = jest.spyOn(window, "open").mockImplementation(() => null);
 
     render(
       <SignInWithYourSelf
@@ -769,20 +798,17 @@ describe("SignInWithYourSelf Component", () => {
       screen.getByRole("button", { name: /Sign in with your/i })
     );
 
-    const installDialog = await screen.findByRole("dialog", {
-      name: "SELF browser extension not detected",
-    });
-    await userEvent.click(screen.getByRole("button", { name: "CANCEL" }));
-    expect(installDialog).not.toBeInTheDocument();
-
-    await userEvent.click(
-      screen.getByRole("button", { name: /Sign in with your/i })
+    await waitFor(() =>
+      expect(assignActiveWindow).toHaveBeenCalledWith(
+        "https://addons.mozilla.org/firefox/addon/self-id-todo/"
+      )
     );
-    await screen.findByRole("dialog", {
-      name: "SELF browser extension not detected",
-    });
-    expect(detectionRequests).toBe(2);
-
-    window.removeEventListener("message", countDetectionRequests);
+    expect(open).not.toHaveBeenCalled();
+    expect(
+      screen.queryByRole("dialog", {
+        name: "SELF browser extension not detected",
+      })
+    ).not.toBeInTheDocument();
+    open.mockRestore();
   });
 });

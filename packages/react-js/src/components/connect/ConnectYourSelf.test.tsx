@@ -4,6 +4,15 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import ConnectYourSelf from "./ConnectYourSelf";
+import { assignActiveWindow } from "../../utils/extensionBridge";
+
+jest.mock("../../utils/extensionBridge", () => {
+  const actual = jest.requireActual("../../utils/extensionBridge");
+  return {
+    ...actual,
+    assignActiveWindow: jest.fn(),
+  };
+});
 
 const originalUserAgent = navigator.userAgent;
 
@@ -129,18 +138,17 @@ describe("ConnectYourSelf Component", () => {
     window.removeEventListener("message", extensionResponder);
   });
 
-  it("shows the configured installation action when the extension is unavailable", async () => {
+  it("redirects the active window when the extension is unavailable", async () => {
     Object.defineProperty(window.navigator, "userAgent", {
       configurable: true,
       value: "Mozilla/5.0 Chrome/123.0.0.0 Safari/537.36",
     });
-    global.window.open = jest.fn();
+    const open = jest.spyOn(window, "open").mockImplementation(() => null);
 
     render(
       <ConnectYourSelf
         challengeDID="did:test:extension"
         extensionConfig={{
-          installUrl: "https://example.test/install-extension",
           detectionTimeoutMs: 1,
         }}
       />
@@ -149,21 +157,17 @@ describe("ConnectYourSelf Component", () => {
       screen.getByRole("button", { name: /Connect your/i })
     );
 
-    const installDialog = await screen.findByRole("dialog", {
-      name: "SELF browser extension not detected",
-    });
-    const installButton = screen.getByRole("button", {
-      name: "INSTALL EXTENSION",
-    });
-    expect(screen.getByRole("button", { name: "CANCEL" })).toBeInTheDocument();
-    await userEvent.click(installButton);
-
-    expect(installDialog).toHaveTextContent(
-      "Install now to connect straight from your browser."
+    await waitFor(() =>
+      expect(assignActiveWindow).toHaveBeenCalledWith(
+        "https://chromewebstore.google.com/detail/self-id-todo"
+      )
     );
-    expect(global.window.open).toHaveBeenCalledWith(
-      "https://example.test/install-extension",
-      "_blank"
-    );
+    expect(open).not.toHaveBeenCalled();
+    expect(
+      screen.queryByRole("dialog", {
+        name: "SELF browser extension not detected",
+      })
+    ).not.toBeInTheDocument();
+    open.mockRestore();
   });
 });

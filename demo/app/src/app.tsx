@@ -158,12 +158,6 @@ const CysTab: React.FC = () => {
     return () => clearInterval(pollingRef.current);
   }, [challenge, authenticated]);
 
-  const handleConnectPress = useCallback(() => {
-    if (challenge?.challengeUrl) {
-      window.open(challenge.challengeUrl, "_blank");
-    }
-  }, [challenge]);
-
   if (error) {
     return <StatusText>{error}</StatusText>;
   }
@@ -181,15 +175,8 @@ const CysTab: React.FC = () => {
     return <StatusText>Creating challenge...</StatusText>;
   }
 
-  return (
-    <ConnectYourSelf
-      challengeDID={challenge.challenge}
-      onConnectPress={handleConnectPress}
-    />
-  );
+  return <ConnectYourSelf challengeDID={challenge.challenge} />;
 };
-
-// -- Main App --
 
 const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<Tab>("cys");

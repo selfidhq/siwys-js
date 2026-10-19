@@ -40,8 +40,14 @@ interface SignInPropsBase {
   showInstructions?: boolean;
   extensionConfig?: ExtensionBridgeConfig | false;
   partner?: ExtensionPartner;
+  requestedCredentials?: RequestedCredential[];
   onAuthenticated?: (session: SignInSession) => void;
   onExtensionResult?: (result: ExtensionSignInResult) => void;
+}
+
+export interface RequestedCredential {
+  schema: string;
+  issuers?: string[];
 }
 
 export interface SignInSession {
@@ -248,6 +254,57 @@ const REPLACE_CHALLENGE_CODES: ExtensionErrorCode[] = [
   EXTENSION_ERROR_CODE.timedOut,
 ];
 
+const REQUESTED_CREDENTIALS_MAX = 20;
+const REQUESTED_DID_MAX = 2048;
+
+function isDid(value: unknown): value is string {
+  return typeof value === "string" && value.startsWith("did:") && value.length <= REQUESTED_DID_MAX;
+}
+
+export function challengeCreateInit(
+  requested: readonly RequestedCredential[] | undefined
+): RequestInit | null {
+  if (!requested || requested.length === 0) {
+    return { method: "POST" };
+  }
+  if (requested.length > REQUESTED_CREDENTIALS_MAX) {
+    return null;
+  }
+
+  const credentials: { schema: string; issuers?: string[] }[] = [];
+  for (const item of requested) {
+    if (typeof item !== "object" || item === null || !isDid(item.schema)) {
+      return null;
+    }
+    if (item.issuers !== undefined && !Array.isArray(item.issuers)) {
+      return null;
+    }
+    const issuers = (item.issuers ?? []).filter(isDid);
+    if (item.issuers && issuers.length !== item.issuers.length) {
+      return null;
+    }
+    credentials.push(
+      issuers.length > 0 ? { schema: item.schema, issuers } : { schema: item.schema }
+    );
+  }
+
+  return {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ credentials }),
+  };
+}
+
+function requestedCredentialsKey(
+  requested: readonly RequestedCredential[] | undefined
+): string {
+  const init = challengeCreateInit(requested);
+  if (!init) {
+    return "invalid";
+  }
+  return typeof init.body === "string" ? init.body : "";
+}
+
 function readCreatedChallenge(
   value: unknown
 ): { did: string; url: string } | null {
@@ -265,13 +322,26 @@ function readCreatedChallenge(
   return { did, url: record.challengeUrl };
 }
 
-function readSignInSession(value: unknown): SignInSession | null {
+function asksForMolecules(
+  requested: readonly RequestedCredential[] | undefined
+): boolean {
+  const init = challengeCreateInit(requested);
+  return init !== null && typeof init.body === "string";
+}
+
+function readSignInSession(
+  value: unknown,
+  options?: { requireMolecules?: boolean }
+): SignInSession | null {
   if (typeof value !== "object" || value === null) {
     return null;
   }
   const record = value as Record<string, unknown>;
-  const signedIn =
-    record.match === true || record.challengeResponseSuccess === true;
+  const moleculesCameBack =
+    Array.isArray(record.credentials) && record.credentials.length > 0;
+  const signedIn = options?.requireMolecules
+    ? record.match === true && moleculesCameBack
+    : record.match === true || record.challengeResponseSuccess === true;
   if (!signedIn) {
     return null;
   }
@@ -302,6 +372,7 @@ const SignInWithYourSelf: React.FC<SignInProps> = ({
   showInstructions = true,
   extensionConfig,
   partner,
+  requestedCredentials,
   onAuthenticated,
   onExtensionResult,
 }) => {
@@ -324,13 +395,16 @@ const SignInWithYourSelf: React.FC<SignInProps> = ({
   const replacingRef = useRef(false);
   const challengeRequestRef = useRef(0);
   const createChallengeUrlRef = useRef(createChallengeUrl);
+  const requestedCredentialsRef = useRef(requestedCredentials);
   const challengeDidPropRef = useRef(challengeDID);
   const onAuthenticatedRef = useRef(onAuthenticated);
   const onExtensionResultRef = useRef(onExtensionResult);
   createChallengeUrlRef.current = createChallengeUrl;
+  requestedCredentialsRef.current = requestedCredentials;
   challengeDidPropRef.current = challengeDID;
   onAuthenticatedRef.current = onAuthenticated;
   onExtensionResultRef.current = onExtensionResult;
+  const credentialsKey = requestedCredentialsKey(requestedCredentials);
 
   useEffect(() => {
     isMounted.current = true;
@@ -346,10 +420,18 @@ const SignInWithYourSelf: React.FC<SignInProps> = ({
       return;
     }
 
+    const init = challengeCreateInit(requestedCredentialsRef.current);
+    if (!init) {
+      challengeRequestRef.current += 1;
+      setChallengeDid("");
+      setChallengeError("Could not create a new challenge.");
+      return;
+    }
+
     replacingRef.current = true;
     setIsReplacingChallenge(true);
     const requestId = ++challengeRequestRef.current;
-    fetch(url, { method: "POST" })
+    fetch(url, init)
       .then((resp) => {
         if (resp.status < 200 || resp.status >= 300) {
           throw new Error("Challenge creation failed");
@@ -372,7 +454,7 @@ const SignInWithYourSelf: React.FC<SignInProps> = ({
           return;
         }
         setChallengeDid("");
-        setChallengeError("Could not start a new sign-in.");
+        setChallengeError("Could not create a new challenge.");
       })
       .finally(() => {
         if (requestId !== challengeRequestRef.current) {
@@ -391,11 +473,18 @@ const SignInWithYourSelf: React.FC<SignInProps> = ({
 
     const requestId = ++challengeRequestRef.current;
     let isActive = true;
+    const init = challengeCreateInit(requestedCredentialsRef.current);
+    if (!init) {
+      setChallengeDid("");
+      setChallengeError("Unable to create a challenge.");
+      return () => {
+        isActive = false;
+      };
+    }
+
     setChallengeError("");
-    // The partner server creates the challenge. This request has no body.
-    fetch(createChallengeUrl, {
-      method: "POST",
-    })
+    // The partner server creates the challenge. Credentials are the schemas it asked for.
+    fetch(createChallengeUrl, init)
       .then((resp) => {
         if (resp.status < 200 || resp.status >= 300) {
           throw new Error("Challenge creation failed");
@@ -419,14 +508,14 @@ const SignInWithYourSelf: React.FC<SignInProps> = ({
           requestId === challengeRequestRef.current &&
           !challengeDidPropRef.current
         ) {
-          setChallengeError("Unable to create a sign-in challenge.");
+          setChallengeError("Unable to create a challenge.");
         }
       });
 
     return () => {
       isActive = false;
     };
-  }, [createChallengeUrl]);
+  }, [createChallengeUrl, credentialsKey]);
 
   useEffect(() => {
     if (!pollForAuthUrl || !challengeDid || isAuthenticated) return;
@@ -445,7 +534,9 @@ const SignInWithYourSelf: React.FC<SignInProps> = ({
           if (!isActive || completed) {
             return;
           }
-          const session = readSignInSession(json);
+          const session = readSignInSession(json, {
+            requireMolecules: asksForMolecules(requestedCredentialsRef.current),
+          });
           if (!session) {
             return;
           }
@@ -625,7 +716,7 @@ const SignInWithYourSelf: React.FC<SignInProps> = ({
         )}
         {isCreatingChallenge && (
           <ChallengeMessage $theme={theme} role="status">
-            Creating sign-in challenge...
+            Creating challenge...
           </ChallengeMessage>
         )}
         {challengeError && (

@@ -86,6 +86,76 @@ describe("SignInWithYourSelf Component", () => {
     );
   });
 
+  it("sends the schemas the partner asked for when creating the challenge", async () => {
+    render(
+      <SignInWithYourSelf
+        createChallengeUrl={createChallengeUrl}
+        requestedCredentials={[
+          { schema: "did:test:name", issuers: ["did:test:amazon"] },
+        ]}
+      />
+    );
+
+    await waitFor(() =>
+      expect(fetchMock).toHaveBeenCalledWith(createChallengeUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          credentials: [{ schema: "did:test:name", issuers: ["did:test:amazon"] }],
+        }),
+      })
+    );
+  });
+
+  it("does not create another challenge when the same schemas arrive in a new array", async () => {
+    const { rerender } = render(
+      <SignInWithYourSelf
+        createChallengeUrl={createChallengeUrl}
+        requestedCredentials={[{ schema: "did:test:name" }]}
+      />
+    );
+
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
+
+    rerender(
+      <SignInWithYourSelf
+        createChallengeUrl={createChallengeUrl}
+        requestedCredentials={[{ schema: "did:test:name" }]}
+      />
+    );
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not create a challenge when a schema is not a DID", async () => {
+    render(
+      <SignInWithYourSelf
+        createChallengeUrl={createChallengeUrl}
+        requestedCredentials={[{ schema: "LinkedIn" }]}
+      />
+    );
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Unable to create a challenge."
+    );
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(screen.queryByTestId("qr-code")).not.toBeInTheDocument();
+  });
+
+  it("does not create a challenge when a credential is missing", async () => {
+    render(
+      <SignInWithYourSelf
+        createChallengeUrl={createChallengeUrl}
+        requestedCredentials={[null as unknown as { schema: string }]}
+      />
+    );
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Unable to create a challenge."
+    );
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
   it("accepts a challenge response without requiring challengeDID", async () => {
     window.fetch = jest.fn().mockResolvedValue({
       status: 201,
@@ -99,7 +169,7 @@ describe("SignInWithYourSelf Component", () => {
     render(<SignInWithYourSelf createChallengeUrl={createChallengeUrl} />);
 
     expect(screen.getByRole("status")).toHaveTextContent(
-      "Creating sign-in challenge..."
+      "Creating challenge..."
     );
     expect(await screen.findByTestId("qr-code")).toBeInTheDocument();
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
@@ -127,7 +197,7 @@ describe("SignInWithYourSelf Component", () => {
     render(<SignInWithYourSelf createChallengeUrl={createChallengeUrl} />);
 
     expect(await screen.findByRole("alert")).toHaveTextContent(
-      "Unable to create a sign-in challenge."
+      "Unable to create a challenge."
     );
     expect(screen.queryByTestId("qr-code")).not.toBeInTheDocument();
   });
@@ -141,7 +211,7 @@ describe("SignInWithYourSelf Component", () => {
     render(<SignInWithYourSelf createChallengeUrl={createChallengeUrl} />);
 
     expect(await screen.findByRole("alert")).toHaveTextContent(
-      "Unable to create a sign-in challenge."
+      "Unable to create a challenge."
     );
     expect(screen.queryByTestId("qr-code")).not.toBeInTheDocument();
   });
@@ -622,6 +692,117 @@ describe("SignInWithYourSelf Component", () => {
       expect(screen.getByTestId("success")).toBeInTheDocument();
     });
     expect(onAuthenticated).toHaveBeenCalledWith({ did: "did:user" });
+  });
+
+  it("does not complete a molecule request when the signature brought no molecules", async () => {
+    jest.useFakeTimers();
+    const onAuthenticated = jest.fn();
+    window.fetch = jest.fn().mockImplementation((input: RequestInfo | URL) => {
+      const url = input.toString();
+      if (url.includes("/challenges")) {
+        return Promise.resolve({
+          status: 200,
+          json: () =>
+            Promise.resolve({
+              challenge: challengeDid,
+              challengeUrl,
+            }),
+        });
+      }
+      return Promise.resolve({
+        status: 200,
+        json: () =>
+          Promise.resolve({
+            challengeResponseSuccess: true,
+            match: false,
+            credentials: [],
+            userSessionDid: "did:user",
+          }),
+      });
+    });
+
+    render(
+      <SignInWithYourSelf
+        createChallengeUrl={createChallengeUrl}
+        pollForAuthUrl={checkAuthUrl}
+        requestedCredentials={[{ schema: "did:test:linkedin" }]}
+        onAuthenticated={onAuthenticated}
+        successComponent={<div data-testid="success">Success</div>}
+      />
+    );
+
+    await waitFor(
+      () => {
+        expect(window.fetch).toHaveBeenCalledWith(
+          `${checkAuthUrl}?challenge=${challengeDid}`
+        );
+      },
+      { timeout: 6000 }
+    );
+    jest.advanceTimersByTime(5000);
+
+    await waitFor(() => {
+      const polls = (window.fetch as jest.Mock).mock.calls.filter(([url]) =>
+        String(url).includes("?challenge=")
+      );
+      expect(polls.length).toBeGreaterThan(1);
+    });
+    expect(screen.queryByTestId("success")).not.toBeInTheDocument();
+    expect(onAuthenticated).not.toHaveBeenCalled();
+    jest.useRealTimers();
+  });
+
+  it("completes a molecule request when the poll reports a match", async () => {
+    jest.useFakeTimers();
+    const onAuthenticated = jest.fn();
+    window.fetch = jest.fn().mockImplementation((input: RequestInfo | URL) => {
+      const url = input.toString();
+      if (url.includes("/challenges")) {
+        return Promise.resolve({
+          status: 200,
+          json: () =>
+            Promise.resolve({
+              challenge: challengeDid,
+              challengeUrl,
+            }),
+        });
+      }
+      return Promise.resolve({
+        status: 200,
+        json: () =>
+          Promise.resolve({
+            match: true,
+            credentials: [{ schema: "did:test:linkedin" }],
+            userSessionDid: "did:user",
+          }),
+      });
+    });
+
+    render(
+      <SignInWithYourSelf
+        createChallengeUrl={createChallengeUrl}
+        pollForAuthUrl={checkAuthUrl}
+        requestedCredentials={[{ schema: "did:test:linkedin" }]}
+        onAuthenticated={onAuthenticated}
+        successComponent={<div data-testid="success">Success</div>}
+      />
+    );
+
+    await waitFor(
+      () => {
+        expect(window.fetch).toHaveBeenCalledWith(
+          `${checkAuthUrl}?challenge=${challengeDid}`
+        );
+      },
+      { timeout: 6000 }
+    );
+    jest.advanceTimersByTime(5000);
+
+    await waitFor(() => {
+      expect(screen.getByTestId("success")).toBeInTheDocument();
+    });
+    expect(onAuthenticated).toHaveBeenCalledWith({ did: "did:user" });
+    jest.useRealTimers();
   });
 
   it("asks for another challenge after the request expires and keeps the notice", async () => {

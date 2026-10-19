@@ -84,7 +84,7 @@ import { saveWallet, loadWallet, updateWallet } from "./services/wallet.js";
 async function setupKeymaster() {
   Keymaster.initialize({
     gatekeeperConfig: {
-      url: process.env.GATEKEEPER_URL || "http://localhost:4422",
+      url: process.env.GATEKEEPER_URL || "http://localhost:4224",
       waitUntilReady: true,
     },
     walletConfig: {

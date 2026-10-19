@@ -25,7 +25,6 @@ export interface ExtensionPartner {
 }
 
 export interface ExtensionBridgeConfig {
-  installUrl?: string;
   detectionTimeoutMs?: number;
 }
 
@@ -235,14 +234,95 @@ export const extensionSignInResult = ({
   return { challengeDID, status, message };
 };
 
-export const isDesktopChromiumBrowser = (): boolean => {
-  if (typeof navigator === "undefined") return false;
+const MOBILE_USER_AGENT = /Android|iPhone|iPad|iPod|Mobile/i;
+
+export type DesktopExtensionBrowser = "chrome" | "edge" | "firefox" | "safari";
+
+// TODO: replace these placeholders with published marketplace listings
+// before any partner release. Redirects will not land on real listings until then.
+export const EXTENSION_STORE_URLS: Record<DesktopExtensionBrowser, string> = {
+  chrome: "https://chromewebstore.google.com/detail/self-id-todo",
+  edge: "https://microsoftedge.microsoft.com/addons/detail/self-id-todo",
+  firefox: "https://addons.mozilla.org/firefox/addon/self-id-todo/",
+  safari: "https://apps.apple.com/app/self-id-safari-extension/id0000000000",
+};
+
+export const MOBILE_APP_STORE_URLS = {
+  ios: "https://apps.apple.com/us/app/self-id/id1663745416",
+  android: "https://play.google.com/store/apps/details?id=id.selfid",
+} as const;
+
+export const MOBILE_APP_OPEN_FALLBACK_MS = 1500;
+
+export const resolveDesktopExtensionBrowser = ():
+  | DesktopExtensionBrowser
+  | null => {
+  if (typeof navigator === "undefined") return null;
 
   const userAgent = navigator.userAgent;
-  const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(userAgent);
-  const isChromium = /Chrome|Chromium|Edg|OPR|Brave/i.test(userAgent);
 
-  return isChromium && !isMobile;
+  if (MOBILE_USER_AGENT.test(userAgent)) return null;
+  if (/Edg\//i.test(userAgent)) return "edge";
+  if (/Firefox\//i.test(userAgent)) return "firefox";
+  if (/Chrome|Chromium|OPR|Brave/i.test(userAgent)) return "chrome";
+  if (/Safari/i.test(userAgent) && !/Chrome|Chromium/i.test(userAgent)) {
+    return "safari";
+  }
+
+  return null;
+};
+
+export const resolveMobileAppStoreUrl = (): string | null => {
+  if (typeof navigator === "undefined") return null;
+
+  const userAgent = navigator.userAgent;
+  if (!MOBILE_USER_AGENT.test(userAgent)) return null;
+  if (/Android/i.test(userAgent)) return MOBILE_APP_STORE_URLS.android;
+  if (/iPhone|iPad|iPod/i.test(userAgent)) return MOBILE_APP_STORE_URLS.ios;
+  return null;
+};
+
+export const assignActiveWindow = (url: string): void => {
+  window.location.assign(url);
+};
+
+export const openInstalledMobileApp = (
+  challengeUrl: string,
+  storeUrl: string,
+  assign: (url: string) => void = assignActiveWindow,
+  fallbackMs = MOBILE_APP_OPEN_FALLBACK_MS
+): (() => void) => {
+  let settled = false;
+  let timer = 0;
+
+  const cancel = () => {
+    if (settled) return;
+    settled = true;
+    window.clearTimeout(timer);
+    document.removeEventListener("visibilitychange", onVisibilityChange);
+    window.removeEventListener("pagehide", onPageHide);
+  };
+
+  const onPageHide = () => {
+    cancel();
+  };
+
+  const onVisibilityChange = () => {
+    if (document.visibilityState === "hidden") {
+      cancel();
+    }
+  };
+
+  document.addEventListener("visibilitychange", onVisibilityChange);
+  window.addEventListener("pagehide", onPageHide);
+  timer = window.setTimeout(() => {
+    if (document.visibilityState === "visible") {
+      assign(storeUrl);
+    }
+    cancel();
+  }, fallbackMs);
+  assign(challengeUrl);
+  return cancel;
 };
 
 export const detectExtension = (

@@ -171,7 +171,7 @@ Best for Node.js / TypeScript backends that prefer running Keymaster inside the 
 
   Keymaster.initialize({
     gatekeeperConfig: {
-      url: process.env.GATEKEEPER_URL || "http://localhost:4422",
+      url: process.env.GATEKEEPER_URL || "http://localhost:4224",
     },
     walletConfig: {
       id: "company-wallet-id",

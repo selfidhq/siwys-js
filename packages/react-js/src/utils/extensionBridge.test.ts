@@ -192,10 +192,7 @@ describe("resolveDesktopExtensionBrowser", () => {
 
   it.each([
     ["Mozilla/5.0 Chrome/123.0.0.0 Safari/537.36", "chrome"],
-    [
-      "Mozilla/5.0 Chrome/123.0.0.0 Safari/537.36 Edg/123.0.0.0",
-      "edge",
-    ],
+    ["Mozilla/5.0 Chrome/123.0.0.0 Safari/537.36 Edg/123.0.0.0", "edge"],
     ["Mozilla/5.0 Firefox/123.0", "firefox"],
     ["Mozilla/5.0 Version/17.0 Safari/605.1.15", "safari"],
     ["Mozilla/5.0 iPhone Chrome/123.0.0.0 Mobile", null],
@@ -207,7 +204,6 @@ describe("resolveDesktopExtensionBrowser", () => {
     });
     expect(resolveDesktopExtensionBrowser()).toBe(browser);
   });
-
 });
 
 describe("resolveMobileAppStoreUrl", () => {

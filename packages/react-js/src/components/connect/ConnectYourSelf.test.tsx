@@ -4,7 +4,10 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import ConnectYourSelf from "./ConnectYourSelf";
-import { assignActiveWindow } from "../../utils/extensionBridge";
+import {
+  assignActiveWindow,
+  EXTENSION_STORE_URLS,
+} from "../../utils/extensionBridge";
 
 jest.mock("../../utils/extensionBridge", () => {
   const actual = jest.requireActual("../../utils/extensionBridge");
@@ -138,7 +141,7 @@ describe("ConnectYourSelf Component", () => {
     window.removeEventListener("message", extensionResponder);
   });
 
-  it("redirects the active window when the extension is unavailable", async () => {
+  it("redirects the active window to the browser store when the extension is unavailable", async () => {
     Object.defineProperty(window.navigator, "userAgent", {
       configurable: true,
       value: "Mozilla/5.0 Chrome/123.0.0.0 Safari/537.36",
@@ -148,9 +151,7 @@ describe("ConnectYourSelf Component", () => {
     render(
       <ConnectYourSelf
         challengeDID="did:test:extension"
-        extensionConfig={{
-          detectionTimeoutMs: 1,
-        }}
+        extensionConfig={{ detectionTimeoutMs: 1 }}
       />
     );
     await userEvent.click(
@@ -158,9 +159,7 @@ describe("ConnectYourSelf Component", () => {
     );
 
     await waitFor(() =>
-      expect(assignActiveWindow).toHaveBeenCalledWith(
-        "https://chromewebstore.google.com/detail/self-id-todo"
-      )
+      expect(assignActiveWindow).toHaveBeenCalledWith(EXTENSION_STORE_URLS.chrome)
     );
     expect(open).not.toHaveBeenCalled();
     expect(

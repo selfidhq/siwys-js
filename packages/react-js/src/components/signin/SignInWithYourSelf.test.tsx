@@ -5,6 +5,7 @@ import userEvent from "@testing-library/user-event";
 import { SignInWithYourSelf } from "../..";
 import {
   assignActiveWindow,
+  EXTENSION_STORE_URLS,
   MOBILE_APP_STORE_URLS,
 } from "../../utils/extensionBridge";
 
@@ -98,6 +99,76 @@ describe("SignInWithYourSelf Component", () => {
     );
   });
 
+  it("sends the schemas the partner asked for when creating the challenge", async () => {
+    render(
+      <SignInWithYourSelf
+        createChallengeUrl={createChallengeUrl}
+        requestedCredentials={[
+          { schema: "did:test:name", issuers: ["did:test:amazon"] },
+        ]}
+      />
+    );
+
+    await waitFor(() =>
+      expect(fetchMock).toHaveBeenCalledWith(createChallengeUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          credentials: [{ schema: "did:test:name", issuers: ["did:test:amazon"] }],
+        }),
+      })
+    );
+  });
+
+  it("does not create another challenge when the same schemas arrive in a new array", async () => {
+    const { rerender } = render(
+      <SignInWithYourSelf
+        createChallengeUrl={createChallengeUrl}
+        requestedCredentials={[{ schema: "did:test:name" }]}
+      />
+    );
+
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
+
+    rerender(
+      <SignInWithYourSelf
+        createChallengeUrl={createChallengeUrl}
+        requestedCredentials={[{ schema: "did:test:name" }]}
+      />
+    );
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not create a challenge when a schema is not a DID", async () => {
+    render(
+      <SignInWithYourSelf
+        createChallengeUrl={createChallengeUrl}
+        requestedCredentials={[{ schema: "LinkedIn" }]}
+      />
+    );
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Unable to create a challenge."
+    );
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(screen.queryByTestId("qr-code")).not.toBeInTheDocument();
+  });
+
+  it("does not create a challenge when a credential is missing", async () => {
+    render(
+      <SignInWithYourSelf
+        createChallengeUrl={createChallengeUrl}
+        requestedCredentials={[null as unknown as { schema: string }]}
+      />
+    );
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Unable to create a challenge."
+    );
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
   it("accepts a challenge response without requiring challengeDID", async () => {
     window.fetch = jest.fn().mockResolvedValue({
       status: 201,
@@ -110,9 +181,9 @@ describe("SignInWithYourSelf Component", () => {
 
     render(<SignInWithYourSelf createChallengeUrl={createChallengeUrl} />);
 
-    expect(
-      screen.getByRole("status", { name: "Creating sign-in challenge" })
-    ).toBeInTheDocument();
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "Creating challenge..."
+    );
     expect(await screen.findByTestId("qr-code")).toBeInTheDocument();
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   });
@@ -139,7 +210,7 @@ describe("SignInWithYourSelf Component", () => {
     render(<SignInWithYourSelf createChallengeUrl={createChallengeUrl} />);
 
     expect(await screen.findByRole("alert")).toHaveTextContent(
-      "Unable to create a sign-in challenge."
+      "Unable to create a challenge."
     );
     expect(screen.queryByTestId("qr-code")).not.toBeInTheDocument();
   });
@@ -153,7 +224,7 @@ describe("SignInWithYourSelf Component", () => {
     render(<SignInWithYourSelf createChallengeUrl={createChallengeUrl} />);
 
     expect(await screen.findByRole("alert")).toHaveTextContent(
-      "Unable to create a sign-in challenge."
+      "Unable to create a challenge."
     );
     expect(screen.queryByTestId("qr-code")).not.toBeInTheDocument();
   });
@@ -383,7 +454,7 @@ describe("SignInWithYourSelf Component", () => {
   });
 
   it("should open challengeUrl in new window when onSiwysPress is not provided", () => {
-    const open = jest.spyOn(window, "open").mockImplementation(() => null);
+    global.window.open = jest.fn();
     render(<SignInWithYourSelf challengeDID={challengeDid} />);
     const signInButton = screen.getByRole("button", {
       name: /Sign in with your/i,
@@ -394,68 +465,6 @@ describe("SignInWithYourSelf Component", () => {
       "_blank"
     );
     open.mockRestore();
-  });
-
-  it("should open the challenge link before the App Store on mobile Safari", () => {
-    jest.useFakeTimers();
-    Object.defineProperty(window.navigator, "userAgent", {
-      configurable: true,
-      value:
-        "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 Mobile/15E148 Safari/604.1",
-    });
-    const open = jest.spyOn(window, "open").mockImplementation(() => null);
-    render(<SignInWithYourSelf challengeDID={challengeDid} />);
-    fireEvent.click(
-      screen.getByRole("button", { name: /Sign in with your/i })
-    );
-    expect(assignActiveWindow).toHaveBeenCalledWith(
-      expect.stringContaining(`challenge=${challengeDid}`)
-    );
-    expect(assignActiveWindow).not.toHaveBeenCalledWith(
-      MOBILE_APP_STORE_URLS.ios
-    );
-    jest.advanceTimersByTime(1500);
-    expect(assignActiveWindow).toHaveBeenLastCalledWith(
-      MOBILE_APP_STORE_URLS.ios
-    );
-    expect(open).not.toHaveBeenCalled();
-    open.mockRestore();
-    jest.useRealTimers();
-    Object.defineProperty(window.navigator, "userAgent", {
-      configurable: true,
-      value: originalUserAgent,
-    });
-  });
-
-  it("should open the challenge link before the Play Store on Android", () => {
-    jest.useFakeTimers();
-    Object.defineProperty(window.navigator, "userAgent", {
-      configurable: true,
-      value:
-        "Mozilla/5.0 (Linux; Android 14; Pixel) AppleWebKit/537.36 Chrome/123.0.0.0 Mobile Safari/537.36",
-    });
-    const open = jest.spyOn(window, "open").mockImplementation(() => null);
-    render(<SignInWithYourSelf challengeDID={challengeDid} />);
-    fireEvent.click(
-      screen.getByRole("button", { name: /Sign in with your/i })
-    );
-    expect(assignActiveWindow).toHaveBeenCalledWith(
-      expect.stringContaining(`challenge=${challengeDid}`)
-    );
-    expect(assignActiveWindow).not.toHaveBeenCalledWith(
-      MOBILE_APP_STORE_URLS.android
-    );
-    jest.advanceTimersByTime(1500);
-    expect(assignActiveWindow).toHaveBeenLastCalledWith(
-      MOBILE_APP_STORE_URLS.android
-    );
-    expect(open).not.toHaveBeenCalled();
-    open.mockRestore();
-    jest.useRealTimers();
-    Object.defineProperty(window.navigator, "userAgent", {
-      configurable: true,
-      value: originalUserAgent,
-    });
   });
 
   it("should handle non-200 polling response without setting authenticated", async () => {
@@ -701,7 +710,118 @@ describe("SignInWithYourSelf Component", () => {
     expect(onAuthenticated).toHaveBeenCalledWith({ did: "did:user" });
   });
 
-  it("asks for another challenge after the request expires and keeps the notice", async () => {
+  it("does not complete a molecule request when the signature brought no molecules", async () => {
+    jest.useFakeTimers();
+    const onAuthenticated = jest.fn();
+    window.fetch = jest.fn().mockImplementation((input: RequestInfo | URL) => {
+      const url = input.toString();
+      if (url.includes("/challenges")) {
+        return Promise.resolve({
+          status: 200,
+          json: () =>
+            Promise.resolve({
+              challenge: challengeDid,
+              challengeUrl,
+            }),
+        });
+      }
+      return Promise.resolve({
+        status: 200,
+        json: () =>
+          Promise.resolve({
+            challengeResponseSuccess: true,
+            match: false,
+            credentials: [],
+            userSessionDid: "did:user",
+          }),
+      });
+    });
+
+    render(
+      <SignInWithYourSelf
+        createChallengeUrl={createChallengeUrl}
+        pollForAuthUrl={checkAuthUrl}
+        requestedCredentials={[{ schema: "did:test:linkedin" }]}
+        onAuthenticated={onAuthenticated}
+        successComponent={<div data-testid="success">Success</div>}
+      />
+    );
+
+    await waitFor(
+      () => {
+        expect(window.fetch).toHaveBeenCalledWith(
+          `${checkAuthUrl}?challenge=${challengeDid}`
+        );
+      },
+      { timeout: 6000 }
+    );
+    jest.advanceTimersByTime(5000);
+
+    await waitFor(() => {
+      const polls = (window.fetch as jest.Mock).mock.calls.filter(([url]) =>
+        String(url).includes("?challenge=")
+      );
+      expect(polls.length).toBeGreaterThan(1);
+    });
+    expect(screen.queryByTestId("success")).not.toBeInTheDocument();
+    expect(onAuthenticated).not.toHaveBeenCalled();
+    jest.useRealTimers();
+  });
+
+  it("completes a molecule request when the poll reports a match", async () => {
+    jest.useFakeTimers();
+    const onAuthenticated = jest.fn();
+    window.fetch = jest.fn().mockImplementation((input: RequestInfo | URL) => {
+      const url = input.toString();
+      if (url.includes("/challenges")) {
+        return Promise.resolve({
+          status: 200,
+          json: () =>
+            Promise.resolve({
+              challenge: challengeDid,
+              challengeUrl,
+            }),
+        });
+      }
+      return Promise.resolve({
+        status: 200,
+        json: () =>
+          Promise.resolve({
+            match: true,
+            credentials: [{ schema: "did:test:linkedin" }],
+            userSessionDid: "did:user",
+          }),
+      });
+    });
+
+    render(
+      <SignInWithYourSelf
+        createChallengeUrl={createChallengeUrl}
+        pollForAuthUrl={checkAuthUrl}
+        requestedCredentials={[{ schema: "did:test:linkedin" }]}
+        onAuthenticated={onAuthenticated}
+        successComponent={<div data-testid="success">Success</div>}
+      />
+    );
+
+    await waitFor(
+      () => {
+        expect(window.fetch).toHaveBeenCalledWith(
+          `${checkAuthUrl}?challenge=${challengeDid}`
+        );
+      },
+      { timeout: 6000 }
+    );
+    jest.advanceTimersByTime(5000);
+
+    await waitFor(() => {
+      expect(screen.getByTestId("success")).toBeInTheDocument();
+    });
+    expect(onAuthenticated).toHaveBeenCalledWith({ did: "did:user" });
+    jest.useRealTimers();
+  });
+
+  it("asks for another challenge after the request expires", async () => {
     Object.defineProperty(window.navigator, "userAgent", {
       configurable: true,
       value: "Mozilla/5.0 Chrome/123.0.0.0 Safari/537.36",
@@ -823,6 +943,35 @@ describe("SignInWithYourSelf Component", () => {
     postMessageSpy.mockRestore();
   });
 
+  it("redirects the active Chrome window to the browser store when the extension is missing", async () => {
+    Object.defineProperty(window.navigator, "userAgent", {
+      configurable: true,
+      value: "Mozilla/5.0 Chrome/123.0.0.0 Safari/537.36",
+    });
+    const open = jest.spyOn(window, "open").mockImplementation(() => null);
+
+    render(
+      <SignInWithYourSelf
+        challengeDID={challengeDid}
+        extensionConfig={{ detectionTimeoutMs: 1 }}
+      />
+    );
+    await userEvent.click(
+      screen.getByRole("button", { name: /Sign in with your/i })
+    );
+
+    await waitFor(() =>
+      expect(assignActiveWindow).toHaveBeenCalledWith(EXTENSION_STORE_URLS.chrome)
+    );
+    expect(open).not.toHaveBeenCalled();
+    expect(
+      screen.queryByRole("dialog", {
+        name: "SELF browser extension not detected",
+      })
+    ).not.toBeInTheDocument();
+    open.mockRestore();
+  });
+
   it("redirects the active window to the browser store when the extension is missing", async () => {
     Object.defineProperty(window.navigator, "userAgent", {
       configurable: true,
@@ -842,7 +991,7 @@ describe("SignInWithYourSelf Component", () => {
 
     await waitFor(() =>
       expect(assignActiveWindow).toHaveBeenCalledWith(
-        "https://addons.mozilla.org/firefox/addon/self-id-todo/"
+        EXTENSION_STORE_URLS.firefox
       )
     );
     expect(open).not.toHaveBeenCalled();
@@ -851,6 +1000,54 @@ describe("SignInWithYourSelf Component", () => {
         name: "SELF browser extension not detected",
       })
     ).not.toBeInTheDocument();
+    open.mockRestore();
+  });
+
+  it("should open the challenge link before the App Store on mobile Safari", () => {
+    jest.useFakeTimers();
+    Object.defineProperty(window.navigator, "userAgent", {
+      configurable: true,
+      value:
+        "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 Mobile/15E148 Safari/604.1",
+    });
+    const open = jest.spyOn(window, "open").mockImplementation(() => null);
+    render(<SignInWithYourSelf challengeDID={challengeDid} />);
+    fireEvent.click(screen.getByRole("button", { name: /Sign in with your/i }));
+    expect(assignActiveWindow).toHaveBeenCalledWith(
+      expect.stringContaining(`challenge=${challengeDid}`)
+    );
+    expect(assignActiveWindow).not.toHaveBeenCalledWith(
+      MOBILE_APP_STORE_URLS.ios
+    );
+    jest.advanceTimersByTime(1500);
+    expect(assignActiveWindow).toHaveBeenLastCalledWith(
+      MOBILE_APP_STORE_URLS.ios
+    );
+    expect(open).not.toHaveBeenCalled();
+    open.mockRestore();
+  });
+
+  it("should open the challenge link before the Play Store on Android", () => {
+    jest.useFakeTimers();
+    Object.defineProperty(window.navigator, "userAgent", {
+      configurable: true,
+      value:
+        "Mozilla/5.0 (Linux; Android 14; Pixel) AppleWebKit/537.36 Chrome/123.0.0.0 Mobile Safari/537.36",
+    });
+    const open = jest.spyOn(window, "open").mockImplementation(() => null);
+    render(<SignInWithYourSelf challengeDID={challengeDid} />);
+    fireEvent.click(screen.getByRole("button", { name: /Sign in with your/i }));
+    expect(assignActiveWindow).toHaveBeenCalledWith(
+      expect.stringContaining(`challenge=${challengeDid}`)
+    );
+    expect(assignActiveWindow).not.toHaveBeenCalledWith(
+      MOBILE_APP_STORE_URLS.android
+    );
+    jest.advanceTimersByTime(1500);
+    expect(assignActiveWindow).toHaveBeenLastCalledWith(
+      MOBILE_APP_STORE_URLS.android
+    );
+    expect(open).not.toHaveBeenCalled();
     open.mockRestore();
   });
 });

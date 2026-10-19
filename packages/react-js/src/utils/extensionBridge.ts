@@ -234,9 +234,9 @@ export const extensionSignInResult = ({
   return { challengeDID, status, message };
 };
 
-export type DesktopExtensionBrowser = "chrome" | "edge" | "firefox" | "safari";
-
 const MOBILE_USER_AGENT = /Android|iPhone|iPad|iPod|Mobile/i;
+
+export type DesktopExtensionBrowser = "chrome" | "edge" | "firefox" | "safari";
 
 // TODO: replace these placeholders with published marketplace listings
 // before any partner release. Redirects will not land on real listings until then.

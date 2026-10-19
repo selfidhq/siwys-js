@@ -13,6 +13,7 @@ import {
   EXTENSION_STORE_URLS,
   resolveDesktopExtensionBrowser,
   resolveMobileAppStoreUrl,
+  openInstalledMobileApp,
   type ExtensionBridgeConfig,
   type ExtensionErrorCode,
   type ExtensionPartner,
@@ -338,6 +339,7 @@ const SignInWithYourSelf: React.FC<SignInProps> = ({
   const [extensionError, setExtensionError] = useState<string>("");
   const [isReplacingChallenge, setIsReplacingChallenge] = useState(false);
   const removeStatusListener = useRef<() => void>();
+  const cancelMobileOpen = useRef<() => void>();
   const isMounted = useRef(true);
   const replacingRef = useRef(false);
   const challengeRequestRef = useRef(0);
@@ -354,6 +356,7 @@ const SignInWithYourSelf: React.FC<SignInProps> = ({
     isMounted.current = true;
     return () => {
       isMounted.current = false;
+      cancelMobileOpen.current?.();
       removeStatusListener.current?.();
     };
   }, []);
@@ -570,7 +573,12 @@ const SignInWithYourSelf: React.FC<SignInProps> = ({
 
     const mobileStoreUrl = resolveMobileAppStoreUrl();
     if (mobileStoreUrl) {
-      assignActiveWindow(mobileStoreUrl);
+      cancelMobileOpen.current?.();
+      cancelMobileOpen.current = openInstalledMobileApp(
+        challengeUrl,
+        mobileStoreUrl,
+        assignActiveWindow
+      );
       return;
     }
 

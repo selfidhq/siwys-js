@@ -252,6 +252,8 @@ export const MOBILE_APP_STORE_URLS = {
   android: "https://play.google.com/store/apps/details?id=id.selfid",
 } as const;
 
+export const MOBILE_APP_OPEN_FALLBACK_MS = 1500;
+
 export const resolveDesktopExtensionBrowser = ():
   | DesktopExtensionBrowser
   | null => {
@@ -282,6 +284,45 @@ export const resolveMobileAppStoreUrl = (): string | null => {
 
 export const assignActiveWindow = (url: string): void => {
   window.location.assign(url);
+};
+
+export const openInstalledMobileApp = (
+  challengeUrl: string,
+  storeUrl: string,
+  assign: (url: string) => void = assignActiveWindow,
+  fallbackMs = MOBILE_APP_OPEN_FALLBACK_MS
+): (() => void) => {
+  let settled = false;
+  let timer = 0;
+
+  const cancel = () => {
+    if (settled) return;
+    settled = true;
+    window.clearTimeout(timer);
+    document.removeEventListener("visibilitychange", onVisibilityChange);
+    window.removeEventListener("pagehide", onPageHide);
+  };
+
+  const onPageHide = () => {
+    cancel();
+  };
+
+  const onVisibilityChange = () => {
+    if (document.visibilityState === "hidden") {
+      cancel();
+    }
+  };
+
+  document.addEventListener("visibilitychange", onVisibilityChange);
+  window.addEventListener("pagehide", onPageHide);
+  timer = window.setTimeout(() => {
+    if (document.visibilityState === "visible") {
+      assign(storeUrl);
+    }
+    cancel();
+  }, fallbackMs);
+  assign(challengeUrl);
+  return cancel;
 };
 
 export const detectExtension = (

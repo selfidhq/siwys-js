@@ -3,6 +3,8 @@ import {
   extensionSignInResult,
   requestExtensionSignIn,
   resolveDesktopExtensionBrowser,
+  MOBILE_APP_OPEN_FALLBACK_MS,
+  openInstalledMobileApp,
   resolveMobileAppStoreUrl,
   MOBILE_APP_STORE_URLS,
 } from "./extensionBridge";
@@ -234,5 +236,73 @@ describe("resolveMobileAppStoreUrl", () => {
       value: userAgent,
     });
     expect(resolveMobileAppStoreUrl()).toBe(storeUrl);
+  });
+});
+
+describe("openInstalledMobileApp", () => {
+  const challengeUrl = "https://www.selfid.link/challenge?challenge=did%3Atest";
+  const originalUserAgent = navigator.userAgent;
+
+  afterEach(() => {
+    jest.useRealTimers();
+    Object.defineProperty(window.navigator, "userAgent", {
+      configurable: true,
+      value: originalUserAgent,
+    });
+    Object.defineProperty(document, "visibilityState", {
+      configurable: true,
+      value: "visible",
+    });
+  });
+
+  it("opens the challenge link on Android, then the Play Store if the page stays visible", () => {
+    jest.useFakeTimers();
+    Object.defineProperty(window.navigator, "userAgent", {
+      configurable: true,
+      value:
+        "Mozilla/5.0 (Linux; Android 14; Pixel) AppleWebKit/537.36 Chrome/123.0.0.0 Mobile Safari/537.36",
+    });
+    const assign = jest.fn();
+
+    openInstalledMobileApp(challengeUrl, MOBILE_APP_STORE_URLS.android, assign);
+
+    expect(assign).toHaveBeenCalledTimes(1);
+    expect(assign).toHaveBeenCalledWith(challengeUrl);
+    jest.advanceTimersByTime(MOBILE_APP_OPEN_FALLBACK_MS);
+    expect(assign).toHaveBeenNthCalledWith(2, MOBILE_APP_STORE_URLS.android);
+  });
+
+  it("opens the challenge link, then the store if the page stays visible", () => {
+    jest.useFakeTimers();
+    Object.defineProperty(window.navigator, "userAgent", {
+      configurable: true,
+      value:
+        "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 Mobile/15E148 Safari/604.1",
+    });
+    const assign = jest.fn();
+
+    openInstalledMobileApp(challengeUrl, MOBILE_APP_STORE_URLS.ios, assign);
+
+    expect(assign).toHaveBeenCalledTimes(1);
+    expect(assign).toHaveBeenCalledWith(challengeUrl);
+    jest.advanceTimersByTime(MOBILE_APP_OPEN_FALLBACK_MS);
+    expect(assign).toHaveBeenNthCalledWith(2, MOBILE_APP_STORE_URLS.ios);
+  });
+
+  it("does not open the store after the app hides the page", () => {
+    jest.useFakeTimers();
+    Object.defineProperty(window.navigator, "userAgent", {
+      configurable: true,
+      value:
+        "Mozilla/5.0 (iPad; CPU OS 17_0 like Mac OS X) AppleWebKit/605.1.15 Mobile/15E148",
+    });
+    const assign = jest.fn();
+
+    openInstalledMobileApp(challengeUrl, MOBILE_APP_STORE_URLS.ios, assign);
+    window.dispatchEvent(new Event("pagehide"));
+    jest.advanceTimersByTime(MOBILE_APP_OPEN_FALLBACK_MS);
+
+    expect(assign).toHaveBeenCalledTimes(1);
+    expect(assign).toHaveBeenCalledWith(challengeUrl);
   });
 });

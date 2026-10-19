@@ -396,7 +396,8 @@ describe("SignInWithYourSelf Component", () => {
     open.mockRestore();
   });
 
-  it("should open the iPhone App Store instead of the challenge on mobile Safari", () => {
+  it("should open the challenge link before the App Store on mobile Safari", () => {
+    jest.useFakeTimers();
     Object.defineProperty(window.navigator, "userAgent", {
       configurable: true,
       value:
@@ -407,9 +408,50 @@ describe("SignInWithYourSelf Component", () => {
     fireEvent.click(
       screen.getByRole("button", { name: /Sign in with your/i })
     );
-    expect(assignActiveWindow).toHaveBeenCalledWith(MOBILE_APP_STORE_URLS.ios);
+    expect(assignActiveWindow).toHaveBeenCalledWith(
+      expect.stringContaining(`challenge=${challengeDid}`)
+    );
+    expect(assignActiveWindow).not.toHaveBeenCalledWith(
+      MOBILE_APP_STORE_URLS.ios
+    );
+    jest.advanceTimersByTime(1500);
+    expect(assignActiveWindow).toHaveBeenLastCalledWith(
+      MOBILE_APP_STORE_URLS.ios
+    );
     expect(open).not.toHaveBeenCalled();
     open.mockRestore();
+    jest.useRealTimers();
+    Object.defineProperty(window.navigator, "userAgent", {
+      configurable: true,
+      value: originalUserAgent,
+    });
+  });
+
+  it("should open the challenge link before the Play Store on Android", () => {
+    jest.useFakeTimers();
+    Object.defineProperty(window.navigator, "userAgent", {
+      configurable: true,
+      value:
+        "Mozilla/5.0 (Linux; Android 14; Pixel) AppleWebKit/537.36 Chrome/123.0.0.0 Mobile Safari/537.36",
+    });
+    const open = jest.spyOn(window, "open").mockImplementation(() => null);
+    render(<SignInWithYourSelf challengeDID={challengeDid} />);
+    fireEvent.click(
+      screen.getByRole("button", { name: /Sign in with your/i })
+    );
+    expect(assignActiveWindow).toHaveBeenCalledWith(
+      expect.stringContaining(`challenge=${challengeDid}`)
+    );
+    expect(assignActiveWindow).not.toHaveBeenCalledWith(
+      MOBILE_APP_STORE_URLS.android
+    );
+    jest.advanceTimersByTime(1500);
+    expect(assignActiveWindow).toHaveBeenLastCalledWith(
+      MOBILE_APP_STORE_URLS.android
+    );
+    expect(open).not.toHaveBeenCalled();
+    open.mockRestore();
+    jest.useRealTimers();
     Object.defineProperty(window.navigator, "userAgent", {
       configurable: true,
       value: originalUserAgent,

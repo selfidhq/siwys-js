@@ -1,15 +1,19 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import styled from "styled-components";
 import QRCode from "./QrCode";
-import ExtensionInstallToast from "./ExtensionInstallToast";
 import { CysButton, SiwysButton } from "../button/SignInButton";
 import {
   EXTENSION_ERROR_CODE,
+  assignActiveWindow,
   detectExtension,
   extensionPartnerPayload,
   extensionSignInResult,
-  isDesktopChromiumBrowser,
   requestExtensionSignIn,
+  MOBILE_APP_STORE_URLS,
+  EXTENSION_STORE_URLS,
+  resolveDesktopExtensionBrowser,
+  resolveMobileAppStoreUrl,
+  openInstalledMobileApp,
   type ExtensionBridgeConfig,
   type ExtensionErrorCode,
   type ExtensionPartner,
@@ -289,6 +293,23 @@ const ChallengeMessage = styled.p<{ $theme: ThemeProp }>`
   text-align: center;
 `;
 
+const ChallengeSpinner = styled.div<{ $theme: ThemeProp }>`
+  width: 28px;
+  height: 28px;
+  margin: 24px 0 70px;
+  border: 3px solid
+    ${(props) => (props.$theme === "dark" ? "#0F0F10" : "#ffffff")};
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: siwys-challenge-spin 0.8s linear infinite;
+
+  @keyframes siwys-challenge-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+`;
+
 const SignInWithYourSelf: React.FC<SignInProps> = ({
   challengeDID,
   onSiwysPress,
@@ -316,10 +337,9 @@ const SignInWithYourSelf: React.FC<SignInProps> = ({
   const [extensionFlowState, setExtensionFlowState] =
     useState<ExtensionFlowState>("idle");
   const [extensionError, setExtensionError] = useState<string>("");
-  const [isInstallPromptDismissed, setIsInstallPromptDismissed] =
-    useState<boolean>(false);
   const [isReplacingChallenge, setIsReplacingChallenge] = useState(false);
   const removeStatusListener = useRef<() => void>();
+  const cancelMobileOpen = useRef<() => void>();
   const isMounted = useRef(true);
   const replacingRef = useRef(false);
   const challengeRequestRef = useRef(0);
@@ -336,6 +356,7 @@ const SignInWithYourSelf: React.FC<SignInProps> = ({
     isMounted.current = true;
     return () => {
       isMounted.current = false;
+      cancelMobileOpen.current?.();
       removeStatusListener.current?.();
     };
   }, []);
@@ -464,21 +485,12 @@ const SignInWithYourSelf: React.FC<SignInProps> = ({
   }, [challengeDid, isAuthenticated, pollForAuthUrl]);
 
   const redirectToPlayStore = () => {
-    const playStoreURL =
-      "https://play.google.com/store/apps/details?id=id.selfid";
-    window.open(playStoreURL, "_blank");
+    window.open(MOBILE_APP_STORE_URLS.android, "_blank");
   };
 
   const redirectToAppStore = () => {
-    const appStoreURL = "https://apps.apple.com/us/app/self-id/id1663745416";
-    window.open(appStoreURL, "_blank");
+    window.open(MOBILE_APP_STORE_URLS.ios, "_blank");
   };
-
-  const openExtensionInstallPage = useCallback(() => {
-    if (extensionConfig && extensionConfig.installUrl) {
-      window.open(extensionConfig.installUrl, "_blank");
-    }
-  }, [extensionConfig]);
 
   const startExtensionSignIn = useCallback(async () => {
     if (replacingRef.current) {
@@ -488,7 +500,6 @@ const SignInWithYourSelf: React.FC<SignInProps> = ({
     removeStatusListener.current = undefined;
     setExtensionFlowState("checking");
     setExtensionError("");
-    setIsInstallPromptDismissed(false);
 
     const detectionTimeoutMs =
       extensionConfig === false
@@ -498,13 +509,19 @@ const SignInWithYourSelf: React.FC<SignInProps> = ({
     if (!isMounted.current) return;
 
     if (!extensionAvailable) {
-      setExtensionFlowState("unavailable");
       onExtensionResultRef.current?.(
         extensionSignInResult({
           challengeDID: challengeDid,
           status: "unavailable",
         })
       );
+      const browser = resolveDesktopExtensionBrowser();
+      if (browser) {
+        setExtensionFlowState("idle");
+        assignActiveWindow(EXTENSION_STORE_URLS[browser]);
+        return;
+      }
+      setExtensionFlowState("unavailable");
       return;
     }
 
@@ -549,8 +566,19 @@ const SignInWithYourSelf: React.FC<SignInProps> = ({
       return;
     }
 
-    if (extensionConfig !== false && isDesktopChromiumBrowser()) {
+    if (extensionConfig !== false && resolveDesktopExtensionBrowser()) {
       startExtensionSignIn();
+      return;
+    }
+
+    const mobileStoreUrl = resolveMobileAppStoreUrl();
+    if (mobileStoreUrl) {
+      cancelMobileOpen.current?.();
+      cancelMobileOpen.current = openInstalledMobileApp(
+        challengeUrl,
+        mobileStoreUrl,
+        assignActiveWindow
+      );
       return;
     }
 
@@ -624,9 +652,11 @@ const SignInWithYourSelf: React.FC<SignInProps> = ({
           </>
         )}
         {isCreatingChallenge && (
-          <ChallengeMessage $theme={theme} role="status">
-            Creating sign-in challenge...
-          </ChallengeMessage>
+          <ChallengeSpinner
+            $theme={theme}
+            role="status"
+            aria-label="Creating sign-in challenge"
+          />
         )}
         {challengeError && (
           <ChallengeMessage $theme={theme} role="alert">
@@ -655,36 +685,9 @@ const SignInWithYourSelf: React.FC<SignInProps> = ({
                 glow
               />
             )}
-            {extensionNotice ? (
-              <ChallengeMessage
-                $theme={theme}
-                aria-label={extensionNotice}
-                role={
-                  extensionFlowState === "error" ||
-                  extensionFlowState === "rejected" ||
-                  extensionFlowState === "unavailable"
-                    ? "alert"
-                    : "status"
-                }
-              >
-                {extensionNotice}
-              </ChallengeMessage>
-            ) : null}
           </>
         )}
       </SignInContainer>
-
-      {extensionFlowState === "unavailable" && !isInstallPromptDismissed && (
-        <ExtensionInstallToast
-          theme={theme}
-          onCancel={() => setIsInstallPromptDismissed(true)}
-          onInstall={
-            extensionConfig && extensionConfig.installUrl
-              ? openExtensionInstallPage
-              : undefined
-          }
-        />
-      )}
 
       {showInstructions && (
         <InstructionsContainer>

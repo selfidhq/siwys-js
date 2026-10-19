@@ -4,18 +4,20 @@ React components for Sign in with your SELF.
 
 ## Browser Extension Bridge
 
-`SignInWithYourSelf` and `ConnectYourSelf` automatically use the
-browser-extension flow in desktop Chromium browsers. Mobile and unsupported
-browsers retain the existing challenge deep-link behavior. Set
-`extensionConfig` to `false` to disable the extension flow, or provide an
-installation URL for browsers where the extension is not installed.
+`SignInWithYourSelf` and `ConnectYourSelf` use the browser-extension flow on
+desktop Chrome, Edge, Firefox, and Safari. If the extension is missing, the
+active window goes to that browser's store listing. On iPhone, iPad, and
+Android, the sign-in button opens the challenge link so the installed SELF app
+can handle it. If the app does not open, the active window goes to the App
+Store or Play Store. Set `extensionConfig` to `false` to skip the extension
+check on desktop.
 
 ```tsx
 <SignInWithYourSelf
   challengeDID={challengeDID}
   pollForAuthUrl="https://partner.example/auth/status"
   extensionConfig={{
-    installUrl: "https://partner.example/install-self-extension",
+    detectionTimeoutMs: 1000,
   }}
 />
 ```

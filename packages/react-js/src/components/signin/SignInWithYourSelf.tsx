@@ -379,6 +379,23 @@ const ChallengeMessage = styled.p<{ $theme: ThemeProp }>`
   text-align: center;
 `;
 
+const ChallengeSpinner = styled.div<{ $theme: ThemeProp }>`
+  width: 28px;
+  height: 28px;
+  margin: 24px 0 70px;
+  border: 3px solid
+    ${(props) => (props.$theme === "dark" ? "#0F0F10" : "#ffffff")};
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: siwys-challenge-spin 0.8s linear infinite;
+
+  @keyframes siwys-challenge-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+`;
+
 const SignInWithYourSelf: React.FC<SignInProps> = ({
   challengeDID,
   onSiwysPress,
@@ -750,9 +767,11 @@ const SignInWithYourSelf: React.FC<SignInProps> = ({
           </>
         )}
         {isCreatingChallenge && (
-          <ChallengeMessage $theme={theme} role="status">
-            Creating challenge...
-          </ChallengeMessage>
+          <ChallengeSpinner
+            $theme={theme}
+            role="status"
+            aria-label="Creating sign-in challenge"
+          />
         )}
         {challengeError && (
           <ChallengeMessage $theme={theme} role="alert">

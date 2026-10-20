@@ -181,8 +181,8 @@ describe("SignInWithYourSelf Component", () => {
 
     render(<SignInWithYourSelf createChallengeUrl={createChallengeUrl} />);
 
-    expect(screen.getByRole("status")).toHaveTextContent(
-      "Creating challenge..."
+    expect(screen.getByRole("status")).toHaveAccessibleName(
+      "Creating sign-in challenge"
     );
     expect(await screen.findByTestId("qr-code")).toBeInTheDocument();
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
@@ -453,9 +453,14 @@ describe("SignInWithYourSelf Component", () => {
     });
   });
 
-  it("should open challengeUrl in new window when onSiwysPress is not provided", () => {
-    global.window.open = jest.fn();
-    render(<SignInWithYourSelf challengeDID={challengeDid} />);
+  it("opens challengeUrl in a new window when extension flow is disabled", () => {
+    const open = jest.spyOn(window, "open").mockImplementation(() => null);
+    render(
+      <SignInWithYourSelf
+        challengeDID={challengeDid}
+        extensionConfig={false}
+      />
+    );
     const signInButton = screen.getByRole("button", {
       name: /Sign in with your/i,
     });
@@ -465,6 +470,114 @@ describe("SignInWithYourSelf Component", () => {
       "_blank"
     );
     open.mockRestore();
+  });
+
+  it("does not render the QR code on iOS", () => {
+    Object.defineProperty(window.navigator, "userAgent", {
+      configurable: true,
+      value:
+        "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 Mobile/15E148 Safari/604.1",
+    });
+
+    render(<SignInWithYourSelf challengeDID={challengeDid} />);
+
+    expect(screen.queryByTestId("qr-code")).not.toBeInTheDocument();
+  });
+
+  it("does not render the QR code on Android", () => {
+    Object.defineProperty(window.navigator, "userAgent", {
+      configurable: true,
+      value:
+        "Mozilla/5.0 (Linux; Android 14; Pixel) AppleWebKit/537.36 Chrome/123.0.0.0 Mobile Safari/537.36",
+    });
+
+    render(<SignInWithYourSelf challengeDID={challengeDid} />);
+
+    expect(screen.queryByTestId("qr-code")).not.toBeInTheDocument();
+  });
+
+  it("starts extension detection on desktop Firefox", async () => {
+    Object.defineProperty(window.navigator, "userAgent", {
+      configurable: true,
+      value: "Mozilla/5.0 Firefox/123.0",
+    });
+    const postMessageSpy = jest
+      .spyOn(window, "postMessage")
+      .mockImplementation(() => {});
+
+    render(<SignInWithYourSelf challengeDID={challengeDid} />);
+    await userEvent.click(
+      screen.getByRole("button", { name: /Sign in with your/i })
+    );
+
+    await waitFor(() => {
+      expect(postMessageSpy).toHaveBeenCalled();
+    });
+    expect(postMessageSpy.mock.calls[0][0].type).toBe("self-id:extension:detect");
+
+    postMessageSpy.mockRestore();
+  });
+
+  it("should open the challenge link before the App Store on mobile Safari", () => {
+    jest.useFakeTimers();
+    Object.defineProperty(window.navigator, "userAgent", {
+      configurable: true,
+      value:
+        "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 Mobile/15E148 Safari/604.1",
+    });
+    const open = jest.spyOn(window, "open").mockImplementation(() => null);
+    render(<SignInWithYourSelf challengeDID={challengeDid} />);
+    fireEvent.click(
+      screen.getByRole("button", { name: /Sign in with your/i })
+    );
+    expect(assignActiveWindow).toHaveBeenCalledWith(
+      expect.stringContaining(`challenge=${challengeDid}`)
+    );
+    expect(assignActiveWindow).not.toHaveBeenCalledWith(
+      MOBILE_APP_STORE_URLS.ios
+    );
+    jest.advanceTimersByTime(1500);
+    expect(assignActiveWindow).toHaveBeenLastCalledWith(
+      MOBILE_APP_STORE_URLS.ios
+    );
+    expect(open).not.toHaveBeenCalled();
+    open.mockRestore();
+    jest.useRealTimers();
+    Object.defineProperty(window.navigator, "userAgent", {
+      configurable: true,
+      value: originalUserAgent,
+    });
+  });
+
+  it("should open the challenge link before the Play Store on Android", () => {
+    jest.useFakeTimers();
+    Object.defineProperty(window.navigator, "userAgent", {
+      configurable: true,
+      value:
+        "Mozilla/5.0 (Linux; Android 14; Pixel) AppleWebKit/537.36 Chrome/123.0.0.0 Mobile Safari/537.36",
+    });
+    const open = jest.spyOn(window, "open").mockImplementation(() => null);
+    render(<SignInWithYourSelf challengeDID={challengeDid} />);
+    fireEvent.click(
+      screen.getByRole("button", { name: /Sign in with your/i })
+    );
+    expect(assignActiveWindow).toHaveBeenCalledWith(
+      expect.stringContaining(`challenge=${challengeDid}`)
+    );
+    expect(assignActiveWindow).not.toHaveBeenCalledWith(
+      MOBILE_APP_STORE_URLS.android
+    );
+    jest.advanceTimersByTime(1500);
+    expect(assignActiveWindow).toHaveBeenLastCalledWith(
+      MOBILE_APP_STORE_URLS.android
+    );
+    expect(open).not.toHaveBeenCalled();
+    open.mockRestore();
+    jest.useRealTimers();
+    Object.defineProperty(window.navigator, "userAgent", {
+      configurable: true,
+      value: originalUserAgent,
+    });
   });
 
   it("should handle non-200 polling response without setting authenticated", async () => {
@@ -943,7 +1056,7 @@ describe("SignInWithYourSelf Component", () => {
     postMessageSpy.mockRestore();
   });
 
-  it("redirects the active Chrome window to the browser store when the extension is missing", async () => {
+  it("opens the Chrome browser store in a new tab when the extension is missing", async () => {
     Object.defineProperty(window.navigator, "userAgent", {
       configurable: true,
       value: "Mozilla/5.0 Chrome/123.0.0.0 Safari/537.36",
@@ -961,9 +1074,17 @@ describe("SignInWithYourSelf Component", () => {
     );
 
     await waitFor(() =>
-      expect(assignActiveWindow).toHaveBeenCalledWith(EXTENSION_STORE_URLS.chrome)
+      expect(open).toHaveBeenCalledWith(EXTENSION_STORE_URLS.chrome, "_blank")
     );
-    expect(open).not.toHaveBeenCalled();
+    expect(assignActiveWindow).not.toHaveBeenCalledWith(
+      EXTENSION_STORE_URLS.chrome
+    );
+    expect(screen.getByTestId("qr-container")).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /SELF browser extension not detected\. Scan this QR with the SELF app/i
+      )
+    ).toBeInTheDocument();
     expect(
       screen.queryByRole("dialog", {
         name: "SELF browser extension not detected",
@@ -972,7 +1093,7 @@ describe("SignInWithYourSelf Component", () => {
     open.mockRestore();
   });
 
-  it("redirects the active window to the browser store when the extension is missing", async () => {
+  it("opens the browser store in a new tab when the extension is missing", async () => {
     Object.defineProperty(window.navigator, "userAgent", {
       configurable: true,
       value: "Mozilla/5.0 Firefox/123.0",
@@ -990,11 +1111,17 @@ describe("SignInWithYourSelf Component", () => {
     );
 
     await waitFor(() =>
-      expect(assignActiveWindow).toHaveBeenCalledWith(
-        EXTENSION_STORE_URLS.firefox
-      )
+      expect(open).toHaveBeenCalledWith(EXTENSION_STORE_URLS.firefox, "_blank")
     );
-    expect(open).not.toHaveBeenCalled();
+    expect(assignActiveWindow).not.toHaveBeenCalledWith(
+      EXTENSION_STORE_URLS.firefox
+    );
+    expect(screen.getByTestId("qr-code")).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /SELF browser extension not detected\. Scan this QR with the SELF app/i
+      )
+    ).toBeInTheDocument();
     expect(
       screen.queryByRole("dialog", {
         name: "SELF browser extension not detected",

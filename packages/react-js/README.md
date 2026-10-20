@@ -6,11 +6,12 @@ React components for Sign in with your SELF.
 
 `SignInWithYourSelf` and `ConnectYourSelf` use the browser-extension flow on
 desktop Chrome, Edge, Firefox, and Safari. If the extension is missing, the
-active window goes to that browser's store listing. On iPhone, iPad, and
-Android, the sign-in button opens the challenge link so the installed SELF app
-can handle it. If the app does not open, the active window goes to the App
-Store or Play Store. Set `extensionConfig` to `false` to skip the extension
-check on desktop.
+SDK opens that browser's store listing in a new tab and keeps the current page
+visible for QR fallback. On iPhone, iPad, and Android, the sign-in button opens
+the challenge link so the installed SELF app can handle it. If the app does not
+open, the active window goes to the App Store or Play Store. Mobile and tablet
+flows are button-first and do not render the QR code block. Set `extensionConfig`
+to `false` to skip the extension check on desktop.
 
 ```tsx
 <SignInWithYourSelf

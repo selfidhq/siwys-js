@@ -4,7 +4,6 @@ import QRCode from "./QrCode";
 import { CysButton, SiwysButton } from "../button/SignInButton";
 import {
   EXTENSION_ERROR_CODE,
-  EXTENSION_STORE_URLS,
   MOBILE_APP_STORE_URLS,
   assignActiveWindow,
   detectExtension,
@@ -12,7 +11,8 @@ import {
   extensionSignInResult,
   openInstalledMobileApp,
   requestExtensionSignIn,
-  resolveDesktopExtensionBrowser,
+  resolveDesktopExtensionStoreUrl,
+  resolveDevicePlatform,
   resolveMobileAppStoreUrl,
   type ExtensionBridgeConfig,
   type ExtensionErrorCode,
@@ -119,11 +119,27 @@ const TitleContainer = styled.div`
   margin-top: 24px;
 `;
 
-const QRContainer = styled.div<{ $theme: ThemeProp }>`
+const QRContainer = styled.div<{ $theme: ThemeProp; $highlight: boolean }>`
   margin-bottom: 70px;
   ${(props) => (props.$theme === "dark" ? "border: 10px black solid" : "")};
   ${(props) => (props.$theme === "dark" ? "border-radius: 26px" : "")};
   ${(props) => (props.$theme === "dark" ? "line-height: 0" : "")};
+  ${(props) =>
+    props.$highlight
+      ? props.$theme === "dark"
+        ? "outline: 2px solid #0f0f10; outline-offset: 10px;"
+        : "box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.35); border-radius: 20px;"
+      : ""};
+`;
+
+const ExtensionUnavailableNotice = styled.p<{ $theme: ThemeProp }>`
+  margin: -54px 0 20px;
+  max-width: 240px;
+  text-align: center;
+  font-family: "Inter", sans-serif;
+  font-size: 13px;
+  line-height: 1.4;
+  color: ${(props) => (props.$theme === "dark" ? "#0F0F10" : "#ffffff")};
 `;
 
 const Title = styled.h4<{ $theme: ThemeProp }>`
@@ -363,6 +379,23 @@ const ChallengeMessage = styled.p<{ $theme: ThemeProp }>`
   text-align: center;
 `;
 
+const ChallengeSpinner = styled.div<{ $theme: ThemeProp }>`
+  width: 28px;
+  height: 28px;
+  margin: 24px 0 70px;
+  border: 3px solid
+    ${(props) => (props.$theme === "dark" ? "#0F0F10" : "#ffffff")};
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: siwys-challenge-spin 0.8s linear infinite;
+
+  @keyframes siwys-challenge-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+`;
+
 const SignInWithYourSelf: React.FC<SignInProps> = ({
   challengeDID,
   onSiwysPress,
@@ -589,11 +622,9 @@ const SignInWithYourSelf: React.FC<SignInProps> = ({
           status: "unavailable",
         })
       );
-      const browser = resolveDesktopExtensionBrowser();
-      if (browser) {
-        setExtensionFlowState("idle");
-        assignActiveWindow(EXTENSION_STORE_URLS[browser]);
-        return;
+      const extensionStoreUrl = resolveDesktopExtensionStoreUrl();
+      if (extensionStoreUrl) {
+        window.open(extensionStoreUrl, "_blank");
       }
       setExtensionFlowState("unavailable");
       return;
@@ -640,19 +671,26 @@ const SignInWithYourSelf: React.FC<SignInProps> = ({
       return;
     }
 
-    if (extensionConfig !== false && resolveDesktopExtensionBrowser()) {
-      startExtensionSignIn();
+    const platform = resolveDevicePlatform();
+
+    if (platform.isMobile) {
+      const mobileStoreUrl = resolveMobileAppStoreUrl();
+      if (mobileStoreUrl) {
+        cancelMobileOpen.current?.();
+        cancelMobileOpen.current = openInstalledMobileApp(
+          challengeUrl,
+          mobileStoreUrl,
+          assignActiveWindow
+        );
+        return;
+      }
+
+      assignActiveWindow(challengeUrl);
       return;
     }
 
-    const mobileStoreUrl = resolveMobileAppStoreUrl();
-    if (mobileStoreUrl) {
-      cancelMobileOpen.current?.();
-      cancelMobileOpen.current = openInstalledMobileApp(
-        challengeUrl,
-        mobileStoreUrl,
-        assignActiveWindow
-      );
+    if (platform.isDesktop && extensionConfig !== false) {
+      startExtensionSignIn();
       return;
     }
 
@@ -698,6 +736,9 @@ const SignInWithYourSelf: React.FC<SignInProps> = ({
   const isCreatingChallenge = Boolean(
     createChallengeUrl && !challengeDid && !challengeError
   );
+  const shouldRenderQrCode = !resolveDevicePlatform().isMobile;
+  const shouldHighlightQrFallback =
+    shouldRenderQrCode && extensionFlowState === "unavailable";
 
   if (isAuthenticated) {
     return <Wrapper>{successComponent}</Wrapper>;
@@ -726,9 +767,11 @@ const SignInWithYourSelf: React.FC<SignInProps> = ({
           </>
         )}
         {isCreatingChallenge && (
-          <ChallengeMessage $theme={theme} role="status">
-            Creating challenge...
-          </ChallengeMessage>
+          <ChallengeSpinner
+            $theme={theme}
+            role="status"
+            aria-label="Creating sign-in challenge"
+          />
         )}
         {challengeError && (
           <ChallengeMessage $theme={theme} role="alert">
@@ -737,9 +780,21 @@ const SignInWithYourSelf: React.FC<SignInProps> = ({
         )}
         {!isCreatingChallenge && !challengeError && (
           <>
-            <QRContainer $theme={theme}>
-              <QRCode challengeUrl={challengeUrl} size={200} level="H" />
-            </QRContainer>
+            {shouldRenderQrCode && (
+              <QRContainer
+                $theme={theme}
+                $highlight={shouldHighlightQrFallback}
+                data-testid="qr-container"
+              >
+                <QRCode challengeUrl={challengeUrl} size={200} level="H" />
+              </QRContainer>
+            )}
+            {shouldHighlightQrFallback && (
+              <ExtensionUnavailableNotice $theme={theme} role="status">
+                SELF browser extension not detected. Scan this QR with the SELF app
+                or install the extension.
+              </ExtensionUnavailableNotice>
+            )}
             {isCYS ? (
               <CysButton
                 key={extensionFlowState}

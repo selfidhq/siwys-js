@@ -1,7 +1,10 @@
 import {
+  detectExtension,
   extensionPartnerPayload,
   extensionSignInResult,
   requestExtensionSignIn,
+  resolveDesktopExtensionStoreUrl,
+  resolveDevicePlatform,
   resolveDesktopExtensionBrowser,
   MOBILE_APP_OPEN_FALLBACK_MS,
   openInstalledMobileApp,
@@ -203,6 +206,131 @@ describe("resolveDesktopExtensionBrowser", () => {
       value: userAgent,
     });
     expect(resolveDesktopExtensionBrowser()).toBe(browser);
+  });
+});
+
+describe("resolveDesktopExtensionStoreUrl", () => {
+  const originalUserAgent = navigator.userAgent;
+
+  afterEach(() => {
+    Object.defineProperty(window.navigator, "userAgent", {
+      configurable: true,
+      value: originalUserAgent,
+    });
+  });
+
+  it("returns the Firefox store URL on Firefox desktop", () => {
+    Object.defineProperty(window.navigator, "userAgent", {
+      configurable: true,
+      value: "Mozilla/5.0 Firefox/123.0",
+    });
+    expect(resolveDesktopExtensionStoreUrl()).toBe(
+      "https://addons.mozilla.org/firefox/addon/self-id-todo/"
+    );
+  });
+});
+
+describe("resolveDevicePlatform", () => {
+  const originalUserAgent = navigator.userAgent;
+  const originalPlatform = navigator.platform;
+
+  afterEach(() => {
+    Object.defineProperty(window.navigator, "userAgent", {
+      configurable: true,
+      value: originalUserAgent,
+    });
+    Object.defineProperty(window.navigator, "platform", {
+      configurable: true,
+      value: originalPlatform,
+    });
+    Object.defineProperty(window.navigator, "maxTouchPoints", {
+      configurable: true,
+      value: 0,
+    });
+  });
+
+  it("marks iOS devices as mobile and not desktop", () => {
+    Object.defineProperty(window.navigator, "userAgent", {
+      configurable: true,
+      value:
+        "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 Mobile/15E148 Safari/604.1",
+    });
+    const platform = resolveDevicePlatform();
+    expect(platform.isMobile).toBe(true);
+    expect(platform.isIOS).toBe(true);
+    expect(platform.isDesktop).toBe(false);
+  });
+
+  it("marks Android devices as mobile and not desktop", () => {
+    Object.defineProperty(window.navigator, "userAgent", {
+      configurable: true,
+      value:
+        "Mozilla/5.0 (Linux; Android 14; Pixel) AppleWebKit/537.36 Chrome/123.0.0.0 Mobile Safari/537.36",
+    });
+    const platform = resolveDevicePlatform();
+    expect(platform.isMobile).toBe(true);
+    expect(platform.isAndroid).toBe(true);
+    expect(platform.isDesktop).toBe(false);
+  });
+
+  it("marks desktop devices as desktop and not mobile", () => {
+    Object.defineProperty(window.navigator, "userAgent", {
+      configurable: true,
+      value: "Mozilla/5.0 (Macintosh; Intel Mac OS X 14_6_1) AppleWebKit/537.36 Chrome/123.0.0.0 Safari/537.36",
+    });
+    Object.defineProperty(window.navigator, "platform", {
+      configurable: true,
+      value: "MacIntel",
+    });
+    const platform = resolveDevicePlatform();
+    expect(platform.isDesktop).toBe(true);
+    expect(platform.isMobile).toBe(false);
+    expect(platform.isMacOS).toBe(true);
+  });
+
+  it("returns empty flags when navigator is unavailable", () => {
+    const originalNavigator = globalThis.navigator;
+    try {
+      Object.defineProperty(globalThis, "navigator", {
+        configurable: true,
+        value: undefined,
+      });
+
+      expect(resolveDevicePlatform()).toEqual({
+        isMobile: false,
+        isTablet: false,
+        isDesktop: false,
+        isIOS: false,
+        isAndroid: false,
+        isMacOS: false,
+        isWindows: false,
+        isLinux: false,
+      });
+    } finally {
+      Object.defineProperty(globalThis, "navigator", {
+        configurable: true,
+        value: originalNavigator,
+      });
+    }
+  });
+});
+
+describe("SSR safety", () => {
+  it("returns false from detectExtension when window is unavailable", async () => {
+    const originalWindow = globalThis.window;
+    try {
+      Object.defineProperty(globalThis, "window", {
+        configurable: true,
+        value: undefined,
+      });
+
+      await expect(detectExtension()).resolves.toBe(false);
+    } finally {
+      Object.defineProperty(globalThis, "window", {
+        configurable: true,
+        value: originalWindow,
+      });
+    }
   });
 });
 

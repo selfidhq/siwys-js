@@ -235,6 +235,9 @@ export const extensionSignInResult = ({
 };
 
 const MOBILE_USER_AGENT = /Android|iPhone|iPad|iPod|Mobile/i;
+const TABLET_USER_AGENT = /iPad|Tablet/i;
+const ANDROID_USER_AGENT = /Android/i;
+const IOS_PHONE_USER_AGENT = /iPhone|iPod/i;
 
 export type DesktopExtensionBrowser = "chrome" | "edge" | "firefox" | "safari";
 
@@ -254,14 +257,65 @@ export const MOBILE_APP_STORE_URLS = {
 
 export const MOBILE_APP_OPEN_FALLBACK_MS = 1500;
 
+export interface DevicePlatform {
+  isMobile: boolean;
+  isTablet: boolean;
+  isDesktop: boolean;
+  isIOS: boolean;
+  isAndroid: boolean;
+  isMacOS: boolean;
+  isWindows: boolean;
+  isLinux: boolean;
+}
+
+const EMPTY_DEVICE_PLATFORM: DevicePlatform = {
+  isMobile: false,
+  isTablet: false,
+  isDesktop: false,
+  isIOS: false,
+  isAndroid: false,
+  isMacOS: false,
+  isWindows: false,
+  isLinux: false,
+};
+
+export const resolveDevicePlatform = (): DevicePlatform => {
+  if (typeof navigator === "undefined") return EMPTY_DEVICE_PLATFORM;
+
+  const userAgent = navigator.userAgent;
+  const platform = navigator.platform || "";
+  const maxTouchPoints =
+    typeof navigator.maxTouchPoints === "number" ? navigator.maxTouchPoints : 0;
+
+  const isAndroid = ANDROID_USER_AGENT.test(userAgent);
+  const isIPad = /iPad/i.test(userAgent) || (platform === "MacIntel" && maxTouchPoints > 1);
+  const isIOS = IOS_PHONE_USER_AGENT.test(userAgent) || isIPad;
+  const isTablet = isIPad || (isAndroid && !/Mobile/i.test(userAgent)) || TABLET_USER_AGENT.test(userAgent);
+  const isMobile = isIOS || isAndroid || MOBILE_USER_AGENT.test(userAgent) || isTablet;
+  const isWindows = /Windows/i.test(userAgent) || /Win/i.test(platform);
+  const isMacOS = !isIOS && (/Macintosh|Mac OS X/i.test(userAgent) || /Mac/i.test(platform));
+  const isLinux = !isAndroid && (/Linux/i.test(userAgent) || /Linux/i.test(platform));
+
+  return {
+    isMobile,
+    isTablet,
+    isDesktop: !isMobile,
+    isIOS,
+    isAndroid,
+    isMacOS,
+    isWindows,
+    isLinux,
+  };
+};
+
 export const resolveDesktopExtensionBrowser = ():
   | DesktopExtensionBrowser
   | null => {
-  if (typeof navigator === "undefined") return null;
+  const platform = resolveDevicePlatform();
+  if (!platform.isDesktop || typeof navigator === "undefined") return null;
 
   const userAgent = navigator.userAgent;
 
-  if (MOBILE_USER_AGENT.test(userAgent)) return null;
   if (/Edg\//i.test(userAgent)) return "edge";
   if (/Firefox\//i.test(userAgent)) return "firefox";
   if (/Chrome|Chromium|OPR|Brave/i.test(userAgent)) return "chrome";
@@ -273,13 +327,17 @@ export const resolveDesktopExtensionBrowser = ():
 };
 
 export const resolveMobileAppStoreUrl = (): string | null => {
-  if (typeof navigator === "undefined") return null;
-
-  const userAgent = navigator.userAgent;
-  if (!MOBILE_USER_AGENT.test(userAgent)) return null;
-  if (/Android/i.test(userAgent)) return MOBILE_APP_STORE_URLS.android;
-  if (/iPhone|iPad|iPod/i.test(userAgent)) return MOBILE_APP_STORE_URLS.ios;
+  const platform = resolveDevicePlatform();
+  if (!platform.isMobile) return null;
+  if (platform.isAndroid) return MOBILE_APP_STORE_URLS.android;
+  if (platform.isIOS) return MOBILE_APP_STORE_URLS.ios;
   return null;
+};
+
+export const resolveDesktopExtensionStoreUrl = (): string | null => {
+  const browser = resolveDesktopExtensionBrowser();
+  if (!browser) return null;
+  return EXTENSION_STORE_URLS[browser];
 };
 
 export const assignActiveWindow = (url: string): void => {

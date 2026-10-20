@@ -141,7 +141,7 @@ describe("ConnectYourSelf Component", () => {
     window.removeEventListener("message", extensionResponder);
   });
 
-  it("redirects the active window to the browser store when the extension is unavailable", async () => {
+  it("opens the extension store in a new tab when the extension is unavailable", async () => {
     Object.defineProperty(window.navigator, "userAgent", {
       configurable: true,
       value: "Mozilla/5.0 Chrome/123.0.0.0 Safari/537.36",
@@ -159,9 +159,11 @@ describe("ConnectYourSelf Component", () => {
     );
 
     await waitFor(() =>
-      expect(assignActiveWindow).toHaveBeenCalledWith(EXTENSION_STORE_URLS.chrome)
+      expect(open).toHaveBeenCalledWith(EXTENSION_STORE_URLS.chrome, "_blank")
     );
-    expect(open).not.toHaveBeenCalled();
+    expect(assignActiveWindow).not.toHaveBeenCalledWith(
+      "https://chromewebstore.google.com/detail/self-id-todo"
+    );
     expect(
       screen.queryByRole("dialog", {
         name: "SELF browser extension not detected",

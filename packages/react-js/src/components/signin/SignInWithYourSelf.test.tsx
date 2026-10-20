@@ -181,8 +181,8 @@ describe("SignInWithYourSelf Component", () => {
 
     render(<SignInWithYourSelf createChallengeUrl={createChallengeUrl} />);
 
-    expect(screen.getByRole("status")).toHaveTextContent(
-      "Creating challenge..."
+    expect(screen.getByRole("status")).toHaveAccessibleName(
+      "Creating sign-in challenge"
     );
     expect(await screen.findByTestId("qr-code")).toBeInTheDocument();
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();

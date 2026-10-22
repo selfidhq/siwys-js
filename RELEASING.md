@@ -93,4 +93,4 @@ Every pull request opened against `main` automatically runs the canary step:
 
 ## NPM Authentication (OIDC)
 
-Releases authenticate with npm using **OIDC Trusted Publishing** (`id-token: write` and `npm_config_provenance: true`). No static access tokens (`NPM_ACCESS_TOKEN` / `NODE_AUTH_TOKEN`) are required. npm verifies the GitHub Actions provenance and cryptographic token generated directly by GitHub.
+Releases authenticate with npm using **OIDC Trusted Publishing**

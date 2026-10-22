@@ -1,17 +1,48 @@
 name: Publish Packages
 
 on:
-  push:
-    branches:
-      - main
   pull_request:
     types: [opened, synchronize]
+  workflow_dispatch:
+    inputs:
+      package:
+        description: 'Package to publish'
+        required: true
+        type: choice
+        options:
+          - 'all'
+          - '@yourself_id/siwys-api-js'
+          - '@yourself_id/siwys-react-js'
+          - '@yourself_id/siwys-react-native'
+      version:
+        description: 'Version bump type'
+        required: true
+        type: choice
+        options:
+          - none          # Skip versioning
+          - graduate      # Beta → Stable
+          - patch         # Bug fixes
+          - minor         # New features
+          - major         # Breaking changes
+          - prerelease    # Increment beta
+          - prepatch      # New beta patch
+          - preminor      # New beta minor
+          - premajor      # New beta major
+      preid:
+        description: 'Pre-release identifier'
+        required: false
+        default: 'beta'
+        type: choice
+        options:
+          - beta
+          - alpha
+          - rc
+          - none
 
 permissions:
   contents: write
   id-token: write
   packages: write
-  pull-requests: write
 
 jobs:
   publish:
@@ -21,6 +52,7 @@ jobs:
         with:
           fetch-depth: 0
           ref: ${{ github.event.pull_request.head.ref || github.ref }}
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Use Node.js
         uses: actions/setup-node@v6
@@ -38,104 +70,81 @@ jobs:
           yarn install --frozen-lockfile
           yarn build
 
-      - name: Version and Publish
+      - name: Run Tests (Official Release)
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          if [ "${{ github.event.inputs.package }}" = "all" ]; then
+            yarn lerna run test --sort --concurrency=1
+          else
+            yarn lerna run test --scope "${{ github.event.inputs.package }}" --include-dependencies --sort --concurrency=1
+          fi
+
+      - name: Publish Canary (Pull Request)
+        if: github.event_name == 'pull_request'
         env:
           npm_config_provenance: true
           npm_config_access: public
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_ACCESS_TOKEN }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Detect if we are on the main branch
-          IS_MAIN=$([[ "${{ github.ref }}" == "refs/heads/main" || "${{ github.base_ref }}" == "main" ]] && [[ "${{ github.event_name }}" == "push" ]] && echo "true" || echo "false")
+          echo "🧪 Performing Canary Release for Branch..."
+          
+          # 1. Get branch name
+          RAW_BRANCH="${{ github.head_ref || github.ref_name }}"
+          SAFE_BRANCH=$(echo "$RAW_BRANCH" | sed 's/\//-/g' | sed 's/refs-heads-//g')
 
-          if [ "$IS_MAIN" = "true" ]; then
-            COMMIT_MSG=$(git log -1 --pretty=%B)
+          # 2. Use the GitHub Run Number to force an increment
+          VERSION_ID="$SAFE_BRANCH.${{ github.run_number }}"
 
-            if [[ "$COMMIT_MSG" =~ ^chore\(release\): ]]; then
-              echo "🚀 Merged release PR detected. Publishing packages to npm..."
-              yarn lerna publish from-package \
-                --no-verify-access \
-                --yes
+          echo "🚀 Versioning with ID: $VERSION_ID"
 
-              echo "🏷️ Creating and pushing release tags..."
-              for pkg in packages/*; do
-                if [ -f "$pkg/package.json" ]; then
-                  PKG_NAME=$(jq -r .name "$pkg/package.json")
-                  PKG_VER=$(jq -r .version "$pkg/package.json")
-                  TAG="$PKG_NAME@$PKG_VER"
-                  if ! git rev-parse "$TAG" >/dev/null 2>&1; then
-                    echo "Tagging $TAG..."
-                    git tag "$TAG" -m "$TAG"
-                    git push origin "$TAG"
-                    gh release create "$TAG" --title "$TAG" --generate-notes || true
-                  fi
-                fi
-              done
-            else
-              echo "🔍 Checking for changed packages..."
-              if yarn lerna changed >/dev/null 2>&1; then
-                echo "📦 Packages changed. Creating or updating release PR..."
-                BRANCH="chore/automated-release"
-                git checkout -B "$BRANCH"
+          yarn lerna version prerelease \
+            --preid "$VERSION_ID" \
+            --yes \
+            --no-push \
+            --no-git-tag-version \
+            --force-publish \
+            --allow-branch '*'
 
-                yarn lerna version \
-                  --conventional-commits \
-                  --no-git-tag-version \
-                  --no-push \
-                  --allow-branch '*' \
-                  --yes
+          # 3. Clean the tree
+          git add .
+          git commit -m "chore: temporary canary bump for run ${{ github.run_number }}"
 
-                git add .
-                git commit -m "chore(release): publish packages" --no-verify
-                git push -u origin "$BRANCH" --force
+          # 4. Publish
+          yarn lerna publish from-package \
+            --dist-tag "$SAFE_BRANCH" \
+            --no-verify-access \
+            --concurrency 1 \
+            --yes
 
-                PR_NUMBER=$(gh pr list --head "$BRANCH" --base main --state open --json number --jq '.[0].number')
-                if [ -z "$PR_NUMBER" ]; then
-                  gh pr create \
-                    --base main \
-                    --head "$BRANCH" \
-                    --title "chore(release): publish packages" \
-                    --body "Automated release PR generated by Lerna in CI. Merge this PR to publish updated packages to npm."
-                else
-                  echo "Updated existing release PR #$PR_NUMBER"
-                fi
-              else
-                echo "No packages changed. Nothing to release."
-              fi
-            fi
+      - name: Version Packages (Official Release)
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.version != 'none'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          SCOPE_FLAG=""
+          if [ "${{ github.event.inputs.package }}" != "all" ]; then
+            SCOPE_FLAG="--scope ${{ github.event.inputs.package }}"
+          fi
+
+          if [[ "${{ github.event.inputs.version }}" == "graduate" ]]; then
+            yarn lerna version --conventional-graduate --yes --no-private $SCOPE_FLAG
+          elif [[ "${{ github.event.inputs.version }}" == pre* ]]; then
+            yarn lerna version ${{ github.event.inputs.version }} --preid ${{ github.event.inputs.preid }} --yes --no-private $SCOPE_FLAG
           else
-            RAW_BRANCH="${{ github.head_ref || github.ref_name }}"
-            if [[ "$RAW_BRANCH" == "chore/automated-release" ]]; then
-              echo "Skipping canary release for automated release branch."
-              exit 0
-            fi
+            yarn lerna version ${{ github.event.inputs.version }} --yes --no-private $SCOPE_FLAG
+          fi
 
-            echo "🧪 Performing Canary Release for Branch..."
-            
-            # 1. Get branch name
-            SAFE_BRANCH=$(echo "$RAW_BRANCH" | sed 's/\//-/g' | sed 's/refs-heads-//g')
-
-            # 2. Use the GitHub Run Number to force an increment
-            VERSION_ID="$SAFE_BRANCH.${{ github.run_number }}"
-
-            echo "🚀 Versioning with ID: $VERSION_ID"
-
-            yarn lerna version prerelease \
-              --preid "$VERSION_ID" \
-              --yes \
-              --no-push \
-              --no-git-tag-version \
-              --force-publish \
-              --allow-branch '*'
-
-            # 3. Clean the tree
-            git add .
-            git commit -m "chore: temporary canary bump for run ${{ github.run_number }}"
-
-            # 4. Publish
-            # Using --dist-tag to keep it on the branch name tag
-            yarn lerna publish from-package \
-              --dist-tag "$SAFE_BRANCH" \
-              --no-verify-access \
-              --concurrency 1 \
-              --yes
+      - name: Publish to NPM (Official Release)
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          npm_config_provenance: true
+          npm_config_access: public
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_ACCESS_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [[ "${{ github.event.inputs.version }}" == pre* ]] && [[ "${{ github.event.inputs.preid }}" != "none" ]]; then
+            yarn lerna publish from-git --dist-tag ${{ github.event.inputs.preid }} --no-verify-access --yes
+          else
+            yarn lerna publish from-git --no-verify-access --yes
           fi

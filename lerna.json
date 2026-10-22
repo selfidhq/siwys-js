@@ -8,7 +8,9 @@
   ],
   "command": {
     "version": {
-      "allowBranch": ["main", "sapp-76-react-js-sdk"],
+      "allowBranch": [
+        "main", "*-beta", "*-release", "beta-*", "release-*", "release/*", "hotfix/*"
+      ],
       "conventionalCommits": true,
       "createRelease": "github",
       "message": "chore(release): publish %s"

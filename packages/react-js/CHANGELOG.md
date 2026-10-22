@@ -3,7 +3,7 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
-# [0.34.0](https://github.com/selfidhq/siwys-js/compare/@yourself_id/siwys-react-js@0.33.1...@yourself_id/siwys-react-js@0.34.0) (2026-10-22)
+# [0.34.1](https://github.com/selfidhq/siwys-js/compare/@yourself_id/siwys-react-js@0.33.1...@yourself_id/siwys-react-js@0.34.1) (2026-10-22)
 
 
 ### Features

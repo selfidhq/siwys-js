@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.37.0](https://github.com/selfidhq/siwys-js/compare/@yourself_id/siwys-api-js@0.36.0...@yourself_id/siwys-api-js@0.37.0) (2026-10-22)
+
+
+### Bug Fixes
+
+* align default gatekeeper port to 4224 ([#99](https://github.com/selfidhq/siwys-js/issues/99)) ([b2fefbb](https://github.com/selfidhq/siwys-js/commit/b2fefbb2454190e3e13ae2b6b52be93442d5fe56))
+
+
+### Features
+
+* **sapp-1291:** open browser extension from sdk ([#96](https://github.com/selfidhq/siwys-js/issues/96)) ([7a72f04](https://github.com/selfidhq/siwys-js/commit/7a72f049fb09b5e19474e4e12bf00c5a1ef65586)), closes [#98](https://github.com/selfidhq/siwys-js/issues/98) [#100](https://github.com/selfidhq/siwys-js/issues/100)
+
+
+
+
+
 # [0.36.0](https://github.com/selfidhq/siwys-js/compare/@yourself_id/siwys-api-js@0.35.0...@yourself_id/siwys-api-js@0.36.0) (2026-09-16)
 
 

@@ -74,7 +74,7 @@ yarn build
 
 ## Releases
 
-Releases are automatically versioned and published via lerna in github actions.
+Official package releases are triggered on demand from dedicated release branches, while canary versions are published automatically on pull requests. See the [Package Release & Publishing Guide](RELEASING.md) for full instructions.
 
 ## Commits
 
@@ -98,6 +98,8 @@ Each commit, and the PR title, must follow the semantic release commit formattin
 ## Pull Requests
 
 Due to our use of lerna's auto versioning and publishing, our pull request titles must also adhere to the commitlint rules. Any PR titles that do not adhere to the formatting rules will fail validation.
+
+For details on the release flow, how canary versions work, and step-by-step instructions for publishing official packages, see the [Package Release & Publishing Guide](RELEASING.md).
 
 ## Local Demo
 

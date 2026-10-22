@@ -3,6 +3,20 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.34.1](https://github.com/selfidhq/siwys-js/compare/@yourself_id/siwys-react-js@0.33.1...@yourself_id/siwys-react-js@0.34.1) (2026-10-22)
+
+
+### Features
+
+* **sapp-1291:** open browser extension from sdk ([#96](https://github.com/selfidhq/siwys-js/issues/96)) ([7a72f04](https://github.com/selfidhq/siwys-js/commit/7a72f049fb09b5e19474e4e12bf00c5a1ef65586)), closes [#98](https://github.com/selfidhq/siwys-js/issues/98) [#100](https://github.com/selfidhq/siwys-js/issues/100)
+* **sapp-1337:** conditionally open extension or mobile app ([#104](https://github.com/selfidhq/siwys-js/issues/104)) ([00e5a72](https://github.com/selfidhq/siwys-js/commit/00e5a72485b46e3b55a09c6d18b31e8027a0f4fb))
+* **sapp-761:** missing extension detection handler ([#101](https://github.com/selfidhq/siwys-js/issues/101)) ([87feb60](https://github.com/selfidhq/siwys-js/commit/87feb608bd821f1a8e27317ea409bf15bbbf0f43))
+* send requested schemas when the button creates a challenge ([#103](https://github.com/selfidhq/siwys-js/issues/103)) ([ce99862](https://github.com/selfidhq/siwys-js/commit/ce9986224f320c7fb1792edcf618a711e32e86dd)), closes [#98](https://github.com/selfidhq/siwys-js/issues/98) [#100](https://github.com/selfidhq/siwys-js/issues/100)
+
+
+
+
+
 ## [0.33.1](https://github.com/selfidhq/siwys-js/compare/@yourself_id/siwys-react-js@0.33.0...@yourself_id/siwys-react-js@0.33.1) (2026-04-08)
 
 **Note:** Version bump only for package @yourself_id/siwys-react-js

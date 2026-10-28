@@ -141,8 +141,9 @@ jobs:
           npm_config_access: public
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          DIST_FLAG=""
           if [[ "${{ github.event.inputs.version }}" == pre* ]] && [[ "${{ github.event.inputs.preid }}" != "none" ]]; then
-            yarn lerna publish from-git --dist-tag ${{ github.event.inputs.preid }} --no-verify-access --yes
-          else
-            yarn lerna publish from-git --no-verify-access --yes
+            DIST_FLAG="--dist-tag ${{ github.event.inputs.preid }}"
           fi
+
+          yarn lerna publish from-package $DIST_FLAG --no-verify-access --concurrency 1 --yes

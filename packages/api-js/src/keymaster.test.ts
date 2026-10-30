@@ -405,6 +405,42 @@ describe("Keymaster", () => {
       });
     });
 
+    it("createChallenge() maps attesters to issuers in the keymaster payload", async () => {
+      await Keymaster.createChallenge({
+        callback: "https://example.com/callback",
+        credentials: [
+          {
+            schema: "did:test:schema",
+            attesters: ["did:test:attester1", " did:test:attester2", "did:test:attester1"],
+          },
+        ],
+      });
+      expect(mockKmCreateChallenge).toHaveBeenCalledWith(
+        {
+          callback: "https://example.com/callback",
+          credentials: [
+            {
+              schema: "did:test:schema",
+              issuers: ["did:test:attester1", "did:test:attester2"],
+            },
+          ],
+        },
+        undefined,
+      );
+    });
+
+    it("createChallenge() rejects invalid attesters before calling keymaster", async () => {
+      await expect(
+        Keymaster.createChallenge({
+          callback: "https://example.com/callback",
+          credentials: [{ schema: "did:test:schema", attesters: ["not-a-did"] }],
+        }),
+      ).rejects.toThrow(
+        "Invalid parameter: challenge.credentials[0].attesters[0] must be a valid DID string",
+      );
+      expect(mockKmCreateChallenge).not.toHaveBeenCalled();
+    });
+
     it("bindCredential()", async () => {
       const result = await Keymaster.bindCredential(
         "schema-1",

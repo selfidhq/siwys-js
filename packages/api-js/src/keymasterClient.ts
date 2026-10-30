@@ -11,6 +11,7 @@ import {
   CreateChallengeSpec,
   SdkConfig,
 } from "./types/index.js";
+import { normalizeChallengeSpec } from "./challengeSpec.js";
 
 export interface KeymasterConfig {
   keymasterConfig?: SdkConfig;
@@ -64,8 +65,9 @@ export class KeymasterExternalClient {
     if (!this.serviceRunning()) {
       throw new Error("Keymaster service not running");
     }
+    const normalizedSpec = normalizeChallengeSpec(spec);
     const challenge: string = await this.keymasterService?.createChallenge(
-      spec,
+      normalizedSpec,
       options
     );
     return {

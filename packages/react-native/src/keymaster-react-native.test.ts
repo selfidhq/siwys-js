@@ -294,6 +294,26 @@ describe("KeymasterReactNative", () => {
       });
     });
 
+    it("should map attesters to issuers before calling keymaster", async () => {
+      KeymasterReactNative.initialize(validConfig);
+      await KeymasterReactNative.start();
+
+      await KeymasterReactNative.createChallenge({
+        callback: "https://example.com/callback",
+        credentials: [
+          { schema: "email-schema", attesters: ["did:issuer:1", "did:issuer:1 "] },
+        ],
+      });
+
+      expect(mockKeymasterInstance.createChallenge).toHaveBeenCalledWith(
+        {
+          callback: "https://example.com/callback",
+          credentials: [{ schema: "email-schema", issuers: ["did:issuer:1"] }],
+        },
+        undefined,
+      );
+    });
+
     it("should pass options to createChallenge", async () => {
       const spec = {
         credentials: [{ schema: "email-schema", issuers: ["did:issuer:1"] }],

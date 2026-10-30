@@ -10,7 +10,9 @@ export {
   WalletConfig,
   CreateChallengeResponse,
   CreateChallengeSpec,
+  RequestedCredentialSpec,
 } from "./types/index.js";
+export { InvalidParameterError } from "./challengeSpec.js";
 
 export * from "@mdip/keymaster";
 import * as GatekeeperTypes from "@mdip/gatekeeper";

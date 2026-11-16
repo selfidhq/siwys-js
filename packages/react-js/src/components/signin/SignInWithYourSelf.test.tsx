@@ -253,6 +253,81 @@ describe("SignInWithYourSelf Component", () => {
     expect(onSiwysPress).toHaveBeenCalledTimes(1);
   });
 
+  it("calls onSiwysPress when the QR code is clicked", async () => {
+    render(
+      <SignInWithYourSelf
+        challengeDID={challengeDid}
+        onSiwysPress={onSiwysPress}
+      />
+    );
+    const qrButton = screen.getByRole("button", {
+      name: /Open the challenge in the SELF app or extension/i,
+    });
+    expect(qrButton).toContainElement(screen.getByTestId("qr-code"));
+    await userEvent.click(qrButton);
+    expect(onSiwysPress).toHaveBeenCalledTimes(1);
+  });
+
+  it("opens challengeUrl in a new window when the QR code is clicked and extension flow is disabled", () => {
+    const open = jest.spyOn(window, "open").mockImplementation(() => null);
+    render(
+      <SignInWithYourSelf
+        challengeDID={challengeDid}
+        extensionConfig={false}
+      />
+    );
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: /Open the challenge in the SELF app or extension/i,
+      })
+    );
+    expect(open).toHaveBeenCalledWith(
+      expect.stringContaining("challenge="),
+      "_blank"
+    );
+    open.mockRestore();
+  });
+
+  it("starts extension detection when the QR code is clicked on desktop", async () => {
+    Object.defineProperty(window.navigator, "userAgent", {
+      configurable: true,
+      value: "Mozilla/5.0 Firefox/123.0",
+    });
+    const postMessageSpy = jest
+      .spyOn(window, "postMessage")
+      .mockImplementation(() => {});
+
+    render(<SignInWithYourSelf challengeDID={challengeDid} />);
+    await userEvent.click(
+      screen.getByRole("button", {
+        name: /Open the challenge in the SELF app or extension/i,
+      })
+    );
+
+    await waitFor(() => {
+      expect(postMessageSpy).toHaveBeenCalled();
+    });
+    expect(postMessageSpy.mock.calls[0][0].type).toBe("self-id:extension:detect");
+
+    postMessageSpy.mockRestore();
+  });
+
+  it("makes the QR code clickable in Connect your SELF", async () => {
+    render(
+      <SignInWithYourSelf
+        challengeDID={challengeDid}
+        onSiwysPress={onSiwysPress}
+        isCYS
+      />
+    );
+    await userEvent.click(
+      screen.getByRole("button", {
+        name: /Open the challenge in the SELF app or extension/i,
+      })
+    );
+    expect(onSiwysPress).toHaveBeenCalledTimes(1);
+  });
+
   it("renders CysButton instead of SiwysButton when isCYS is true", () => {
     render(
       <SignInWithYourSelf

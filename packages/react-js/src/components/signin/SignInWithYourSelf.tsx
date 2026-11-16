@@ -132,6 +132,27 @@ const QRContainer = styled.div<{ $theme: ThemeProp; $highlight: boolean }>`
       : ""};
 `;
 
+// A native <button> (not a clickable <div>) so the QR is keyboard-focusable
+// and announced to assistive tech.
+const QRButton = styled.button`
+  display: block;
+  padding: 0;
+  border: none;
+  background: none;
+  line-height: 0;
+  border-radius: 16px;
+  cursor: pointer;
+
+  &:disabled {
+    cursor: not-allowed;
+  }
+
+  &:focus-visible {
+    outline: 2px solid #d8ee4f;
+    outline-offset: 4px;
+  }
+`;
+
 const ExtensionUnavailableNotice = styled.p<{ $theme: ThemeProp }>`
   margin: -54px 0 20px;
   max-width: 240px;
@@ -786,7 +807,15 @@ const SignInWithYourSelf: React.FC<SignInProps> = ({
                 $highlight={shouldHighlightQrFallback}
                 data-testid="qr-container"
               >
-                <QRCode challengeUrl={challengeUrl} size={200} level="H" />
+                {/* Clicking the QR follows the same flow as the CTA button. */}
+                <QRButton
+                  type="button"
+                  onClick={defaultSiwysClick}
+                  disabled={isExtensionRequestActive || isReplacingChallenge}
+                  aria-label="Open the challenge in the SELF app or extension"
+                >
+                  <QRCode challengeUrl={challengeUrl} size={200} level="H" />
+                </QRButton>
               </QRContainer>
             )}
             {shouldHighlightQrFallback && (

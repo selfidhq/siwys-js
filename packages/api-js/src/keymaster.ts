@@ -9,6 +9,7 @@ import {
   SdkConfig,
   WalletConfig,
 } from "./types/index.js";
+import { normalizeChallengeSpec } from "./challengeSpec.js";
 import {
   ChallengeResponse,
   CreateAssetOptions,
@@ -547,9 +548,10 @@ export class Keymaster {
     spec: CreateChallengeSpec,
     options?: CreateAssetOptions,
   ): Promise<CreateChallengeResponse> {
+    const normalizedSpec = normalizeChallengeSpec(spec);
     await this.ensureServiceIsRunning();
     const challenge: string = await this.keymasterService.createChallenge(
-      spec,
+      normalizedSpec,
       options,
     );
     return {

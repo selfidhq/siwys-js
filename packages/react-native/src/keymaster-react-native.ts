@@ -23,6 +23,7 @@ import {
   CreateChallengeSpec,
   SdkConfig,
 } from "./types/index.js";
+import { normalizeChallengeSpec } from "./challengeSpec.js";
 import KeymasterModule from "@mdip/keymaster";
 import { encMnemonic } from "@mdip/keymaster/encryption";
 
@@ -596,8 +597,9 @@ export class KeymasterReactNative {
     spec: CreateChallengeSpec,
     options?: CreateAssetOptions,
   ): Promise<CreateChallengeResponse> {
+    const normalizedSpec = normalizeChallengeSpec(spec);
     const challenge: string = await this.keymasterService.createChallenge(
-      spec,
+      normalizedSpec,
       options,
     );
     return {

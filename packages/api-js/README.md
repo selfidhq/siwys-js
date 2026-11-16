@@ -146,7 +146,7 @@ app.post("/challenges", async (req, res) => {
     const challenge = await Keymaster.createChallenge({
       callback: `${process.env.BACKEND_URL}/login`,
       // Optional: require user to present specific credentials
-      // credentials: [{ schema: "did:test:schema-id", issuers: ["did:test:issuer-did"] }]
+      // credentials: [{ schema: "did:test:schema-id", attesters: ["did:test:attester-did"] }]
     });
 
     // Returns: { challenge: "did:test:...", challengeUrl: "https://.../login?challenge=did:test:..." }
@@ -156,6 +156,38 @@ app.post("/challenges", async (req, res) => {
   }
 });
 ```
+
+#### Enforcing Accepted Attesters
+
+To only accept credentials (molecules) issued by Attesters you trust, list their DIDs in `attesters` for each requested schema. The wallet will only fulfill the challenge with a credential of that schema signed by one of them:
+
+```typescript
+import { Keymaster, InvalidParameterError } from "@yourself_id/siwys-api-js";
+
+try {
+  const challenge = await Keymaster.createChallenge({
+    callback: "https://partner.com/api/verify",
+    credentials: [
+      {
+        schema: "did:self:schema-kyc-v1",
+        attesters: ["did:self:netki-attester-did", "did:self:acme-id-attester-did"],
+      },
+    ],
+  });
+} catch (err) {
+  if (err instanceof InvalidParameterError) {
+    // e.g. "Invalid parameter: challenge.credentials[0].attesters[1] must be a valid DID string (received \"acme\")"
+  }
+  throw err;
+}
+```
+
+Rules applied by `createChallenge` (both `Keymaster` and `KeymasterExternalClient`) before the challenge is created:
+
+- `attesters`, its alias `acceptedAttesters`, and the legacy W3C field `issuers` are all accepted; they are sent to MDIP and the wallets as `issuers`.
+- Entries are trimmed and deduplicated, and every entry must be a valid DID (`did:<method>:<id>`). An empty list is passed through unchanged; SELF wallets treat it as "any attester".
+- If more than one of these fields is provided for the same credential, they must contain the same DIDs; otherwise an `InvalidParameterError` reporting an ambiguous attester configuration is thrown.
+- Omitting all three fields accepts credentials of that schema from any attester.
 
 ### 2. Verifying Authentication Responses
 

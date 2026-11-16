@@ -102,6 +102,47 @@ describe("KeymasterExternalClient", () => {
       });
     });
 
+    it("should transmit attesters as issuers in the REST payload", async () => {
+      const client = new KeymasterExternalClient(validConfig);
+      await client.start();
+
+      await client.createChallenge({
+        callback: "https://example.com/callback",
+        credentials: [
+          { schema: "did:test:schema", acceptedAttesters: ["did:test:attester1"] },
+        ],
+      });
+
+      expect(mockCreateChallenge).toHaveBeenCalledWith(
+        {
+          callback: "https://example.com/callback",
+          credentials: [
+            { schema: "did:test:schema", issuers: ["did:test:attester1"] },
+          ],
+        },
+        undefined,
+      );
+    });
+
+    it("should reject conflicting attesters and issuers", async () => {
+      const client = new KeymasterExternalClient(validConfig);
+      await client.start();
+
+      await expect(
+        client.createChallenge({
+          callback: "https://example.com/callback",
+          credentials: [
+            {
+              schema: "did:test:schema",
+              attesters: ["did:test:attester1"],
+              issuers: ["did:test:attester2"],
+            },
+          ],
+        }),
+      ).rejects.toThrow(/ambiguous attester configuration/);
+      expect(mockCreateChallenge).not.toHaveBeenCalled();
+    });
+
     it("should auto-start service if not started", async () => {
       const client = new KeymasterExternalClient(validConfig);
       const spec = { callback: "https://example.com/callback" };

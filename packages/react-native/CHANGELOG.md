@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.40.0](https://github.com/selfidhq/siwys-js/compare/@yourself_id/siwys-react-native@0.38.0...@yourself_id/siwys-react-native@0.40.0) (2026-11-17)
+
+
+### Features
+
+* **api-js,react-native:** support accepted attesters in createChallenge ([#107](https://github.com/selfidhq/siwys-js/issues/107)) ([faa6557](https://github.com/selfidhq/siwys-js/commit/faa65574a44b4fe1a29d4a2d4cc2a37f547a0a4d))
+
+
+
+
+
 # [0.39.0](https://github.com/selfidhq/siwys-js/compare/@yourself_id/siwys-react-native@0.38.0...@yourself_id/siwys-react-native@0.39.0) (2026-10-22)
 
 **Note:** Version bump only for package @yourself_id/siwys-react-native

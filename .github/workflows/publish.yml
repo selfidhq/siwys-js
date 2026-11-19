@@ -1,4 +1,4 @@
-name: Publish Packages
+name: "Publish Packages"
 
 on:
   pull_request:
@@ -47,20 +47,22 @@ permissions:
 jobs:
   publish:
     runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.head.repo.full_name == github.repository
     env:
       NODE_AUTH_TOKEN: ${{ secrets.NPM_ACCESS_TOKEN }}
     steps:
-      - uses: actions/checkout@v7
+      - name: Checkout repository
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          ref: ${{ github.event.pull_request.head.ref || github.ref }}
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Use Node.js
-        uses: actions/setup-node@v7.1.0
+        uses: actions/setup-node@v4
         with:
-          node-version: 22.23.4
+          node-version: "22.23.4"
           registry-url: 'https://registry.npmjs.org/'
+          cache: 'yarn'
 
       - name: Configure Git
         run: |
@@ -90,11 +92,9 @@ jobs:
         run: |
           echo "🧪 Performing Canary Release for Branch..."
           
-          # 1. Get branch name
           RAW_BRANCH="${{ github.head_ref || github.ref_name }}"
-          SAFE_BRANCH=$(echo "$RAW_BRANCH" | sed 's/\//-/g' | sed 's/refs-heads-//g')
+          SAFE_BRANCH=$(echo "$RAW_BRANCH" | sed 's|^refs/heads/||' | sed 's/[^0-9A-Za-z-]/-/g')
 
-          # 2. Use the GitHub Run Number to force an increment
           VERSION_ID="$SAFE_BRANCH.${{ github.run_number }}"
 
           echo "🚀 Versioning with ID: $VERSION_ID"
@@ -107,11 +107,10 @@ jobs:
             --force-publish \
             --allow-branch '*'
 
-          # 3. Clean the tree
           git add .
           git commit -m "chore: temporary canary bump for run ${{ github.run_number }}"
 
-          # 4. Publish
+
           yarn lerna publish from-package \
             --dist-tag "$SAFE_BRANCH" \
             --no-verify-access \

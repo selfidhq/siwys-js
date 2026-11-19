@@ -1,4 +1,4 @@
-name: "Publish Packages"
+name: Publish Packages
 
 on:
   pull_request:
@@ -91,9 +91,11 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           echo "🧪 Performing Canary Release for Branch..."
-          
+
           RAW_BRANCH="${{ github.head_ref || github.ref_name }}"
           SAFE_BRANCH=$(echo "$RAW_BRANCH" | sed 's|^refs/heads/||' | sed 's/[^0-9A-Za-z-]/-/g')
+
+          git checkout -B "canary-$SAFE_BRANCH"
 
           VERSION_ID="$SAFE_BRANCH.${{ github.run_number }}"
 
@@ -109,7 +111,6 @@ jobs:
 
           git add .
           git commit -m "chore: temporary canary bump for run ${{ github.run_number }}"
-
 
           yarn lerna publish from-package \
             --dist-tag "$SAFE_BRANCH" \
